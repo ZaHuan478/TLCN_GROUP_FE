@@ -1,7 +1,6 @@
 import React from "react";
 import { GoogleLoginButton } from "../../molecules/GoogleLoginButton";
 import { Input } from "../../atoms/Input/Input";
-import { Checkbox } from "../../atoms/Checkbox.tsx/Checkbox";
 import { Button } from "../../atoms/Button/Button";
 import { Link } from "react-router-dom";
 

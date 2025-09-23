@@ -1,9 +1,14 @@
 import React from "react";
 import { Button } from "../../atoms/Button/Button";
 
-export const GoogleLoginButton: React.FC = () => (
+type GoogleLoginButtonProps = {
+    onClick?: () => void;
+}
+
+export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({ onClick }) => (
     <Button
         variant="outline"
+        onClick={onClick}
         className="flex items-center justify-center w-full gap-2 border border-gray-300"
         style={{ width: 360, height: 48, border: "1px solid #D8DADC", borderRadius: 6 }}
     >
