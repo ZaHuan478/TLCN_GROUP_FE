@@ -1,5 +1,4 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
-import { config } from "zod";
 
 class ApiClient {
   private client: AxiosInstance;

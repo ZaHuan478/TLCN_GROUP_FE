@@ -21,7 +21,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
                     <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute inset-y-0 right-3 flex items-center text-sm text-blue-600 hover:underline"
+                        className="absolute inset-y-0 right-3 flex items-center text-sm text-black hover:text-blue-500"
                     >
                         {showPassword ? "Hide" : "Show"}
                     </button>

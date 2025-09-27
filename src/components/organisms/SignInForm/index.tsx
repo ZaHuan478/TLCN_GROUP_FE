@@ -53,7 +53,19 @@ export const SignInForm: React.FC = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-16 p-8 bg-white rounded-lg shadow">
+    <div className="max-w-md mx-auto mt-16 p-8 bg-white rounded-lg shadow relative">
+      {/* Close button to return to homepage */}
+      <button 
+        onClick={() => navigate('/')}
+        className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
+        aria-label="Close"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+
       <h2 className="text-2xl font-bold mb-1">Welcome</h2>
       <p className="mb-6 text-gray-500">
         Welcome back! Please enter your details.
@@ -94,15 +106,15 @@ export const SignInForm: React.FC = () => {
             />
             Remember for 30 days
           </label>
-          <Link to="/forgot-password"  className="text-sm text-blue-600 hover:underline">
+          <Link to="/forgot-password"  className="text-sm text-black hover:text-blue-500">
             Forgot password?
           </Link>
         </div>
         <Button
           type="submit"
           disabled={isLoading}
-          className="w-full h-12 bg-blue-600 text-white hover:bg-blue-700 rounded-[6px]">
-          {isLoading ? "Đang đăng nhập..." : "Log in"}
+          className="w-full h-12 bg-black text-white hover:bg-blue-500 rounded-[6px]">
+          {isLoading ? "Sign in..." : "Log in"}
         </Button>
       </form>
       <p className="mt-6 text-center text-gray-400 text-sm">

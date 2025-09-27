@@ -1,4 +1,5 @@
 import React from "react";
+import Heading from "../../atoms/Heading/Heading";
 
 const data = [
   {
@@ -42,9 +43,15 @@ const data = [
 const PopularCourses: React.FC = () => {
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-10 py-16 bg-[#FFF0D9]">
-      <h3 className="font-bold text-center text-lg mb-6">Pick the most popular courses</h3>
+      <Heading 
+        level={2}
+        className=" text-center"
+        style={{ fontFamily: "Neurial Grotesk" }}
+        >
+        Pick the most popular courses
+      </Heading>
       <p className="text-center text-sm text-[#4B4B4B] max-w-xl mx-auto mb-10">
-        We have the best courses for you to learn and grow your skills.
+        You learn today and earn tomorrow. The roots of education are bitter but the fruits are sweet.
       </p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 max-w-5xl mx-auto">

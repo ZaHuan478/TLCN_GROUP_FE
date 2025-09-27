@@ -1,13 +1,19 @@
 import React, { useState } from "react";
 import { Input } from "../../atoms/Input/Input";
 import { Button } from "../../atoms/Button/Button";
+import Heading from "../../atoms/Heading/Heading";
 
 const Subscribe: React.FC = () => {
   const [email, setEmail] = useState("");
   return (
     <section className="bg-yellow-300 py-12 px-4 sm:px-10">
       <div className="max-w-4xl mx-auto text-center">
-        <h3 className="font-bold text-lg mb-4">Subscribe to get update every new course</h3>
+        <Heading 
+          level={2} 
+          style={{ fontFamily: "Neurial Grotesk" }}
+        >
+          Subscribe to get update every new course
+        </Heading>
         <p className="text-sm mb-6 max-w-xl mx-auto text-[#1E1E1E]">
           Get notified about new courses, discounts, and special offers.
         </p>

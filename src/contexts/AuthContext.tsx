@@ -1,11 +1,13 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { authService, User } from "../services/authService";
+import { apiClient } from "../services/apiClient";
 
 type AuthContextType = {
     user: User | null;
     isAuthenticated: boolean;
     isLoading: boolean;
     login: (username: string, password: string) => Promise<void>;
+    register: (userData: any) => Promise<void>;
     logout: () => Promise<void>;
     refreshUser: () => Promise<void>;
 }
@@ -20,27 +22,34 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
-    const isAuthenticated = authService.isAuthenticated();
-
     useEffect(() => {
         const initializeAuth = async () => {
             try {
                 const oauthResult = authService.handleOAuthCallback();
                 if (oauthResult) {
-                    await refreshUser();
+                    // Fix: Get user info after setting tokens
+                    try {
+                        const response = await apiClient.get<{ data: { user: User } }>('/auth/me');
+                        setUser(response.data.user);
+                        localStorage.setItem("user", JSON.stringify(response.data.user));
+                    } catch (error) {
+                        console.error('Failed to get user info after OAuth:', error);
+                        // Fallback: try to get from localStorage
+                        await refreshUser();
+                    }
                 } else {
                     const savedUser = await authService.getCurrentUser();
-                    if (savedUser && isAuthenticated) {
+                    if (savedUser && authService.isAuthenticated()) {
                         setUser(savedUser);
                     } else {
-                        authService.logout();
+                        await authService.logout();
                     }
                 }
             } catch (error) {
                 console.error('Auth initialization error:', error);
-                authService.logout();
+                await authService.logout();
             } finally {
-                setIsLoading(true);
+                setIsLoading(false);
             }
         };
 
@@ -82,7 +91,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
     };
 
-    const value: AuthContextType = { user, isAuthenticated, isLoading, login, logout, refreshUser };
+    const register = async (userData: any): Promise<void> => {
+        try {
+            setIsLoading(true);
+            const response = await authService.register(userData);
+            setUser(response.user);
+        } catch (error) {
+            throw error;
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const value: AuthContextType = { 
+        user, 
+        isAuthenticated: authService.isAuthenticated() && !!user, // Fix: Calculate dynamically
+        isLoading, 
+        login, 
+        register,
+        logout, 
+        refreshUser 
+    };
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 };

@@ -10,7 +10,7 @@ const links = [
 ];
 
 const NavLinks: React.FC<{ className?: string }> = ({ className = "" }) => (
-	<ul className={`hidden md:flex md:flex-1 md:justify-center space-x-8 text-sm font-semibold ${className}`}>
+	<ul className={`hidden md:flex space-x-8 text-sm font-semibold ${className}`}>
 		{links.map((l) => (
 			<li key={l.to}>
 				<Link className="hover:text-yellow-400" to={l.to}>

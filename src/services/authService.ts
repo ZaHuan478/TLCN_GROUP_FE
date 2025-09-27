@@ -1,119 +1,89 @@
 import { apiClient } from "./apiClient";
-
-export type User = {
-  id: string;
-  fullName: string;
-  userName: string;
-  email: string;
-  role: "STUDENT" | "COMPANY" | "ADMIN";
-  isActive: boolean;
-};
-
-export type LoginRequest = {
-  username: string;
-  password: string;
-};
-
-export type LoginResponse = {
-  accessToken: string;
-  refreshToken: string;
-  user: User;
-};
-
-export type RefreshTokenRequest = {
-  refreshToken: string;
-};
-
-export type RefreshTokenResponse = {
-  accessToken: string;
-};
+import { User, LoginRequest, LoginResponse, RefreshTokenResponse, RegisterRequest, RegisterResponse } from "../types/types";
+import { storage } from "../helper/storage";
 
 class AuthService {
   async login(credentials: LoginRequest): Promise<LoginResponse> {
-    const response = await apiClient.post<{ data: LoginResponse }>(
-      "/auth",
-      credentials
-    );
+    const { data } = await apiClient.post<{ data: LoginResponse }>("/auth", credentials);
 
-    apiClient.setAuthTokens(
-      response.data.accessToken,
-      response.data.refreshToken
-    );
+    apiClient.setAuthTokens(data.accessToken, data.refreshToken);
+    storage.setUser(data.user);
 
-    localStorage.setItem("user", JSON.stringify(response.data.user));
-
-    return response.data;
+    return data;
   }
 
   async refreshToken(refreshToken: string): Promise<RefreshTokenResponse> {
-    const response = await apiClient.post<{ data: RefreshTokenResponse }>(
+    const { data } = await apiClient.post<{ data: RefreshTokenResponse }>(
       "/auth/refresh-token",
-      {
-        refreshToken,
-      }
+      { refreshToken }
     );
-
-    return response.data;
+    return data;
   }
 
   async logout(): Promise<void> {
     try {
       await apiClient.post("/auth/logout");
-    } catch (error) {
-      console.error("Logout error:", error);
+    } catch (err) {
+      console.error("Logout error:", err);
     } finally {
       apiClient.clearAuthTokens();
-      localStorage.removeItem("user");
+      storage.clearUser();
+      storage.clearTokens();
     }
   }
 
-  async getCurrentUser(): Promise<User | null> {
-    const userStr = localStorage.getItem("user");
-    if (!userStr) return null;
-
-    try {
-      return JSON.parse(userStr);
-    } catch {
-      return null;
-    }
+  getCurrentUser(): User | null {
+    return storage.getUser();
   }
 
   isAuthenticated(): boolean {
-    return apiClient.isAuthenticated() && !!localStorage.getItem("user");
+    return apiClient.isAuthenticated() && !!storage.getUser();
   }
 
   getAccessToken(): string | null {
-    return localStorage.getItem("accessToken");
+    return storage.getAccessToken();
   }
 
   getRefreshToken(): string | null {
-    return localStorage.getItem("refreshToken");
+    return storage.getRefreshToken();
   }
 
   // Google OAuth
   initiateGoogleLogin(): void {
-    const googleAuthUrl = `${
-      import.meta.env.VITE_API_URL || "http://localhost:3000/api"
-    }/auth/google`;
-    window.location.href = googleAuthUrl;
+    const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+    window.location.href = `${baseUrl}/auth/google`;
   }
 
-  // Xử lý OAuth callback (từ URL params)
   handleOAuthCallback(): { accessToken: string; refreshToken: string } | null {
-    const urlParams = new URLSearchParams(window.location.search);
-    const accessToken = urlParams.get("accessToken");
-    const refreshToken = urlParams.get("refreshToken");
+    const params = new URLSearchParams(window.location.search);
+    const accessToken = params.get("accessToken");
+    const refreshToken = params.get("refreshToken");
 
     if (accessToken && refreshToken) {
       apiClient.setAuthTokens(accessToken, refreshToken);
 
-      // Làm sạch URL
+      // Xóa query khỏi URL
       window.history.replaceState({}, document.title, window.location.pathname);
 
       return { accessToken, refreshToken };
     }
-
     return null;
+  }
+
+  async register(credentials: RegisterRequest): Promise<RegisterResponse> {
+    await apiClient.post("/users", {
+      email: credentials.email,
+      username: credentials.userName,
+      fullName: credentials.userName,
+      role: "STUDENT",
+      password: credentials.password,
+      provider: "LOCAL",
+    });
+
+    return this.login({
+      username: credentials.userName,
+      password: credentials.password,
+    }) as Promise<RegisterResponse>;
   }
 }
 
