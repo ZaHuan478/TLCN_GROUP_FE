@@ -3,7 +3,7 @@ export type User = {
     fullName: string;
     userName: string;
     email: string;
-    role: "STUDENT" | "COMPANY" | "ADMIN";
+    role: "STUDENT" | "COMPANY" | "ADMIN" | null;
     isActive: boolean;
   };
   
@@ -31,7 +31,7 @@ export type User = {
     email: string;
     password: string;
     confirmPassword: string;
+    role?: "STUDENT" | "COMPANY" | "ADMIN";
   };
   
   export type RegisterResponse = LoginResponse;
-  

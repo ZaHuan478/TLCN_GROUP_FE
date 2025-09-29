@@ -39,6 +39,15 @@ const Navbar: React.FC = () => {
     return "U";
   };
 
+  const getRoleLabel = () => {
+    const roleMap: Record<string, string> = {
+      STUDENT: "Student",
+      COMPANY: "Company",
+      ADMIN: "Admin",
+    };
+    return roleMap[user?.role ?? ""] ?? "Unknown role";
+  };
+
   return (
     <nav className="flex justify-between items-center px-4 sm:px-10 py-4 bg-[#FFF0D9] border-b border-[#F3D94B]">
       <div className="w-[102px]"></div>
@@ -65,6 +74,9 @@ const Navbar: React.FC = () => {
                     {user.fullName || user.userName}
                   </p>
                   <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Role: <span className="font-medium text-gray-700">{getRoleLabel()}</span>
+                  </p>
                 </div>
                 
                 <Link 

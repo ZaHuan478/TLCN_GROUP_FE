@@ -2,6 +2,7 @@ import { apiClient } from "./apiClient";
 import { User, LoginRequest, LoginResponse, RefreshTokenResponse, RegisterRequest, RegisterResponse } from "../types/types";
 import { storage } from "../helper/storage";
 
+
 class AuthService {
   async login(credentials: LoginRequest): Promise<LoginResponse> {
     const { data } = await apiClient.post<{ data: LoginResponse }>("/auth", credentials);
@@ -22,14 +23,20 @@ class AuthService {
 
   async logout(): Promise<void> {
     try {
-      await apiClient.post("/auth/logout");
+      if (this.isAuthenticated()) {
+        await apiClient.post("/auth/logout");
+      }
     } catch (err) {
       console.error("Logout error:", err);
     } finally {
-      apiClient.clearAuthTokens();
-      storage.clearUser();
-      storage.clearTokens();
+      this.clearSession();
     }
+  }
+
+  clearSession(): void {
+    apiClient.clearAuthTokens();
+    storage.clearUser();
+    storage.clearTokens();
   }
 
   getCurrentUser(): User | null {
@@ -75,7 +82,7 @@ class AuthService {
       email: credentials.email,
       username: credentials.userName,
       fullName: credentials.userName,
-      role: "STUDENT",
+      role: credentials.role ?? null,
       password: credentials.password,
       provider: "LOCAL",
     });

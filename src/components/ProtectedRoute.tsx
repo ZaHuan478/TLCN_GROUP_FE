@@ -26,6 +26,11 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <Navigate to="/signin" state={{ from: location }} replace />;
   }
 
+  // If user doesn't have a role yet, redirect to role selection
+  if (!user?.role) {
+    return <Navigate to="/role-selection" replace />;
+  }
+
   if (requiredRole && user?.role !== requiredRole) {
     return <Navigate to="/unauthorized" replace />;
   }

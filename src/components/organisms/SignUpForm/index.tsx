@@ -6,6 +6,7 @@ import { Button } from "../../atoms/Button/Button";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../../contexts/AuthContext";
 import { authService } from "../../../services/authService";
+import RoleSelectionModal from "../../molecules/RoleSelectionModal/RoleSelectionModal";
 
 export const SignUpForm: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -14,11 +15,13 @@ export const SignUpForm: React.FC = () => {
     password: "",
     confirmPassword: "",
   });
+  const [pendingCredentials, setPendingCredentials] = useState<typeof formData | null>(null);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showRoleModal, setShowRoleModal] = useState(false);
 
-  const { register } = useAuth();
+  const { register, refreshUser } = useAuth();
   const navigate = useNavigate();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -45,42 +48,76 @@ export const SignUpForm: React.FC = () => {
     return null;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     setError("");
     setSuccess("");
 
     const validationError = validateForm();
     if (validationError) {
       setError(validationError);
-      setIsLoading(false);
+      return;
+    }
+
+    setPendingCredentials({
+      userName: formData.userName,
+      email: formData.email,
+      password: formData.password,
+      confirmPassword: formData.confirmPassword,
+    });
+    setShowRoleModal(true);
+  };
+
+  const handleGoogleLogin = () => {
+    authService.initiateGoogleLogin();
+  };
+
+  const handleRoleSelection = async (role: string) => {
+    if (!pendingCredentials) {
+      setError("Không tìm thấy thông tin người dùng. Vui lòng thử lại.");
+      setShowRoleModal(false);
       return;
     }
 
     try {
-      await register({
-        userName: formData.userName,
-        email: formData.email,
-        password: formData.password,
-        confirmPassword: formData.confirmPassword,
-      });
-      
-      setSuccess("Đăng ký thành công! Đang chuyển hướng đến trang đăng nhập...");
-      
-      setTimeout(() => {
-        navigate("/signin"); 
-      }, 2000);
+      setIsLoading(true);
+      const roleMapping: Record<string, "STUDENT" | "COMPANY" | "ADMIN"> = {
+        student: "STUDENT",
+        company: "COMPANY",
+        admin: "ADMIN",
+      };
+      const backendRole = roleMapping[role] || "STUDENT";
 
+      await register({
+        ...pendingCredentials,
+        role: backendRole,
+      });
+
+      authService.clearSession();
+      await refreshUser();
+
+      setSuccess("Đăng ký thành công! Đang chuyển hướng đến trang đăng nhập...");
+      setShowRoleModal(false);
+      setPendingCredentials(null);
+
+      setTimeout(() => {
+        navigate("/signin");
+      }, 2000);
     } catch (err: any) {
-      setError(err.response?.data?.message || "Đăng ký thất bại. Vui lòng thử lại.");
+      const errorMessage =
+        err.response?.data?.message ||
+        err.message ||
+        "Không thể hoàn tất đăng ký. Vui lòng thử lại.";
+      setError(errorMessage);
+      setShowRoleModal(false);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleGoogleLogin = () => {
-    authService.initiateGoogleLogin();
+  const handleCloseRoleModal = () => {
+    setShowRoleModal(false);
+    setPendingCredentials(null);
   };
 
   return (
@@ -180,6 +217,13 @@ export const SignUpForm: React.FC = () => {
           </Link>
         </p>
       </div>
+      
+      {/* Role Selection Modal */}
+      <RoleSelectionModal
+        isOpen={showRoleModal}
+        onSelectRole={handleRoleSelection}
+        onClose={handleCloseRoleModal}
+      />
     </div>
   );
 };

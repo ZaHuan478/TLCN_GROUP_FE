@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { authService, User } from "../services/authService";
+import { authService } from "../services/authService";
+import { User } from "../types/types";
 import { apiClient } from "../services/apiClient";
 
 type AuthContextType = {
@@ -7,7 +8,7 @@ type AuthContextType = {
     isAuthenticated: boolean;
     isLoading: boolean;
     login: (username: string, password: string) => Promise<void>;
-    register: (userData: any) => Promise<void>;
+    register: (userData: any) => Promise<any>;
     logout: () => Promise<void>;
     refreshUser: () => Promise<void>;
 }
@@ -42,12 +43,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                     if (savedUser && authService.isAuthenticated()) {
                         setUser(savedUser);
                     } else {
-                        await authService.logout();
+                        authService.clearSession();
                     }
                 }
             } catch (error) {
                 console.error('Auth initialization error:', error);
-                await authService.logout();
+                authService.clearSession();
             } finally {
                 setIsLoading(false);
             }
@@ -74,7 +75,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             await authService.logout();
             setUser(null);
         } catch (error) {
-            console.error('Logout error:', error)
+            console.error('Logout error:', error);
+            authService.clearSession();
             setUser(null);
         } finally {
             setIsLoading(false);
@@ -91,12 +93,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
     };
 
-    const register = async (userData: any): Promise<void> => {
+    const register = async (userData: any): Promise<any> => {
         try {
             setIsLoading(true);
             const response = await authService.register(userData);
-            setUser(response.user);
+            
+            // Log response để debug
+            console.log("Register response:", response);
+            
+            // Kiểm tra response có user info không
+            if (response && response.user) {
+                setUser(response.user);
+            } else {
+                console.error("Invalid response from register:", response);
+            }
+            
+            return response;
         } catch (error) {
+            console.error("Register error:", error);
             throw error;
         } finally {
             setIsLoading(false);
@@ -105,7 +119,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     const value: AuthContextType = { 
         user, 
-        isAuthenticated: authService.isAuthenticated() && !!user, // Fix: Calculate dynamically
+        isAuthenticated: authService.isAuthenticated() && !!user,
         isLoading, 
         login, 
         register,
