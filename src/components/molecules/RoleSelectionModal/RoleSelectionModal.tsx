@@ -1,13 +1,13 @@
 import React from 'react';
 import Heading from '../../atoms/Heading/Heading';
 
-interface RoleSelectionModalProps {
+type RoleSelectionModalProps = {
   isOpen: boolean;
   onSelectRole: (role: string) => void;
   onClose?: () => void;
 }
 
-interface RoleOption {
+type RoleOption = {
   id: string;
   title: string;
   description: string;
@@ -28,12 +28,6 @@ const roleOptions: RoleOption[] = [
     description: 'Post job opportunities and recruit talented individuals',
     icon: '🏢',
   },
-  {
-    id: 'admin',
-    title: 'Admin',
-    description: 'Manage platform content, users, and settings',
-    icon: '👑',
-  }
 ];
 
 const RoleSelectionModal: React.FC<RoleSelectionModalProps> = ({ isOpen, onSelectRole, onClose }) => {

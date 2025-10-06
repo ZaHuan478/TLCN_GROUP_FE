@@ -7,6 +7,7 @@ import { Button } from "../../atoms/Button/Button";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../../contexts/AuthContext";
 import { authService } from "../../../services/authService";
+import { Toast } from "../../molecules/ToastNotification";
 
 export const SignInForm: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -14,7 +15,7 @@ export const SignInForm: React.FC = () => {
     password: "",
     rememberMe: false,
   });
-  const [error, setError] = useState("");
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'warning' } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const { login } = useAuth();
@@ -29,20 +30,19 @@ export const SignInForm: React.FC = () => {
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
-
-    if (error) setError("");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError("");
+    setToast(null);
 
     try {
       await login(formData.username, formData.password);
-      navigate(form, { replace: true });
+      setToast({ message: 'Login successful!', type: 'success' });
+      setTimeout (() => navigate(form, { replace: true }), 1000);
     } catch (err: any) {
-      setError(err.response?.data?.message || "Dang nhap that bai");
+      setToast({ message: 'Login failed. Please try again.', type: 'error' });
     } finally {
       setIsLoading(false);
     }
@@ -54,7 +54,13 @@ export const SignInForm: React.FC = () => {
 
   return (
     <div className="max-w-md mx-auto mt-16 p-8 bg-white rounded-lg shadow relative">
-      {/* Close button to return to homepage */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
       <button 
         onClick={() => navigate('/')}
         className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
@@ -76,11 +82,6 @@ export const SignInForm: React.FC = () => {
         <span className="mx-3 text-gray-400 text-sm">or</span>
         <div className="flex-1 h-px bg-gray-200" />
       </div>
-      {error && (
-        <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-            {error}
-        </div>
-      )}
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
           <Input type="text" name="username" placeholder="UserName" value={formData.username} onChange={handleInputChange} required />
