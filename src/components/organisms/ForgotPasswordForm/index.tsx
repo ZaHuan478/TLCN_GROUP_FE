@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { OTPModal } from "../../molecules/OTPModal";
 import { ResetPasswordModal } from "../../molecules/ResetPasswordModal";
 import { Toast } from "../../molecules/ToastNotification";
+import { ArrowLeft } from "lucide-react";
 
 export const ForgotPasswordForm: React.FC = () => {
     const [username, setUsername] = useState("");
@@ -57,6 +58,10 @@ export const ForgotPasswordForm: React.FC = () => {
     return (
         <>
             <div className="max-w-md mx-auto mt-16 p-8 bg-white rounded-lg shadow">
+                <Link to="/signin" className="flex items-center text-black hover:text-blue-600 mb-6">
+                    <ArrowLeft className="w-5 h-5 mr-2" />
+                    Back to Login
+                </Link>
                 <h2 className="text-3xl font-bold mb-4">Forgot Password</h2>
                 <p className="mb-8 text-gray-500">
                     Enter your username below and we’ll send you code on how to reset your password.
@@ -80,9 +85,6 @@ export const ForgotPasswordForm: React.FC = () => {
                         {isLoading ? "Sending..." : "Send"}
                     </Button>
                 </form>
-                <Link to="/signin" className="block mt-6 text-black hover:text-blue-600 font-medium">
-                    Back to Login
-                </Link>
             </div>
 
             {showOTPModal && (
