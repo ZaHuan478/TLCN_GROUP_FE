@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Input } from "../../atoms/Input/Input";
 import { Button } from "../../atoms/Button/Button";
-import { Toast } from "../ToastNotification"; // Import Toast
+import { Toast } from "../ToastNotification";
 
 interface OTPModalProps {
     username: string;
@@ -32,12 +32,11 @@ export const OTPModal: React.FC<OTPModalProps> = ({ username, onSuccess, onClose
             });
 
             const data = await response.json();
-            
             if (response.ok) {
                 setToast({ message: 'Xác thực OTP thành công!', type: 'success' });
                 setTimeout(() => {
                     onSuccess();
-                }, 1000); // Delay để hiển thị toast
+                }, 1000);
             } else {
                 setToast({ message: data.message || 'Mã OTP không đúng', type: 'error' });
             }
@@ -51,45 +50,46 @@ export const OTPModal: React.FC<OTPModalProps> = ({ username, onSuccess, onClose
     return (
         <>
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4">
-                    <h2 className="text-2xl font-bold mb-4">Nhập mã OTP</h2>
+                <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4 relative">
+                    <Button variant="icon"
+                        onClick={onClose}
+                        aria-label="Close"
+                        className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 z-10">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </Button>
+                    <h2 className="text-2xl font-bold mb-4">Enter OTP code</h2>
                     <p className="mb-6 text-gray-500">
-                        Chúng tôi đã gửi mã OTP đến tài khoản của bạn. Vui lòng nhập mã để xác thực.
+                        We have sent an OTP code to your account. Please enter the code to verify.
                     </p>
-                    
+
                     <form onSubmit={handleSubmit}>
                         <div className="mb-6">
                             <Input
                                 type="text"
-                                placeholder="Nhập mã OTP"
+                                placeholder="Enter OTP code"
                                 required
                                 value={otp}
                                 onChange={e => setOtp(e.target.value)}
                                 maxLength={6}
                             />
                         </div>
-                        
+
                         <div className="flex gap-4">
-                            <Button
-                                type="button"
-                                onClick={onClose}
-                                className="flex-1 h-12 bg-gray-300 text-gray-700 hover:bg-gray-400 rounded-[6px]"
-                                disabled={isLoading}
-                            >
-                                Hủy
-                            </Button>
-                            <Button
+                           <Button
                                 type="submit"
                                 className="flex-1 h-12 bg-black text-white hover:bg-blue-700 rounded-[6px] disabled:opacity-50"
                                 disabled={isLoading}
                             >
-                                {isLoading ? 'Đang xác thực...' : 'Xác thực'}
+                                {isLoading ? 'Verifying...' : 'Verify OTP'}
                             </Button>
                         </div>
                     </form>
                 </div>
             </div>
-            
+
             {toast && (
                 <Toast
                     message={toast.message}

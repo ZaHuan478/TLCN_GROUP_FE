@@ -61,20 +61,20 @@ export const SignInForm: React.FC = () => {
           onClose={() => setToast(null)}
         />
       )}
-      <button 
+      <Button
+        variant="icon"
         onClick={() => navigate('/')}
-        className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
         aria-label="Close"
-      >
+        className="absolute top-4 right-4 text-gray-500 hover:text-black">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <line x1="18" y1="6" x2="6" y2="18"></line>
           <line x1="6" y1="6" x2="18" y2="18"></line>
         </svg>
-      </button>
+      </Button>
 
       <h2 className="text-2xl font-bold mb-1">Welcome</h2>
       <p className="mb-6 text-gray-500">
-        Welcome back! Please enter your details.
+        Enter your username and password to sign in.
       </p>
       <GoogleLoginButton onClick={handleGoogleLogin} />
       <div className="flex items-center my-6">
@@ -99,7 +99,7 @@ export const SignInForm: React.FC = () => {
         </div>
         <div className="flex items-center justify-between mb-6">
           <label className="flex items-center text-sm text-gray-600">
-            <Checkbox  
+            <Checkbox
                 name="rememberMe"
                 checked={formData.rememberMe}
                 onChange={handleInputChange}
