@@ -52,7 +52,6 @@ export const ForgotPasswordForm: React.FC = () => {
     const handleResetSuccess = () => {
         setShowResetModal(false);
         setUsername("");
-        alert('Password reset successful! Please log in with your new password.');
     }
 
     return (

@@ -33,7 +33,7 @@ export const OTPModal: React.FC<OTPModalProps> = ({ username, onSuccess, onClose
 
             const data = await response.json();
             if (response.ok) {
-                setToast({ message: 'Xác thực OTP thành công!', type: 'success' });
+                setToast({ message: 'OTP authentication successful!', type: 'success' });
                 setTimeout(() => {
                     onSuccess();
                 }, 1000);
