@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Input } from "../../atoms/Input/Input";
 import { Button } from "../../atoms/Button/Button";
 import { Toast } from "../ToastNotification";
+import { authService } from "../../../services/authService";
 
 type ResetPasswordModalProps = {
     username: string;
@@ -36,30 +37,14 @@ export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({ username
 
         setIsLoading(true);
         try {
-            const response = await fetch('http://localhost:5000/auth/reset-password', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    username,
-                    newPassword,
-                    confirmNewPassword
-                }),
+            await authService.resetPassword(username, newPassword, confirmNewPassword);
+            setToast({ message: "Password changed successfully!", type: "success" });
+            setTimeout(() => onSuccess(), 1500);
+        } catch (err: any) {
+            setToast({
+                message: err?.message || "Error resetting password",
+                type: "error",
             });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                setToast({ message: 'Password changed successfully!', type: 'success' });
-                setTimeout(() => {
-                    onSuccess();
-                }, 1500);
-            } else {
-                setToast({ message: data.message || 'Có lỗi xảy ra khi đổi mật khẩu', type: 'error' });
-            }
-        } catch (error) {
-            setToast({ message: 'Không thể kết nối đến server', type: 'error' });
         } finally {
             setIsLoading(false);
         }

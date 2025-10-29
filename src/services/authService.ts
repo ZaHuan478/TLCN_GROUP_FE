@@ -33,6 +33,45 @@ class AuthService {
     }
   }
 
+  async resetPassword(
+    username: string,
+    newPassword: string,
+    confirmNewPassword: string
+  ): Promise<any> {
+    try {
+      const data = await apiClient.post<{ message: string }>(
+        "/auth/reset-password", {
+          username,
+          newPassword,
+          confirmNewPassword,
+        }
+      );
+      return data;
+    } catch (error: any) {
+      throw error.response?.data || { message: "Unable to reset password" };
+    }
+  }
+
+  async verifyOTP(username: string, otp: string): Promise<{ message: string }> {
+    try {
+      const data = await apiClient.post<{ message: string }>("/auth/verify-otp", { username, otp });
+      return data;
+    } catch(error: any) {
+      const message = error.response?.data?.message || error.message || "OTP verification failed";
+      throw { message };
+    }
+  }
+
+  async verifyUsername(username: string): Promise<{ message: string }> {
+    try {
+      const data  = await apiClient.post<{ message: string }>("/auth/verify-username", { username });
+      return data;
+    } catch (error: any) {
+      const message = error.response?.data?.message || error.message || "Username verification failed";
+      throw { message };
+    }
+  }
+
   clearSession(): void {
     apiClient.clearAuthTokens();
     storage.clearUser();
@@ -57,7 +96,7 @@ class AuthService {
 
   // Google OAuth
   initiateGoogleLogin(): void {
-    const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+    const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
     window.location.href = `${baseUrl}/auth/google`;
   }
 

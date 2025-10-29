@@ -6,6 +6,7 @@ import { OTPModal } from "../../molecules/OTPModal";
 import { ResetPasswordModal } from "../../molecules/ResetPasswordModal";
 import { Toast } from "../../molecules/ToastNotification";
 import { ArrowLeft } from "lucide-react";
+import { authService } from "../../../services/authService";
 
 export const ForgotPasswordForm: React.FC = () => {
     const [username, setUsername] = useState("");
@@ -21,24 +22,12 @@ export const ForgotPasswordForm: React.FC = () => {
         setIsLoading(true);
 
         try {
-            const response = await fetch('http://localhost:5000/auth/verify-username', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ username }),
-            });
+            await authService.verifyUsername(username);
 
-            const data = await response.json();
-
-            if (response.ok) {
-                setShowOTPModal(true);
-                setToast({ message: 'OTP code sent!', type: 'success' });
-            } else {
-                setToast({ message: data.message || 'This account was not found.', type: 'error' });
-            }
-        } catch (error) {
-           setToast({ message: 'Unable to connect to server', type: 'error' });
+            setShowOTPModal(true);
+            setToast({ message: 'OTP code sent!', type: 'success' });
+        } catch (error: any) {
+            setToast({ message: error.message || 'This account was not found.', type: 'error' });
         } finally {
             setIsLoading(false);
         }

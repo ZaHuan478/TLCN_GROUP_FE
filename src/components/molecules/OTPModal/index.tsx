@@ -2,8 +2,9 @@ import React, { useState } from "react";
 import { Input } from "../../atoms/Input/Input";
 import { Button } from "../../atoms/Button/Button";
 import { Toast } from "../ToastNotification";
+import { authService } from "../../../services/authService";
 
-interface OTPModalProps {
+type OTPModalProps = {
     username: string;
     onSuccess: () => void;
     onClose: () => void;
@@ -17,31 +18,22 @@ export const OTPModal: React.FC<OTPModalProps> = ({ username, onSuccess, onClose
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!otp.trim()) {
-            setToast({ message: 'Vui lòng nhập mã OTP', type: 'error' });
+            setToast({ message: 'Please enter OTP code', type: 'error' });
             return;
         }
 
         setIsLoading(true);
         try {
-            const response = await fetch('http://localhost:5000/auth/verify-otp', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ username, otp }),
+            await authService.verifyOTP(username, otp);
+            setToast({ message: "OTP authentication successful!", type: "success" });
+            setTimeout(() => {
+                onSuccess();
+            }, 1000);
+        } catch (error: any) {
+            setToast({
+                message: error.message || "Incorrect OTP code",
+                type: "error",
             });
-
-            const data = await response.json();
-            if (response.ok) {
-                setToast({ message: 'OTP authentication successful!', type: 'success' });
-                setTimeout(() => {
-                    onSuccess();
-                }, 1000);
-            } else {
-                setToast({ message: data.message || 'Mã OTP không đúng', type: 'error' });
-            }
-        } catch (error) {
-            setToast({ message: 'Không thể kết nối đến server', type: 'error' });
         } finally {
             setIsLoading(false);
         }
@@ -78,7 +70,7 @@ export const OTPModal: React.FC<OTPModalProps> = ({ username, onSuccess, onClose
                         </div>
 
                         <div className="flex gap-4">
-                           <Button
+                            <Button
                                 type="submit"
                                 className="flex-1 h-12 bg-black text-white hover:bg-blue-700 rounded-[6px] disabled:opacity-50"
                                 disabled={isLoading}
