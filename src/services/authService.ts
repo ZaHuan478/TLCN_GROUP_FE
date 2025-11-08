@@ -10,14 +10,21 @@ class AuthService {
   }
 
   async register(credentials: RegisterRequest): Promise<RegisterResponse> {
-    await apiClient.post("/users", {
+    const payload = {
       email: credentials.email,
       username: credentials.userName,
       fullName: credentials.userName,
       role: credentials.role ?? null,
       password: credentials.password,
       provider: "LOCAL",
-    });
+    };
+
+    try {
+      await apiClient.post("/users", payload);
+    } catch (error) {
+      console.error('Registration error details:', error);
+      throw error;
+    }
 
     return this.login({
       username: credentials.userName,
@@ -30,6 +37,8 @@ class AuthService {
       if (this.isAuthenticated()) {
         await apiClient.post("/auth/logout");
       }
+    } catch (error) {
+      console.warn('Logout API call failed:', error);
     } finally {
       this.clearSession();
     }
@@ -53,7 +62,7 @@ class AuthService {
 
   // OAuth
   initiateGoogleLogin(): void {
-    const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
+    const baseUrl = import.meta.env.VITE_API_URL;
     window.location.href = `${baseUrl}/auth/google`;
   }
 

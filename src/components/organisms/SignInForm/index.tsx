@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { GoogleLoginButton } from "../../molecules/GoogleLoginButton";
+import { GoogleLoginButton } from "../../atoms/GoogleLoginButton";
 import { Input } from "../../atoms/Input/Input";
 import { Checkbox } from "../../atoms/Checkbox.tsx/Checkbox";
 import { Button } from "../../atoms/Button/Button";

@@ -5,7 +5,8 @@ import SignUpPage from "../../components/pages/SignUpPage";
 import ForgotPasswordPage from "../../components/pages/ForgotPasswordPage";
 import { OAuthSuccessPage } from "../../components/pages/OAuthSuccessPage";
 import { useAuth } from "../../contexts/AuthContext";
-import Homepage from "../../pages/Homepage";
+// import Homepage from "../../pages/Homepage";
+import BlogPage from "../../components/pages/BlogPage";
 
 const AppRoutes: React.FC = () => {
   const { isAuthenticated } = useAuth();
@@ -17,7 +18,7 @@ const AppRoutes: React.FC = () => {
       <Route path="/signup" element={<SignUpPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/oath-success" element={<OAuthSuccessPage />} />
-      <Route path="/" element={<Homepage />} />
+      <Route path="/" element={<BlogPage />} />
 
       {/* Catch-all route */}
       <Route

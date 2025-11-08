@@ -85,8 +85,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     const refreshUser = async (): Promise<void> => {
         try {
-            const currentUser = await authService.getCurrentUser();
-            setUser(currentUser);
+            // Try to get fresh user data from backend
+            if (authService.isAuthenticated()) {
+                try {
+                    const response = await apiClient.get<{ data: { user: User } }>('/auth/me');
+                    const updatedUser = response.data.user;
+                    setUser(updatedUser);
+                    localStorage.setItem("user", JSON.stringify(updatedUser));
+                } catch (apiError) {
+                    console.warn('Failed to refresh from API, using cached data:', apiError);
+                    // Fallback to cached user
+                    const currentUser = await authService.getCurrentUser();
+                    setUser(currentUser);
+                }
+            } else {
+                setUser(null);
+            }
         } catch (error) {
             console.error('Refresh user error:', error);
             setUser(null);

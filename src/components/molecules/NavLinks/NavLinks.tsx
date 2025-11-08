@@ -4,9 +4,9 @@ import { Link } from "react-router-dom";
 const links = [
 	{ to: "/", label: "Home" },
 	{ to: "/courses", label: "Courses" },
-	{ to: "/mentor", label: "Mentor" },
-	{ to: "/about", label: "About" },
-	{ to: "/blog", label: "Blog" },
+	// { to: "/mentor", label: "Mentor" },
+	// { to: "/about", label: "About" },
+	// { to: "/blog", label: "Blog" },
 ];
 
 const NavLinks: React.FC<{ className?: string }> = ({ className = "" }) => (

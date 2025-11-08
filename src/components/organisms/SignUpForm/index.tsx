@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { GoogleLoginButton } from "../../molecules/GoogleLoginButton";
+import { GoogleLoginButton } from "../../atoms/GoogleLoginButton";
 import { Input } from "../../atoms/Input/Input";
 import { Button } from "../../atoms/Button/Button";
 import { Link } from "react-router-dom";
@@ -15,6 +15,10 @@ export const SignUpForm: React.FC = () => {
     email: "",
     password: "",
     confirmPassword: "",
+  });
+  const [roleSpecificData, setRoleSpecificData] = useState({
+    studentId: "",
+    companyId: "",
   });
   const [pendingCredentials, setPendingCredentials] = useState<typeof formData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -93,7 +97,10 @@ export const SignUpForm: React.FC = () => {
     authService.initiateGoogleLogin();
   };
 
-  const handleRoleSelection = async (role: string) => {
+  const handleRoleSelection = async (
+    role: string, 
+    roleData?: { studentId?: string; companyId?: string }
+  ) => {
     if (!pendingCredentials) {
       setToast({ message: "User information not found. Please try again.", type: "error" });
       setShowRoleModal(false);
@@ -108,10 +115,21 @@ export const SignUpForm: React.FC = () => {
       };
       const backendRole = roleMapping[role] || "STUDENT";
 
-      await register({
+      // Build the registration payload with role-specific data
+      const registrationPayload: any = {
         ...pendingCredentials,
         role: backendRole,
-      });
+      };
+
+      // Add studentId or companyId if provided
+      if (roleData?.studentId) {
+        registrationPayload.studentId = roleData.studentId;
+      }
+      if (roleData?.companyId) {
+        registrationPayload.companyId = roleData.companyId;
+      }
+
+      await register(registrationPayload);
 
       authService.clearSession();
       await refreshUser();
@@ -124,6 +142,10 @@ export const SignUpForm: React.FC = () => {
         navigate("/signin");
       }, 2000);
     } catch (err: any) {
+      console.error('Full registration error:', err);
+      console.error('Error response data:', err.response?.data);
+      console.error('Error status:', err.response?.status);
+      
       const errorMessage =
         err.response?.data?.message ||
         err.message ||

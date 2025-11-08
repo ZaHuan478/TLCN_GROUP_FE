@@ -49,7 +49,7 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <nav className="flex justify-between items-center px-4 sm:px-10 py-4 bg-[#FFF0D9] border-b border-[#F3D94B]">
+    <nav className="flex justify-between items-center px-4 sm:px-10 py-4  border-b border-[#F3D94B]">
       <div className="w-[102px]"></div>
       <div className="flex-1 flex justify-center">
         <NavLinks />
