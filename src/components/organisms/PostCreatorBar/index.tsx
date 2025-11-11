@@ -19,17 +19,6 @@ const PostCreatorBar: React.FC<PostCreatorBarProps> = ({ onOpen }) => {
             >
                 What's on your mind, {user?.fullName || user?.userName || 'there'}?
             </Button>
-
-            <div className="flex space-x-3">
-                <Button
-                    variant="icon"
-                    className="text-green-500"
-                    onClick={() => alert('Feature coming soon!')}
-                >
-                    🖼️ Photo
-                </Button>
-
-            </div>
         </div>
     );
 };

@@ -1,20 +1,26 @@
 import React, { useState } from "react";
 
 type InputProps = React.InputHTMLAttributes<HTMLInputElement> & {
-    isPassword?: boolean; 
+    isPassword?: boolean;
+    overrideDefaultStyles?: boolean; // Cho phép override hoàn toàn style mặc định
 };
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
-    ({ isPassword = false, className = "", type = "text", ...props }, ref) => {
+    ({ isPassword = false, overrideDefaultStyles = false, className = "", type = "text", ...props }, ref) => {
         const [showPassword, setShowPassword] = useState(false);
+
+        // Nếu overrideDefaultStyles = true, chỉ sử dụng className được truyền vào
+        const defaultStyles = "w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500";
+        const finalClassName = overrideDefaultStyles 
+            ? `${className} ${isPassword ? "pr-14" : ""}`
+            : `${defaultStyles} ${isPassword ? "pr-14" : ""} ${className}`;
 
         return (
             <div className={isPassword ? "relative" : ""}>
                 <input
                     ref={ref}
                     type={isPassword ? (showPassword ? "text" : "password") : type}
-                    className={`w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 ${isPassword ? "pr-14" : ""
-                        } ${className}`}
+                    className={finalClassName}
                     {...props}
                 />
                 {isPassword && (

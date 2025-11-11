@@ -4,32 +4,24 @@ export type Blog = {
     id: string;
     title: string;
     content: string;
-    author: string | { 
-        id: string; 
-        username: string 
+    author: string | {
+        id: string;
+        username: string
     };
+    images?: string[];
     createdAt: string;
 }
 
 export type CreateBlogPayLoad = {
     content: string;
+    images?: File[];
 }
 
-type BlogListApiResponse = {
-    total: number;
-    blogs: Blog[];
-    currentPage: number;
-    totalPages: number;
-}
 
-type CreateBlogResponse = {
-    data: Blog;
-}
 
 export const blogApi = {
     getAll: async (forceRefresh = false): Promise<Blog[]> => {
         try {
-            // Add cache-busting headers để tránh 304 Not Modified
             const headers: any = {};
             if (forceRefresh) {
                 headers['Cache-Control'] = 'no-cache, no-store, must-revalidate';
@@ -40,17 +32,14 @@ export const blogApi = {
             const response = await apiClient.get<any>('/blogs', { headers });
             console.log('blogApi.getAll response:', response);
 
-            // Backend trả về object với blogs array, không phải array trực tiếp
             let blogs: Blog[] = [];
-            
+
             if (response && response.blogs && Array.isArray(response.blogs)) {
                 blogs = response.blogs;
             } else if (Array.isArray(response)) {
-                // Fallback nếu backend trả về array trực tiếp
                 blogs = response;
             } else {
                 console.warn('Unexpected response format:', typeof response, response);
-                // Clear cache nếu response không hợp lệ
                 localStorage.removeItem('blogs_cache');
                 return [];
             }
@@ -67,7 +56,7 @@ export const blogApi = {
                 const cached = localStorage.getItem('blogs_cache');
                 const lastFetch = localStorage.getItem('blogs_last_fetch');
                 const cacheAge = lastFetch ? Date.now() - parseInt(lastFetch) : Infinity;
-                
+
                 // Chỉ dùng cache nếu không quá 5 phút
                 if (cached && cacheAge < 300000) {
                     console.log('Using cached blogs due to API error (cache age:', cacheAge, 'ms)');
@@ -93,16 +82,39 @@ export const blogApi = {
 
     create: async (data: CreateBlogPayLoad): Promise<Blog> => {
         try {
-            const response = await apiClient.post<Blog>('/blogs', data);
-            console.log('blogApi.create response:', response);
+            // Nếu có images, sử dụng FormData để upload
+            if (data.images && data.images.length > 0) {
+                const formData = new FormData();
+                formData.append('content', data.content);
 
-            // Update cache with new blog
-            const cached = localStorage.getItem('blogs_cache');
-            const blogs = cached ? JSON.parse(cached) : [];
-            const updatedBlogs = [response, ...blogs];
-            localStorage.setItem('blogs_cache', JSON.stringify(updatedBlogs));
+                // Append each image file
+                data.images.forEach((image) => {
+                    formData.append(`images`, image);
+                });
 
-            return response;
+                const response = await apiClient.postFormData<Blog>('/blogs', formData);
+                console.log('blogApi.create (with images) response:', response);
+
+                // Update cache with new blog
+                const cached = localStorage.getItem('blogs_cache');
+                const blogs = cached ? JSON.parse(cached) : [];
+                const updatedBlogs = [response, ...blogs];
+                localStorage.setItem('blogs_cache', JSON.stringify(updatedBlogs));
+
+                return response;
+            } else {
+                // Không có images, gửi JSON như bình thường
+                const response = await apiClient.post<Blog>('/blogs', { content: data.content });
+                console.log('blogApi.create response:', response);
+
+                // Update cache with new blog
+                const cached = localStorage.getItem('blogs_cache');
+                const blogs = cached ? JSON.parse(cached) : [];
+                const updatedBlogs = [response, ...blogs];
+                localStorage.setItem('blogs_cache', JSON.stringify(updatedBlogs));
+
+                return response;
+            }
         } catch (error) {
             console.error('blogApi.create error:', error);
 

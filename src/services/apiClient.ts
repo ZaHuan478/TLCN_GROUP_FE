@@ -82,6 +82,17 @@ class ApiClient {
     return res.data.data;
   }
 
+  async postFormData<T>(url: string, formData: FormData, config?: AxiosRequestConfig): Promise<T> {
+    const res = await this.client.post<ApiResponse<T>>(url, formData, {
+      ...config,
+      headers: {
+        ...config?.headers,
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return res.data.data;
+  }
+
   async put<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
     const res = await this.client.put<ApiResponse<T>>(url, data, config);
     return res.data.data;

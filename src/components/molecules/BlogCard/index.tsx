@@ -1,8 +1,14 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { Blog } from "../../../api/blogApi";
-import { Button } from "../../atoms/Button/Button";
+import { commentApi } from "../../../api/commentApi";
+import { Comment } from "../../../types/types.ts";
 import { useAuth } from "../../../contexts/AuthContext";
-import { canUserModifyPost, getUserDisplayName, canUserCreateBlog } from "../../../utils/userUtils.ts";
+import { canUserCreateBlog } from "../../../utils/userUtils.ts";
+import { BlogHeader } from "../BlogHeader";
+import { BlogContent } from "../BlogContent";
+import { BlogStats } from "../BlogStats";
+import { BlogActions } from "../BlogActions";
+import { CommentSection } from "../../organisms/CommentSection";
 
 type BlogCardProps = {
     blog: Blog;
@@ -17,40 +23,44 @@ type Reaction = {
     isLiked: boolean;
 };
 
-type Comment = {
-    id: string;
-    author: string;
-    content: string;
-    createdAt: string;
-};
-
 export const BlogCard: React.FC<BlogCardProps> = ({ blog, onEdit, onDelete }) => {
     const { user } = useAuth();
     const [showComments, setShowComments] = useState(false);
-    const [showDropdown, setShowDropdown] = useState(false);
-    const [newComment, setNewComment] = useState("");
     const [reactions, setReactions] = useState<Reaction[]>([
         { id: "like", emoji: "👍", count: 0, isLiked: false },
     ]);
     const [comments, setComments] = useState<Comment[]>([]);
-    const dropdownRef = useRef<HTMLDivElement>(null);
+    const [totalComments, setTotalComments] = useState(0);
+    const [loadingComments, setLoadingComments] = useState(false);
 
-    // Đóng dropdown khi click bên ngoài
     useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-                setShowDropdown(false);
-            }
-        };
+        setComments([]);
+        setTotalComments(0);
+        loadComments();
+    }, [blog.id]);
 
-        if (showDropdown) {
-            document.addEventListener('mousedown', handleClickOutside);
+    useEffect(() => {
+        if (showComments && comments.length === 0) {
+            loadComments();
         }
+    }, [showComments]);
 
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, [showDropdown]);
+    const loadComments = async () => {
+        try {
+            setLoadingComments(true);
+            console.log('🔄 Loading comments for blog:', blog.id);
+            const { comments: blogComments, total } = await commentApi.getByBlogId(blog.id);
+            console.log('✅ Loaded comments:', blogComments);
+            setComments(blogComments);
+            setTotalComments(total);
+        } catch (error) {
+            console.error('❌ Failed to load comments:', error);
+            setComments([]);
+            setTotalComments(0);
+        } finally {
+            setLoadingComments(false);
+        }
+    };
 
     const handleReaction = (reactionId: string) => {
         setReactions(prev => prev.map(reaction => {
@@ -70,194 +80,166 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog, onEdit, onDelete }) =>
         }));
     };
 
-    const handleAddComment = () => {
-        if (!newComment.trim()) return;
+    const handleAddComment = async (content: string) => {
+        if (!content.trim() || !user) return;
 
-        const comment: Comment = {
-            id: Date.now().toString(),
-            author: getUserDisplayName(user),
-            content: newComment,
-            createdAt: new Date().toLocaleString()
-        };
+        try {
+            const commentData = {
+                blogId: blog.id,
+                content: content
+            };
 
-        setComments(prev => [...prev, comment]);
-        setNewComment("");
+            const newCommentResult = await commentApi.create(commentData);
+            setComments(prev => [newCommentResult, ...prev]);
+            setTotalComments(prev => prev + 1);
+        } catch (error: any) {
+            console.error('Failed to add comment:', error);
+
+            // Show error to user
+            if (error.response?.status === 401) {
+                alert('Please login to comment');
+            } else if (error.response?.status === 403) {
+                alert('You do not have permission to comment');
+            } else {
+                alert('Failed to add comment. Please try again.');
+            }
+        }
     };
 
-    // Check if current user is the owner of the blog post
-    const isOwner = () => {
-        return canUserModifyPost(user, blog.author);
+    const handleReplyComment = async (parentId: string, content: string) => {
+        if (!content.trim() || !user) return;
+
+        try {
+            const replyData = {
+                blogId: blog.id,
+                content: content,
+                parentId: parentId
+            };
+
+            const newReply = await commentApi.create(replyData);
+
+            // Add reply to the parent comment's replies array
+            setComments(prev => {
+                const addReplyToComment = (comments: Comment[]): Comment[] => {
+                    return comments.map(comment => {
+                        if (comment.id === parentId) {
+                            return {
+                                ...comment,
+                                replies: [...(comment.replies || []), newReply]
+                            };
+                        }
+                        if (comment.replies && comment.replies.length > 0) {
+                            return {
+                                ...comment,
+                                replies: addReplyToComment(comment.replies)
+                            };
+                        }
+                        return comment;
+                    });
+                };
+                return addReplyToComment(prev);
+            });
+
+            setTotalComments(prev => prev + 1);
+        } catch (error: any) {
+            console.error('Failed to add reply:', error);
+            alert('Failed to add reply. Please try again.');
+        }
+    };
+
+    const handleEditComment = async (commentId: string, newContent: string) => {
+        if (!newContent.trim()) return;
+
+        try {
+            await commentApi.update(commentId, { content: newContent });
+
+            // Update comment in state
+            setComments(prev => {
+                const updateCommentContent = (comments: Comment[]): Comment[] => {
+                    return comments.map(comment => {
+                        if (comment.id === commentId) {
+                            return { ...comment, content: newContent };
+                        }
+                        if (comment.replies && comment.replies.length > 0) {
+                            return {
+                                ...comment,
+                                replies: updateCommentContent(comment.replies)
+                            };
+                        }
+                        return comment;
+                    });
+                };
+                return updateCommentContent(prev);
+            });
+        } catch (error: any) {
+            console.error('Failed to edit comment:', error);
+            alert('Failed to edit comment. Please try again.');
+        }
+    };
+
+    const handleDeleteComment = async (commentId: string) => {
+        try {
+            await commentApi.delete(commentId);
+
+            setComments(prev => {
+                const removeComment = (comments: Comment[]): Comment[] => {
+                    return comments.filter(comment => {
+                        if (comment.id === commentId) {
+                            const countReplies = (c: Comment): number => {
+                                let count = 1;
+                                if (c.replies) {
+                                    c.replies.forEach(r => count += countReplies(r));
+                                }
+                                return count;
+                            };
+                            setTotalComments(prev => prev - countReplies(comment));
+                            return false;
+                        }
+                        if (comment.replies && comment.replies.length > 0) {
+                            comment.replies = removeComment(comment.replies);
+                        }
+                        return true;
+                    });
+                };
+                return removeComment(prev);
+            });
+        } catch (error: any) {
+            console.error('Failed to delete comment:', error);
+            alert('Failed to delete comment. Please try again.');
+        }
     };
 
     return (
         <div className="border rounded-lg p-4 shadow-sm bg-white mb-4">
-            {/* Header với avatar và thông tin tác giả */}
-            <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-semibold">
-                        {typeof blog.author === 'object'
-                            ? (blog.author?.username?.[0]?.toUpperCase() || 'U')
-                            : (blog.author?.[0]?.toUpperCase() || 'U')}
-                    </div>
-                    <div>
-                        <p className="font-medium text-sm">
-                            {typeof blog.author === 'object'
-                                ? blog.author?.username || 'Unknown'
-                                : blog.author || 'Unknown'}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                            {new Date(blog.createdAt).toLocaleDateString('vi-VN')}
-                        </p>
-                    </div>
-                </div>
+            <BlogHeader
+                blog={blog}
+                currentUser={user}
+                onEdit={onEdit}
+                onDelete={onDelete}
+            />
 
-                {/* Nút Edit/Delete - chỉ hiện với chủ sở hữu bài viết */}
-                {user && isOwner() && (
-                    <div className="relative" ref={dropdownRef}>
-                        <Button
-                            variant="icon"
-                            onClick={() => setShowDropdown(!showDropdown)}
-                            className="text-gray-500 hover:text-gray-700 p-2"
-                        >
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
-                            </svg>
-                        </Button>
+            <BlogContent blog={blog} />
 
-                        {/* Dropdown Menu */}
-                        {showDropdown && (
-                            <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-10 min-w-[120px]">
-                                <button
-                                    onClick={() => {
-                                        onEdit?.(blog);
-                                        setShowDropdown(false);
-                                    }}
-                                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                                >
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
-                                    </svg>
-                                    Edit
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        onDelete?.(blog.id);
-                                        setShowDropdown(false);
-                                    }}
-                                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
-                                >
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                        <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
-                                    </svg>
-                                    Delete
-                                </button>
-                            </div>
-                        )}
-                    </div>
-                )}
-            </div>
+            <BlogStats reactions={reactions} totalComments={totalComments} />
 
-            {/* Nội dung bài viết */}
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">{blog.title}</h3>
-            <p className="text-gray-700 mb-4">{blog.content}</p>
+            <BlogActions
+                reactions={reactions}
+                onReaction={handleReaction}
+                onToggleComments={() => setShowComments(!showComments)}
+            />
 
-            {/* Reactions */}
-            <div className="flex items-center gap-2 py-3 border-t border-gray-100">
-                {reactions.map(reaction => (
-                    <button
-                        key={reaction.id}
-                        onClick={() => handleReaction(reaction.id)}
-                        className={`flex items-center gap-1 px-3 py-1 rounded-full transition-colors ${reaction.isLiked
-                            ? 'bg-blue-100 text-blue-600 border border-blue-200'
-                            : 'hover:bg-gray-100 border border-gray-200'
-                            }`}
-                    >
-                        <span className="text-lg">{reaction.emoji}</span>
-                        {reaction.count > 0 && (
-                            <span className="text-sm font-medium">{reaction.count}</span>
-                        )}
-                    </button>
-                ))}
-            </div>
-
-            {/* Phần bình luận */}
-            <div className="border-t border-gray-100 pt-3">
-                <button
-                    onClick={() => setShowComments(!showComments)}
-                    className="text-sm text-gray-600 hover:text-gray-800 mb-3 flex items-center gap-2"
-                >
-                    💬 {comments.length} bình luận
-                    <span className={`transform transition-transform ${showComments ? 'rotate-180' : ''}`}>
-                        ▼
-                    </span>
-                </button>
-
-                {/* Input thêm bình luận */}
-                {canUserCreateBlog(user) ? (
-                    <div className="flex gap-2 mb-3">
-                        <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center text-xs font-semibold">
-                            {user?.fullName?.[0]?.toUpperCase() || user?.userName?.[0]?.toUpperCase() || 'U'}
-                        </div>
-                        <div className="flex-1 flex gap-2">
-                            <input
-                                type="text"
-                                placeholder="Viết bình luận..."
-                                value={newComment}
-                                onChange={(e) => setNewComment(e.target.value)}
-                                onKeyPress={(e) => e.key === 'Enter' && handleAddComment()}
-                                className="flex-1 px-3 py-2 border border-gray-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            />
-                            <Button
-                                onClick={handleAddComment}
-                                disabled={!newComment.trim()}
-                                className="px-4 py-2 text-sm"
-                            >
-                                Gửi
-                            </Button>
-                        </div>
-                    </div>
-                ) : user ? (
-                    <div className="mb-3 p-3 bg-gray-50 rounded-lg border">
-                        <p className="text-sm text-gray-600 text-center">
-                            <span className="font-medium">Students can view but not comment.</span>
-                            <br />
-                            Only companies can create posts and comments.
-                        </p>
-                    </div>
-                ) : (
-                    <div className="mb-3 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
-                        <p className="text-sm text-yellow-800 text-center">
-                            Please <a href="/signin" className="font-medium underline hover:text-yellow-900">sign in</a> to comment on posts.
-                        </p>
-                    </div>
-                )}
-
-                {/* Danh sách bình luận */}
-                {showComments && (
-                    <div className="space-y-3 bg-gray-50 rounded-lg p-3">
-                        {comments.length > 0 ? (
-                            comments.map(comment => (
-                                <div key={comment.id} className="flex gap-2">
-                                    <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center text-xs font-semibold">
-                                        {comment.author[0]?.toUpperCase()}
-                                    </div>
-                                    <div className="flex-1">
-                                        <div className="bg-white rounded-lg px-3 py-2 shadow-sm">
-                                            <p className="font-medium text-sm text-blue-600">{comment.author}</p>
-                                            <p className="text-sm">{comment.content}</p>
-                                        </div>
-                                        <p className="text-xs text-gray-500 mt-1 ml-3">{comment.createdAt}</p>
-                                    </div>
-                                </div>
-                            ))
-                        ) : (
-                            <p className="text-center text-gray-500 text-sm py-4">
-                                Chưa có bình luận nào. Hãy là người đầu tiên bình luận! 💬
-                            </p>
-                        )}
-                    </div>
-                )}
-            </div>
+            {showComments && (
+                <CommentSection
+                    comments={comments}
+                    loading={loadingComments}
+                    user={user}
+                    canComment={canUserCreateBlog(user) && !!user}
+                    onAddComment={handleAddComment}
+                    onReplyComment={handleReplyComment}
+                    onEditComment={handleEditComment}
+                    onDeleteComment={handleDeleteComment}
+                />
+            )}
         </div>
     );
 };
