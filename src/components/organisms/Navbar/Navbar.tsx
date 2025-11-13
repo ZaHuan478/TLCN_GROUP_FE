@@ -7,6 +7,8 @@ import { useAuth } from "../../../contexts/AuthContext";
 const Navbar: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const [showDropdown, setShowDropdown] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -39,60 +41,101 @@ const Navbar: React.FC = () => {
     return "U";
   };
 
-  const getRoleLabel = () => {
-    const roleMap: Record<string, string> = {
-      STUDENT: "Student",
-      COMPANY: "Company",
-      ADMIN: "Admin",
-    };
-    return roleMap[user?.role ?? ""] ?? "Unknown role";
-  };
-
   return (
-    <nav className="flex justify-between items-center px-4 sm:px-10 py-4  border-b border-[#F3D94B]">
-      <div className="w-[102px]"></div>
-      <div className="flex-1 flex justify-center">
+    <nav className="relative flex items-center px-4 sm:px-10 py-4 border-b border-[#F3D94B] bg-white">
+      {/* Search Bar - Left */}
+      <div className="flex-shrink-0">
+        <div className="relative w-64">
+          <div className={`relative flex items-center rounded-full bg-gray-100 transition-all duration-200 ${
+            isSearchFocused ? 'bg-white shadow-md ring-2 ring-blue-500' : ''
+          }`}>
+            <div className="absolute left-4 flex items-center pointer-events-none">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500">
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.35-4.35"></path>
+              </svg>
+            </div>
+            <input
+              type="text"
+              placeholder="Tìm kiếm trên trang..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={() => setIsSearchFocused(true)}
+              onBlur={() => setIsSearchFocused(false)}
+              className="w-full pl-10 pr-4 py-2 bg-transparent border-none outline-none text-sm text-gray-900 placeholder-gray-500 rounded-full"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 flex items-center justify-center w-6 h-6 rounded-full hover:bg-gray-200 transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* NavLinks - Center (Absolute positioning để luôn ở giữa) */}
+      <div className="absolute left-1/2 transform -translate-x-1/2">
         <NavLinks />
       </div>
 
-      <div className="hidden md:flex items-center gap-3 w-[220px] justify-end">
+      {/* Profile/Auth - Right */}
+      <div className="flex-shrink-0 flex items-center gap-3 ml-auto">
         {isAuthenticated && user ? (
           <div className="relative" ref={dropdownRef}>
             {/* Avatar circle */}
-            <button 
+            <button
               onClick={() => setShowDropdown(!showDropdown)}
               className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold focus:outline-none hover:bg-blue-700 transition-colors"
             >
               {getInitials()}
             </button>
-            
-            {/* Dropdown menu */}
+
             {showDropdown && (
               <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 border border-gray-200">
-                <div className="px-4 py-2 border-b border-gray-100">
-                  <p className="text-sm font-semibold text-gray-700">
-                    {user.fullName || user.userName}
-                  </p>
-                  <p className="text-xs text-gray-500 truncate">{user.email}</p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Role: <span className="font-medium text-gray-700">{getRoleLabel()}</span>
-                  </p>
-                </div>
-                
-                <Link 
-                  to="/profile" 
-                  onClick={() => setShowDropdown(false)}
-                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                >
-                  Thông tin tài khoản
+                <Link to="/profile" onClick={() => setShowDropdown(false)}>
+                  <Button
+                    variant="unstyled"
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-none flex items-center gap-2"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    Profile
+                  </Button>
                 </Link>
-                
-                <button
+
+                <Link to="/settings" onClick={() => setShowDropdown(false)}>
+                  <Button
+                    variant="unstyled"
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-none flex items-center gap-2"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="3"></circle>
+                      <path d="M12 1v6m0 6v6M5.64 5.64l4.24 4.24m4.24 4.24l4.24 4.24M1 12h6m6 0h6M5.64 18.36l4.24-4.24m4.24-4.24l4.24-4.24"></path>
+                    </svg>
+                    Settings
+                  </Button>
+                </Link>
+
+                <Button
+                  variant="unstyled"
                   onClick={handleLogout}
-                  className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                  className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 rounded-none flex items-center gap-2"
                 >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                  </svg>
                   Log out
-                </button>
+                </Button>
               </div>
             )}
           </div>

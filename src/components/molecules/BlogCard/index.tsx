@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Blog } from "../../../api/blogApi";
 import { commentApi } from "../../../api/commentApi";
+import { likeApi } from "../../../api/likeApi";
 import { Comment } from "../../../types/types.ts";
 import { useAuth } from "../../../contexts/AuthContext";
 import { canUserCreateBlog } from "../../../utils/userUtils.ts";
@@ -33,6 +34,11 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog, onEdit, onDelete }) =>
     const [totalComments, setTotalComments] = useState(0);
     const [loadingComments, setLoadingComments] = useState(false);
 
+    // Load likes từ backend khi component mount
+    useEffect(() => {
+        loadLikes();
+    }, [blog.id]);
+
     useEffect(() => {
         setComments([]);
         setTotalComments(0);
@@ -45,12 +51,41 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog, onEdit, onDelete }) =>
         }
     }, [showComments]);
 
+    const loadLikes = async () => {
+        if (!user) {
+            // Nếu chưa login, chỉ load count (backend vẫn trả về liked: false)
+            try {
+                const likeInfo = await likeApi.getByBlogId(blog.id);
+                setReactions([{
+                    id: "like",
+                    emoji: "👍",
+                    count: likeInfo.count,
+                    isLiked: false
+                }]);
+            } catch (error) {
+                console.error('❌ Failed to load likes:', error);
+            }
+            return;
+        }
+
+        try {
+            const likeInfo = await likeApi.getByBlogId(blog.id);
+            setReactions([{
+                id: "like",
+                emoji: "👍",
+                count: likeInfo.count,
+                isLiked: likeInfo.liked
+            }]);
+        } catch (error) {
+            console.error('❌ Failed to load likes:', error);
+            setReactions([{ id: "like", emoji: "👍", count: 0, isLiked: false }]);
+        }
+    };
+
     const loadComments = async () => {
         try {
             setLoadingComments(true);
-            console.log('🔄 Loading comments for blog:', blog.id);
             const { comments: blogComments, total } = await commentApi.getByBlogId(blog.id);
-            console.log('✅ Loaded comments:', blogComments);
             setComments(blogComments);
             setTotalComments(total);
         } catch (error) {
@@ -62,22 +97,53 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog, onEdit, onDelete }) =>
         }
     };
 
-    const handleReaction = (reactionId: string) => {
-        setReactions(prev => prev.map(reaction => {
-            if (reaction.id === reactionId) {
-                return {
-                    ...reaction,
-                    count: reaction.isLiked ? reaction.count - 1 : reaction.count + 1,
-                    isLiked: !reaction.isLiked
-                };
+    const handleReaction = async (reactionId: string) => {
+        if (!user) {
+            alert('Vui lòng đăng nhập để like bài viết');
+            return;
+        }
+
+        if (reactionId !== 'like') return;
+
+        // Optimistic update - cập nhật UI ngay lập tức
+        const currentReaction = reactions.find(r => r.id === 'like');
+        const wasLiked = currentReaction?.isLiked || false;
+
+        setReactions([{
+            id: "like",
+            emoji: "👍",
+            count: wasLiked ? (currentReaction?.count || 1) - 1 : (currentReaction?.count || 0) + 1,
+            isLiked: !wasLiked
+        }]);
+
+        try {
+            // Gọi API để toggle like
+            const likeInfo = await likeApi.toggleLike(blog.id);
+
+            // Sync lại với response từ server (đảm bảo consistency)
+            setReactions([{
+                id: "like",
+                emoji: "👍",
+                count: likeInfo.count,
+                isLiked: likeInfo.liked
+            }]);
+        } catch (error: any) {
+            console.error('❌ Failed to toggle like:', error);
+
+            // Rollback nếu API fail
+            setReactions([{
+                id: "like",
+                emoji: "👍",
+                count: currentReaction?.count || 0,
+                isLiked: wasLiked
+            }]);
+
+            if (error.response?.status === 401) {
+                alert('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+            } else {
+                alert('Không thể like bài viết. Vui lòng thử lại.');
             }
-            // Remove other reactions when user clicks a new one
-            return {
-                ...reaction,
-                count: reaction.isLiked ? reaction.count - 1 : reaction.count,
-                isLiked: false
-            };
-        }));
+        }
     };
 
     const handleAddComment = async (content: string) => {
@@ -95,7 +161,6 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog, onEdit, onDelete }) =>
         } catch (error: any) {
             console.error('Failed to add comment:', error);
 
-            // Show error to user
             if (error.response?.status === 401) {
                 alert('Please login to comment');
             } else if (error.response?.status === 403) {
@@ -118,7 +183,6 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog, onEdit, onDelete }) =>
 
             const newReply = await commentApi.create(replyData);
 
-            // Add reply to the parent comment's replies array
             setComments(prev => {
                 const addReplyToComment = (comments: Comment[]): Comment[] => {
                     return comments.map(comment => {
@@ -152,8 +216,6 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog, onEdit, onDelete }) =>
 
         try {
             await commentApi.update(commentId, { content: newContent });
-
-            // Update comment in state
             setComments(prev => {
                 const updateCommentContent = (comments: Comment[]): Comment[] => {
                     return comments.map(comment => {

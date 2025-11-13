@@ -8,7 +8,9 @@ type BlogContentProps = {
 export const BlogContent: React.FC<BlogContentProps> = ({ blog }) => {
     return (
         <>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">{blog.title}</h3>
+            {blog.title && (
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">{blog.title}</h3>
+            )}
             <p className="text-gray-700 mb-4">{blog.content}</p>
 
             {/* Display images if available */}

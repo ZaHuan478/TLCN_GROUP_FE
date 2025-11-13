@@ -2,13 +2,19 @@ import { apiClient } from "../services/apiClient";
 
 export type Blog = {
     id: string;
-    title: string;
+    title?: string; // Optional since backend doesn't have title field
     content: string;
     author: string | {
         id: string;
         username: string
     };
     images?: string[];
+    media?: Array<{
+        id: string;
+        url: string | null;
+        type: 'image' | 'file';
+        status: 'pending' | 'uploaded' | 'error';
+    }>;
     createdAt: string;
 }
 
@@ -16,6 +22,30 @@ export type CreateBlogPayLoad = {
     content: string;
     images?: File[];
 }
+
+const transformBlog = (blog: any): Blog => {
+    if (blog.images && Array.isArray(blog.images)) {
+        return blog as Blog;
+    }
+
+    if (blog.media && Array.isArray(blog.media)) {
+        const imageUrls = blog.media
+            .filter((m: any) => m.type === 'image' && m.status === 'uploaded' && m.url)
+            .map((m: any) => m.url);
+
+        return {
+            ...blog,
+            images: imageUrls.length > 0 ? imageUrls : undefined,
+            media: undefined
+        };
+    }
+
+    return blog as Blog;
+};
+
+const transformBlogs = (blogs: any[]): Blog[] => {
+    return blogs.map(transformBlog);
+};
 
 
 
@@ -35,36 +65,31 @@ export const blogApi = {
             let blogs: Blog[] = [];
 
             if (response && response.blogs && Array.isArray(response.blogs)) {
-                blogs = response.blogs;
+                blogs = transformBlogs(response.blogs);
             } else if (Array.isArray(response)) {
-                blogs = response;
+                blogs = transformBlogs(response);
             } else {
                 console.warn('Unexpected response format:', typeof response, response);
                 localStorage.removeItem('blogs_cache');
                 return [];
             }
-
-            // Cache the blogs array
             localStorage.setItem('blogs_cache', JSON.stringify(blogs));
             localStorage.setItem('blogs_last_fetch', Date.now().toString());
             return blogs;
         } catch (error) {
             console.error('blogApi.getAll error:', error);
-
-            // Chỉ dùng cache nếu không phải là lần đầu load và không force refresh
             if (!forceRefresh) {
                 const cached = localStorage.getItem('blogs_cache');
                 const lastFetch = localStorage.getItem('blogs_last_fetch');
                 const cacheAge = lastFetch ? Date.now() - parseInt(lastFetch) : Infinity;
 
-                // Chỉ dùng cache nếu không quá 5 phút
                 if (cached && cacheAge < 300000) {
                     console.log('Using cached blogs due to API error (cache age:', cacheAge, 'ms)');
-                    return JSON.parse(cached);
+                    const cachedBlogs = JSON.parse(cached);
+                    return transformBlogs(cachedBlogs);
                 }
             }
 
-            // Xóa cache cũ và trả về mảng rỗng
             localStorage.removeItem('blogs_cache');
             localStorage.removeItem('blogs_last_fetch');
             return [];
@@ -72,8 +97,8 @@ export const blogApi = {
     },
     getById: async (id: string): Promise<Blog | null> => {
         try {
-            const response = await apiClient.get<Blog>(`/blogs/${id}`);
-            return response;
+            const response = await apiClient.get<any>(`/blogs/${id}`);
+            return transformBlog(response);
         } catch (error) {
             console.error('blogApi.getById error:', error);
             return null;
@@ -82,54 +107,49 @@ export const blogApi = {
 
     create: async (data: CreateBlogPayLoad): Promise<Blog> => {
         try {
-            // Nếu có images, sử dụng FormData để upload
             if (data.images && data.images.length > 0) {
                 const formData = new FormData();
                 formData.append('content', data.content);
 
-                // Append each image file
                 data.images.forEach((image) => {
                     formData.append(`images`, image);
                 });
 
-                const response = await apiClient.postFormData<Blog>('/blogs', formData);
+                const response = await apiClient.postFormData<any>('/blogs', formData);
                 console.log('blogApi.create (with images) response:', response);
 
-                // Update cache with new blog
+                const transformedBlog = transformBlog(response);
                 const cached = localStorage.getItem('blogs_cache');
                 const blogs = cached ? JSON.parse(cached) : [];
-                const updatedBlogs = [response, ...blogs];
+                const updatedBlogs = [transformedBlog, ...blogs];
                 localStorage.setItem('blogs_cache', JSON.stringify(updatedBlogs));
 
-                return response;
+                return transformedBlog;
             } else {
-                // Không có images, gửi JSON như bình thường
-                const response = await apiClient.post<Blog>('/blogs', { content: data.content });
+                const response = await apiClient.post<any>('/blogs', { content: data.content });
                 console.log('blogApi.create response:', response);
 
-                // Update cache with new blog
+                const transformedBlog = transformBlog(response);
                 const cached = localStorage.getItem('blogs_cache');
                 const blogs = cached ? JSON.parse(cached) : [];
-                const updatedBlogs = [response, ...blogs];
+                const updatedBlogs = [transformedBlog, ...blogs];
                 localStorage.setItem('blogs_cache', JSON.stringify(updatedBlogs));
 
-                return response;
+                return transformedBlog;
             }
         } catch (error) {
             console.error('blogApi.create error:', error);
 
-            // If API fails, create a mock blog with temp ID for offline mode
             const errorObj = error as any;
             if (errorObj?.message?.includes('Network Error') || errorObj?.code === 'ECONNREFUSED') {
                 const mockBlog: Blog = {
                     id: 'temp_' + Date.now(),
-                    title: 'Untitled', // Default title since backend doesn't use it
+                    title: 'Untitled',
                     content: data.content,
                     author: 'You',
                     createdAt: new Date().toISOString()
                 };
 
-                // Add to cache
                 const cached = localStorage.getItem('blogs_cache');
                 const blogs = cached ? JSON.parse(cached) : [];
                 const updatedBlogs = [mockBlog, ...blogs];
@@ -145,8 +165,8 @@ export const blogApi = {
 
     update: async (id: string, data: { content: string }): Promise<Blog> => {
         try {
-            const response = await apiClient.put<Blog>(`/blogs/${id}`, data);
-            return response;
+            const response = await apiClient.put<any>(`/blogs/${id}`, data);
+            return transformBlog(response);
         } catch (error) {
             console.error('blogApi.update error:', error);
             throw error;
@@ -162,13 +182,14 @@ export const blogApi = {
         }
     },
 
-    // Helper functions for cache management
     clearCache: () => {
         localStorage.removeItem('blogs_cache');
     },
 
     getCachedBlogs: (): Blog[] => {
         const cached = localStorage.getItem('blogs_cache');
-        return cached ? JSON.parse(cached) : [];
+        if (!cached) return [];
+        const cachedBlogs = JSON.parse(cached);
+        return transformBlogs(cachedBlogs);
     }
 }

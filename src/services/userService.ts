@@ -17,3 +17,7 @@ export const updateUserRole = async (userId: string, role: string): Promise<User
 export const getUserProfile = async (userId: string): Promise<User> => {
   return apiClient.get<User>(`/users/${userId}`);
 };
+
+export const updateUserProfile = async (userId: string, payload: Partial<User>): Promise<User> => {
+  return apiClient.put<User>(`/users/${userId}`, payload);
+};
