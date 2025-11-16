@@ -8,7 +8,7 @@ export type LikeInfo = {
 export const likeApi = {
   getByBlogId: async (blogId: string): Promise<LikeInfo> => {
     try {
-      const response = await apiClient.get<any>(`/like/${blogId}`);
+      const response = await apiClient.get<any>(`/likes/${blogId}`);
       if (response && typeof response === "object") {
         const liked = !!response.liked;
         const count = Number(response.count ?? 0);
@@ -24,7 +24,7 @@ export const likeApi = {
 
   toggleLike: async (blogId: string): Promise<LikeInfo> => {
     try {
-      const response = await apiClient.post<any>(`/like/${blogId}`);
+      const response = await apiClient.post<any>(`/likes/${blogId}`);
       if (response && typeof response === "object") {
         const liked = !!response.liked;
         const count = Number(response.count ?? 0);
