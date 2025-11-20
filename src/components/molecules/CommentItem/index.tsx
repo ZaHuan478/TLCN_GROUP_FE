@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Comment } from "../../../types/types";
 import { Avatar } from "../../atoms/Avatar";
+import ClickableAvatar from "../../atoms/Avatar/ClickableAvatar";
 import { User } from "../../../types/types";
 import { CommentInput } from "../CommentInput";
 import { Button } from "../../atoms/Button/Button";
@@ -84,7 +85,14 @@ export const CommentItem: React.FC<CommentItemProps> = ({
 
     return (
         <div className="flex gap-2">
-            <Avatar name={getAuthorInitial()} size="sm" bgColor="bg-gray-300" />
+                {/* Clickable avatar shows actions: view profile or chat */}
+                <ClickableAvatar
+                    userId={comment.author?.id || ''}
+                    username={comment.author?.username}
+                    fullName={comment.author?.fullName}
+                    size="sm"
+                    className="bg-gray-300"
+                />
             <div className="flex-1">
                 {isEditing ? (
                     <div className="bg-gray-100 rounded-2xl px-3 py-2">

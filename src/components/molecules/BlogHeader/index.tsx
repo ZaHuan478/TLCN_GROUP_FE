@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Blog } from "../../../api/blogApi";
 import { Button } from "../../atoms/Button/Button";
 import { Avatar } from "../../atoms/Avatar";
+import ClickableAvatar from "../../atoms/Avatar/ClickableAvatar";
 import { canUserModifyPost } from "../../../utils/userUtils";
 
 type BlogHeaderProps = {
@@ -57,7 +58,12 @@ export const BlogHeader: React.FC<BlogHeaderProps> = ({
     return (
         <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-                <Avatar name={getAuthorInitial()} size="md" />
+                <ClickableAvatar
+                    userId={typeof blog.author === 'object' ? blog.author.id : ''}
+                    username={typeof blog.author === 'object' ? blog.author.username : (typeof blog.author === 'string' ? blog.author : '')}
+                    fullName={typeof blog.author === 'object' && (blog.author as any).fullName ? (blog.author as any).fullName : undefined}
+                    size="md"
+                />
                 <div>
                     <p className="font-medium text-sm">{getAuthorName()}</p>
                     <p className="text-xs text-gray-500">

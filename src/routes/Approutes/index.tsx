@@ -8,6 +8,8 @@ import { useAuth } from "../../contexts/AuthContext";
 import BlogPage from "../../components/pages/BlogPage";
 import ProfilePage from "../../components/pages/Profile/Profile";
 import SettingsPage from "../../components/pages/Setting/Settings";
+import ConnectionsPage from "../../components/pages/Connections";
+import UserProfilePage from "../../components/pages/UserProfile";
 
 const AppRoutes: React.FC = () => {
   const { isAuthenticated } = useAuth();
@@ -22,6 +24,8 @@ const AppRoutes: React.FC = () => {
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/oath-success" element={<OAuthSuccessPage />} />
       <Route path="/" element={<BlogPage />} />
+      <Route path="/connections" element={<ConnectionsPage />} />
+      <Route path="/users/:id" element={<UserProfilePage />} />
 
       {/* Catch-all route */}
       <Route

@@ -1,20 +1,28 @@
 import React, { useState, useRef, useEffect } from "react";
 import NavLinks from "../../molecules/NavLinks/NavLinks";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../../atoms/Button/Button";
 import { useAuth } from "../../../contexts/AuthContext";
 
 const Navbar: React.FC = () => {
-  const { user, isAuthenticated, logout } = useAuth();
-  const [showDropdown, setShowDropdown] = useState(false);
+  const { user, isAuthenticated, logout, unreadMessages, resetUnread, notifications, clearNotifications } = useAuth() as any;
+  const navigate = useNavigate();
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+  const [showNotifDropdown, setShowNotifDropdown] = useState(false);
+  const notifRef = useRef<HTMLDivElement | null>(null);
+  const profileRef = useRef<HTMLDivElement | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setShowDropdown(false);
+      const target = event.target as Node;
+      if (profileRef.current && !profileRef.current.contains(target) && showProfileDropdown) {
+        setShowProfileDropdown(false);
+      }
+      if (notifRef.current && !notifRef.current.contains(target) && showNotifDropdown) {
+        setShowNotifDropdown(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -26,7 +34,7 @@ const Navbar: React.FC = () => {
   const handleLogout = async () => {
     try {
       await logout();
-      setShowDropdown(false);
+      setShowProfileDropdown(false);
     } catch (error) {
       console.error('Logout error:', error);
     }
@@ -87,57 +95,95 @@ const Navbar: React.FC = () => {
       {/* Profile/Auth - Right */}
       <div className="flex-shrink-0 flex items-center gap-3 ml-auto">
         {isAuthenticated && user ? (
-          <div className="relative" ref={dropdownRef}>
-            {/* Avatar circle */}
-            <button
-              onClick={() => setShowDropdown(!showDropdown)}
-              className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold focus:outline-none hover:bg-blue-700 transition-colors"
-            >
-              {getInitials()}
-            </button>
+          <div className="relative flex items-center" ref={profileRef}>
+            <div className="mr-3 flex items-center relative" ref={notifRef}>
+              <button
+                title="Notifications"
+                onClick={() => { setShowNotifDropdown((s) => !s); try { resetUnread && resetUnread(); } catch(e){} }}
+                className="relative w-10 h-10 rounded-full bg-gray-100 text-gray-700 flex items-center justify-center font-semibold focus:outline-none hover:bg-gray-200 transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                { (unreadMessages || 0) > 0 && (
+                  <span className="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">{unreadMessages}</span>
+                ) }
+              </button>
 
-            {showDropdown && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 border border-gray-200">
-                <Link to="/profile" onClick={() => setShowDropdown(false)}>
+              {/** Notifications dropdown (small) */}
+              {showNotifDropdown && (
+                <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-md shadow-lg py-2 z-20 border border-gray-200">
+                  <div className="px-4 py-2 text-sm text-gray-700">You have {unreadMessages || 0} new message{(unreadMessages || 0) > 1 ? 's' : ''}.</div>
+                  <div className="max-h-48 overflow-auto">
+                    { (notifications && notifications.length > 0) ? (
+                        notifications.map((n: any, idx: number) => (
+                        <div key={idx} className="px-3 py-2 border-t text-sm cursor-pointer hover:bg-gray-50" onClick={() => { try { resetUnread && resetUnread(); clearNotifications && clearNotifications(); navigate(`/connections?conversationId=${n.conversationId}`); setShowNotifDropdown(false); } catch(e){} }}>
+                          <div className="font-medium">{n.message?.sender?.fullName || n.message?.sender?.username || 'Someone'}</div>
+                          <div className="text-xs text-gray-600 truncate">{n.message?.content}</div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="px-3 py-2 text-sm text-gray-500">No new messages</div>
+                    )}
+                  </div>
+                  <div className="px-2 py-2 border-t">
+                    <button className="w-full text-left text-sm text-blue-600 px-3 py-1 hover:bg-gray-50" onClick={() => { try { resetUnread && resetUnread(); clearNotifications && clearNotifications(); navigate('/connections'); setShowNotifDropdown(false); } catch(e){} }}>
+                      View messages
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="relative">
+              <button
+                onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+                className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold focus:outline-none hover:bg-blue-700 transition-colors"
+              >
+                {getInitials()}
+              </button>
+
+              {showProfileDropdown && (
+                <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 border border-gray-200">
+                  <Link to="/profile" onClick={() => setShowProfileDropdown(false)}>
+                    <Button
+                      variant="unstyled"
+                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-none flex items-center gap-2"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                      </svg>
+                      Profile
+                    </Button>
+                  </Link>
+
+                  <Link to="/settings" onClick={() => setShowProfileDropdown(false)}>
+                    <Button
+                      variant="unstyled"
+                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-none flex items-center gap-2"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M12 1v6m0 6v6M5.64 5.64l4.24 4.24m4.24 4.24l4.24 4.24M1 12h6m6 0h6M5.64 18.36l4.24-4.24m4.24-4.24l4.24-4.24"></path>
+                      </svg>
+                      Settings
+                    </Button>
+                  </Link>
+
                   <Button
                     variant="unstyled"
-                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-none flex items-center gap-2"
+                    onClick={handleLogout}
+                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 rounded-none flex items-center gap-2"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                      <circle cx="12" cy="7" r="4"></circle>
+                      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                      <polyline points="16 17 21 12 16 7"></polyline>
+                      <line x1="21" y1="12" x2="9" y2="12"></line>
                     </svg>
-                    Profile
+                    Log out
                   </Button>
-                </Link>
-
-                <Link to="/settings" onClick={() => setShowDropdown(false)}>
-                  <Button
-                    variant="unstyled"
-                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-none flex items-center gap-2"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="12" r="3"></circle>
-                      <path d="M12 1v6m0 6v6M5.64 5.64l4.24 4.24m4.24 4.24l4.24 4.24M1 12h6m6 0h6M5.64 18.36l4.24-4.24m4.24-4.24l4.24-4.24"></path>
-                    </svg>
-                    Settings
-                  </Button>
-                </Link>
-
-                <Button
-                  variant="unstyled"
-                  onClick={handleLogout}
-                  className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 rounded-none flex items-center gap-2"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                    <polyline points="16 17 21 12 16 7"></polyline>
-                    <line x1="21" y1="12" x2="9" y2="12"></line>
-                  </svg>
-                  Log out
-                </Button>
-              </div>
-            )}
+                </div>
+              )}
+            </div>
           </div>
         ) : (
           <>

@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 const links = [
 	{ to: "/", label: "Home" },
 	{ to: "/courses", label: "Courses" },
+	{ to: "/connections", label: "Connections" },
 	// { to: "/mentor", label: "Mentor" },
 	// { to: "/about", label: "About" },
 	// { to: "/blog", label: "Blog" },
