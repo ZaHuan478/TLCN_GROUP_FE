@@ -6,7 +6,6 @@ import { Button } from '../../atoms/Button/Button';
 export const StudentProfileCard: React.FC = () => {
   const { user } = useAuth();
 
-  // Fallbacks for demo when fields are missing
   const fullName = user?.fullName ?? 'Your Name';
   const studentId = user?.studentId ?? 'S1234567';
   const school = user?.companyId ? '' : 'University of Example';

@@ -27,9 +27,9 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
 }) => {
     return (
         <div className="pt-3 border-t border-gray-100">
-            <CommentInput 
-                user={user} 
-                onSubmit={onAddComment} 
+            <CommentInput
+                user={user}
+                onSubmit={onAddComment}
                 disabled={!canComment}
             />
 
@@ -41,8 +41,8 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
                     </div>
                 ) : comments.length > 0 ? (
                     comments.map(comment => (
-                        <CommentItem 
-                            key={comment.id} 
+                        <CommentItem
+                            key={comment.id}
                             comment={comment}
                             user={user}
                             canComment={canComment}

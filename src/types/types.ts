@@ -3,10 +3,73 @@ export type User = {
   studentId?: string; // For STUDENT role
   companyId?: string; // For COMPANY role
   fullName: string;
-  userName: string;
+  username: string;
   email: string;
   role: "STUDENT" | "COMPANY" | "ADMIN" | null;
   isActive: boolean;
+  createdAt: string;
+};
+
+export type CompanyProfile = {
+  companyId: string;
+  companyName: string;
+  email: string;
+  taxCode?: string;
+  website?: string;
+  address?: string;
+  description?: string;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type UpdateCompanyProfilePayload = {
+  companyName?: string;
+  email?: string;
+  taxCode?: string;
+  website?: string;
+  address?: string;
+  description?: string;
+  password?: string;
+};
+
+export type CareerTest = {
+  id: string;
+  title: string;
+  description?: string;
+  imageUrl?: string | null;
+  companyId: string;
+  createdAt: string;
+  updatedAt?: string;
+};
+
+export type Course = {
+  id: string;
+  title: string;
+  description?: string | null;
+  image?: string | null;
+  category?: string | null;
+  companyId: string;
+  createdAt: string;
+  updatedAt: string;
+  company?: {
+    id?: string;
+    companyName?: string;
+  } | null;
+  lessons?: any[];
+  finalTest?: any;
+};
+
+export type CourseListResponse = {
+  total: number;
+  page: number;
+  limit: number;
+  data: Course[];
+};
+
+export type CreateCareerTestPayload = {
+  title: string;
+  description?: string;
+  images?: File | null;
 };
 
 export type LoginRequest = {
@@ -29,7 +92,7 @@ export type RefreshTokenResponse = {
 };
 
 export type RegisterRequest = {
-  userName: string;
+  username: string;
   email: string;
   password: string;
   confirmPassword: string;
@@ -107,3 +170,19 @@ export type CommentListResponse = {
   currentPage: number;
   totalPages: number;
 };
+
+export type CreateUserPayload = {
+    username: string;
+    fullName: string;
+    email: string;
+    password: string;
+    role: "STUDENT" | "COMPANY" | "ADMIN";
+}
+
+export type UpdateUserPayload = {
+    username?: string;
+    fullName?: string;
+    email?: string;
+    role?: "STUDENT" | "COMPANY" | "ADMIN";
+    isActive?: boolean;
+}

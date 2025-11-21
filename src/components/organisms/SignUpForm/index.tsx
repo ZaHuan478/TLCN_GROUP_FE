@@ -11,14 +11,10 @@ import { Toast } from "../../molecules/ToastNotification";
 
 export const SignUpForm: React.FC = () => {
   const [formData, setFormData] = useState({
-    userName: "",
+    username: "",
     email: "",
     password: "",
     confirmPassword: "",
-  });
-  const [roleSpecificData, setRoleSpecificData] = useState({
-    studentId: "",
-    companyId: "",
   });
   const [pendingCredentials, setPendingCredentials] = useState<typeof formData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -37,7 +33,7 @@ export const SignUpForm: React.FC = () => {
   };
 
   const validateForm = (): boolean => {
-    if (!formData.userName.trim()) {
+    if (!formData.username.trim()) {
       setToast({ message: "Please enter username", type: "error" });
       return false;
     }
@@ -85,7 +81,7 @@ export const SignUpForm: React.FC = () => {
     }
 
     setPendingCredentials({
-      userName: formData.userName,
+      username: formData.username,
       email: formData.email,
       password: formData.password,
       confirmPassword: formData.confirmPassword,
@@ -198,9 +194,9 @@ export const SignUpForm: React.FC = () => {
           <div className="mb-4">
             <Input
               type="text"
-              name="userName"
+              name="username"
               placeholder="UserName"
-              value={formData.userName}
+              value={formData.username}
               onChange={handleInputChange}
             />
           </div>

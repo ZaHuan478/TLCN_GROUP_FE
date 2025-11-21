@@ -72,7 +72,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({
     };
 
     const handleDelete = () => {
-        if (onDelete && confirm('Bạn có chắc muốn xóa comment này?')) {
+        if (onDelete) {
             onDelete(comment.id);
         }
         setShowDropdown(false);

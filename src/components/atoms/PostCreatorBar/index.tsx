@@ -1,5 +1,5 @@
 import React from "react";
-import { Button } from "../../atoms/Button/Button";
+import { Button } from "../Button/Button";
 import { useAuth } from "../../../contexts/AuthContext";
 
 type PostCreatorBarProps = {
@@ -17,7 +17,7 @@ const PostCreatorBar: React.FC<PostCreatorBarProps> = ({ onOpen }) => {
                 onClick={onOpen}
                 className="flex-1 text-left bg-gray-100 text-gray-600 hover:bg-gray-200 rounded-full px-4 py-2 transition"
             >
-                What's on your mind, {user?.fullName || user?.userName || 'there'}?
+                What's on your mind, {user?.fullName || user?.username || 'there'}?
             </Button>
         </div>
     );

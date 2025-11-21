@@ -98,6 +98,17 @@ class ApiClient {
     return res.data.data;
   }
 
+  async putFormData<T>(url: string, formData: FormData, config?: AxiosRequestConfig): Promise<T> {
+    const res = await this.client.put<ApiResponse<T>>(url, formData, {
+      ...config,
+      headers: {
+        ...config?.headers,
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return res.data.data;
+  }
+
   async delete<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
     const res = await this.client.delete<ApiResponse<T>>(url, config);
     return res.data.data;

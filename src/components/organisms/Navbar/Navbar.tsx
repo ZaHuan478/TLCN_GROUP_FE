@@ -35,8 +35,8 @@ const Navbar: React.FC = () => {
   const getInitials = () => {
     if (user?.fullName) {
       return user.fullName.charAt(0).toUpperCase();
-    } else if (user?.userName) {
-      return user.userName.charAt(0).toUpperCase();
+    } else if (user?.username) {
+      return user.username.charAt(0).toUpperCase();
     }
     return "U";
   };
@@ -97,45 +97,69 @@ const Navbar: React.FC = () => {
             </button>
 
             {showDropdown && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 border border-gray-200">
-                <Link to="/profile" onClick={() => setShowDropdown(false)}>
+              <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-2 z-50 border border-gray-200">
+                {/* Menu Items */}
+                <div className="py-1">
+                  <Link to="/profile" onClick={() => setShowDropdown(false)} className="block">
+                    <Button
+                      variant="unstyled"
+                      className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 rounded-none flex items-center gap-3"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                      </svg>
+                      Profile
+                    </Button>
+                  </Link>
+
+                  {(user?.role === 'COMPANY' || user?.role === 'ADMIN') && (
+                    <Link to="/career-paths" onClick={() => setShowDropdown(false)} className="block">
+                      <Button
+                        variant="unstyled"
+                        className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 rounded-none flex items-center gap-3"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500">
+                          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                        </svg>
+                        Career Paths
+                      </Button>
+                    </Link>
+                  )}
+
+                  <Link to="/settings" onClick={() => setShowDropdown(false)} className="block">
+                    <Button
+                      variant="unstyled"
+                      className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 rounded-none flex items-center gap-3"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M12 1v6m0 6v6M5.64 5.64l4.24 4.24m4.24 4.24l4.24 4.24M1 12h6m6 0h6M5.64 18.36l4.24-4.24m4.24-4.24l4.24-4.24"></path>
+                      </svg>
+                      Settings
+                    </Button>
+                  </Link>
+                </div>
+
+                {/* Divider */}
+                <div className="border-t border-gray-100 my-1"></div>
+
+                {/* Logout */}
+                <div className="px-1">
                   <Button
                     variant="unstyled"
-                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-none flex items-center gap-2"
+                    onClick={handleLogout}
+                    className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-gray-100 rounded-none flex items-center gap-3"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                      <circle cx="12" cy="7" r="4"></circle>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-600">
+                      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                      <polyline points="16 17 21 12 16 7"></polyline>
+                      <line x1="21" y1="12" x2="9" y2="12"></line>
                     </svg>
-                    Profile
+                    Đăng xuất
                   </Button>
-                </Link>
-
-                <Link to="/settings" onClick={() => setShowDropdown(false)}>
-                  <Button
-                    variant="unstyled"
-                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-none flex items-center gap-2"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="12" r="3"></circle>
-                      <path d="M12 1v6m0 6v6M5.64 5.64l4.24 4.24m4.24 4.24l4.24 4.24M1 12h6m6 0h6M5.64 18.36l4.24-4.24m4.24-4.24l4.24-4.24"></path>
-                    </svg>
-                    Settings
-                  </Button>
-                </Link>
-
-                <Button
-                  variant="unstyled"
-                  onClick={handleLogout}
-                  className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 rounded-none flex items-center gap-2"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                    <polyline points="16 17 21 12 16 7"></polyline>
-                    <line x1="21" y1="12" x2="9" y2="12"></line>
-                  </svg>
-                  Log out
-                </Button>
+                </div>
               </div>
             )}
           </div>

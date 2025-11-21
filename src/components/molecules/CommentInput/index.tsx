@@ -27,7 +27,7 @@ export const CommentInput: React.FC<CommentInputProps> = ({
     const getUserInitial = () => {
         if (!user) return 'U';
         return user?.fullName?.[0]?.toUpperCase() ||
-            user?.userName?.[0]?.toUpperCase() ||
+            user?.username?.[0]?.toUpperCase() ||
             'U';
     };
 
@@ -36,18 +36,6 @@ export const CommentInput: React.FC<CommentInputProps> = ({
             <div className="mb-3 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
                 <p className="text-sm text-yellow-800 text-center">
                     Please <a href="/signin" className="font-medium underline hover:text-yellow-900">sign in</a> to comment on posts.
-                </p>
-            </div>
-        );
-    }
-
-    if (disabled) {
-        return (
-            <div className="mb-3 p-3 bg-gray-50 rounded-lg border">
-                <p className="text-sm text-gray-600 text-center">
-                    <span className="font-medium">Students can view but not comment.</span>
-                    <br />
-                    Only companies can create posts and comments.
                 </p>
             </div>
         );
@@ -65,13 +53,27 @@ export const CommentInput: React.FC<CommentInputProps> = ({
                     onKeyPress={(e) => e.key === 'Enter' && handleSubmit()}
                     overrideDefaultStyles={true}
                     className="w-full pl-4 pr-20 py-2.5 border border-gray-300 rounded-full text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    disabled={disabled}
                 />
                 <Button
                     onClick={handleSubmit}
-                    disabled={!comment.trim()}
-                    className="absolute right-1.5 top-1/2 -translate-y-1/2 px-4 py-1.5 text-sm rounded-full bg-blue-500 text-white hover:bg-blue-600 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed transition-colors"
+                    disabled={!comment.trim() || disabled}
+                    className="absolute right-1.5 top-1/2 -translate-y-1/2 p-2 rounded-full bg-blue-500 text-white hover:bg-blue-600 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed transition-colors"
+                    aria-label="Send comment"
                 >
-                    Send
+                    <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                    >
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
                 </Button>
             </div>
         </div>

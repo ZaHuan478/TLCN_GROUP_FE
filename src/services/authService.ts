@@ -12,8 +12,8 @@ class AuthService {
   async register(credentials: RegisterRequest): Promise<RegisterResponse> {
     const payload = {
       email: credentials.email,
-      username: credentials.userName,
-      fullName: credentials.userName,
+      username: credentials.username,
+      fullName: credentials.username,
       role: credentials.role ?? null,
       password: credentials.password,
       provider: "LOCAL",
@@ -27,7 +27,7 @@ class AuthService {
     }
 
     return this.login({
-      username: credentials.userName,
+      username: credentials.username,
       password: credentials.password,
     });
   }

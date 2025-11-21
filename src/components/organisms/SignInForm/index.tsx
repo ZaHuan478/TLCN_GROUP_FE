@@ -8,6 +8,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../../../contexts/AuthContext";
 import { authService } from "../../../services/authService";
 import { Toast } from "../../molecules/ToastNotification";
+import { isAdmin, isStudent, isCompany } from "../../../utils/roleUtils";
 
 export const SignInForm: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -18,11 +19,9 @@ export const SignInForm: React.FC = () => {
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'warning' } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-
-  const form = location.state?.form?.pathname || "/";
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -38,9 +37,29 @@ export const SignInForm: React.FC = () => {
     setToast(null);
 
     try {
-      await login(formData.username, formData.password);
+      const loggedInUser = await login(formData.username, formData.password);
       setToast({ message: 'Login successful!', type: 'success' });
-      setTimeout (() => navigate(form, { replace: true }), 1000);
+      
+      // Redirect based on user role after login
+      setTimeout(() => {
+        // Determine redirect path based on role
+        let redirectPath = '/';
+        
+        if (loggedInUser) {
+          if (isAdmin(loggedInUser)) {
+            redirectPath = '/admin/dashboard';
+          } else if (isStudent(loggedInUser)) {
+            redirectPath = location.state?.from || '/';
+          } else if (isCompany(loggedInUser)) {
+            redirectPath = location.state?.from || '/';
+          }
+        } else {
+          // Fallback to intended path or home
+          redirectPath = location.state?.from || '/';
+        }
+        
+        navigate(redirectPath, { replace: true });
+      }, 1000);
     } catch (err: any) {
       setToast({ message: 'Login failed. Please try again.', type: 'error' });
     } finally {

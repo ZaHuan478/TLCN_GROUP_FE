@@ -2,62 +2,105 @@ import React, { useState, useEffect } from 'react';
 import { Input } from '../../atoms/Input/Input';
 import { Button } from '../../atoms/Button/Button';
 import { useAuth } from '../../../contexts/AuthContext';
-import { updateUserProfile } from '../../../services/userService';
+import { getCompanyProfile, updateCompanyProfile } from '../../../services/companyService';
+import { CompanyProfile, UpdateCompanyProfilePayload } from '../../../types/types';
 
 export const CompanySettingsForm: React.FC = () => {
   const { user, refreshUser } = useAuth();
-  const [companyName, setCompanyName] = useState((user as any)?.companyName ?? '');
-  const [taxId, setTaxId] = useState((user as any)?.taxId ?? '');
-  const [userName, setUserName] = useState(user?.userName ?? user?.fullName ?? '');
-  const [email, setEmail] = useState(user?.email ?? '');
+  const [companyProfile, setCompanyProfile] = useState<CompanyProfile | null>(null);
+  const [companyName, setCompanyName] = useState('');
+  const [taxId, setTaxId] = useState('');
+  const [userName, setUserName] = useState(user?.username ?? user?.fullName ?? '');
+  const [email, setEmail] = useState('');
   const [website, setWebsite] = useState('');
   const [address, setAddress] = useState('');
   const [description, setDescription] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoadingProfile, setIsLoadingProfile] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    setCompanyName((user as any)?.companyName ?? '');
-    setTaxId((user as any)?.taxId ?? '');
-    setUserName(user?.userName ?? user?.fullName ?? '');
-    setEmail(user?.email ?? '');
+    setUserName(user?.username ?? user?.fullName ?? '');
   }, [user]);
 
+  useEffect(() => {
+    const fetchCompanyProfile = async () => {
+      setIsLoadingProfile(true);
+      try {
+        const profile = await getCompanyProfile();
+        setCompanyProfile(profile);
+        setCompanyName(profile.companyName ?? '');
+        setTaxId(profile.taxCode ?? '');
+        setEmail(profile.email ?? '');
+        setWebsite(profile.website ?? '');
+        setAddress(profile.address ?? '');
+        setDescription(profile.description ?? '');
+      } catch (error) {
+        console.error('Failed to load company profile', error);
+      } finally {
+        setIsLoadingProfile(false);
+      }
+    };
+
+    fetchCompanyProfile();
+  }, []);
+
   const handleSave = async () => {
-    if (!user) return;
     if (!companyName || companyName.trim() === '') {
       alert('Tên công ty là bắt buộc');
       return;
     }
 
     try {
-      const payload: any = { email };
-      payload.fullName = companyName;
-      if (!user.userName && user.fullName) {
-        payload.userName = user.fullName;
-      }
-      if ((taxId ?? '').trim() !== '') payload.taxId = taxId;
-      if ((website ?? '').trim() !== '') payload.website = website;
-      if ((address ?? '').trim() !== '') payload.address = address;
-      if ((description ?? '').trim() !== '') payload.description = description;
+      setIsSaving(true);
+      const payload: UpdateCompanyProfilePayload = {
+        companyName: companyName.trim(),
+        email: email.trim(),
+        taxCode: taxId.trim() || undefined,
+        website: (website ?? '').trim() || undefined,
+        address: (address ?? '').trim() || undefined,
+        description: (description ?? '').trim() || undefined,
+        password: (password ?? '').trim() || undefined,
+      };
 
-      await updateUserProfile(user.id, payload as any);
+      const updatedProfile = await updateCompanyProfile(payload);
+      setCompanyProfile(updatedProfile);
+      setCompanyName(updatedProfile.companyName ?? '');
+      setTaxId(updatedProfile.taxCode ?? '');
+      setEmail(updatedProfile.email ?? '');
+      setWebsite(updatedProfile.website ?? '');
+      setAddress(updatedProfile.address ?? '');
+      setDescription(updatedProfile.description ?? '');
+      setPassword('');
       refreshUser();
       alert('Company profile updated');
     } catch (err) {
       console.error('Failed to update company profile', err);
       alert('Failed to update profile');
+    } finally {
+      setIsSaving(false);
     }
   };
 
   const handleCancel = () => {
-    setCompanyName((user as any)?.companyName ?? '');
-    setTaxId((user as any)?.taxId ?? '');
-    setUserName(user?.userName ?? user?.fullName ?? '');
-    setEmail(user?.email ?? '');
-    setWebsite('');
-    setAddress('');
-    setDescription('');
-    setPassword('');
+    if (companyProfile) {
+      setCompanyName(companyProfile.companyName ?? '');
+      setTaxId(companyProfile.taxCode ?? '');
+      setEmail(companyProfile.email ?? '');
+      setWebsite(companyProfile.website ?? '');
+      setAddress(companyProfile.address ?? '');
+      setDescription(companyProfile.description ?? '');
+      setPassword('');
+    } else {
+      setCompanyName((user as any)?.companyName ?? '');
+      setTaxId((user as any)?.taxId ?? '');
+      setUserName(user?.username ?? user?.fullName ?? '');
+      setEmail(user?.email ?? '');
+      setWebsite('');
+      setAddress('');
+      setDescription('');
+      setPassword('');
+    }
   };
 
   return (
@@ -311,6 +354,7 @@ export const CompanySettingsForm: React.FC = () => {
           variant="secondary" 
           onClick={handleCancel}
           className="px-6"
+          disabled={isLoadingProfile || isSaving}
         >
           Hủy
         </Button>
@@ -318,6 +362,7 @@ export const CompanySettingsForm: React.FC = () => {
           variant="primary" 
           onClick={handleSave}
           className="px-6 flex items-center justify-center"
+          disabled={isLoadingProfile || isSaving}
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
             <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>

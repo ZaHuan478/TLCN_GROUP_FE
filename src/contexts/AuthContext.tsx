@@ -7,7 +7,7 @@ type AuthContextType = {
     user: User | null;
     isAuthenticated: boolean;
     isLoading: boolean;
-    login: (username: string, password: string) => Promise<void>;
+    login: (username: string, password: string) => Promise<User>;
     register: (userData: any) => Promise<any>;
     logout: () => Promise<void>;
     refreshUser: () => Promise<void>;
@@ -21,47 +21,33 @@ type AuthProviderProps = {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(true); // Start with true while checking auth
 
+    // Restore user on mount
     useEffect(() => {
-        const initializeAuth = async () => {
+        const initAuth = async () => {
             try {
-                const oauthResult = authService.handleOAuthCallback();
-                if (oauthResult) {
-                    // Fix: Get user info after setting tokens
-                    try {
-                        const response = await apiClient.get<{ data: { user: User } }>('/auth/me');
-                        setUser(response.data.user);
-                        localStorage.setItem("user", JSON.stringify(response.data.user));
-                    } catch (error) {
-                        console.error('Failed to get user info after OAuth:', error);
-                        // Fallback: try to get from localStorage
-                        await refreshUser();
-                    }
-                } else {
-                    const savedUser = await authService.getCurrentUser();
-                    if (savedUser && authService.isAuthenticated()) {
-                        setUser(savedUser);
-                    } else {
-                        authService.clearSession();
-                    }
+                if (authService.isAuthenticated()) {
+                    const currentUser = await authService.getCurrentUser();
+                    setUser(currentUser);
                 }
             } catch (error) {
-                console.error('Auth initialization error:', error);
-                authService.clearSession();
+                console.error('Failed to restore auth:', error);
+                setUser(null);
             } finally {
                 setIsLoading(false);
             }
         };
 
-        initializeAuth();
+        initAuth();
     }, []);
 
-    const login = async (username: string, password: string): Promise<void> => {
+    const login = async (username: string, password: string): Promise<User> => {
         try {
             setIsLoading(true);
             const response = await authService.login({ username, password });
             setUser(response.user);
+            return response.user;
         } catch (error) {
             throw error;
         } finally {
@@ -69,7 +55,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
     };
 
-    const logout = async () : Promise<void> => {
+    const logout = async (): Promise<void> => {
         try {
             setIsLoading(true);
             await authService.logout();
@@ -111,17 +97,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         try {
             setIsLoading(true);
             const response = await authService.register(userData);
-            
-            // Log response để debug
             console.log("Register response:", response);
-            
-            // Kiểm tra response có user info không
+
             if (response && response.user) {
                 setUser(response.user);
             } else {
                 console.error("Invalid response from register:", response);
             }
-            
+
             return response;
         } catch (error) {
             console.error("Register error:", error);
@@ -131,20 +114,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
     };
 
-    const value: AuthContextType = { 
-        user, 
-        isAuthenticated: authService.isAuthenticated() && !!user,
-        isLoading, 
-        login, 
+    const value: AuthContextType = {
+        user,
+        isAuthenticated: authService.isAuthenticated() && !!user, // 👈 Production mode: check token + user
+        // isAuthenticated: !!user, // 🔥 DEV MODE: Simplified check
+        isLoading,
+        login,
         register,
-        logout, 
-        refreshUser 
+        logout,
+        refreshUser
     };
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 };
 
-export const useAuth = () : AuthContextType => {
+export const useAuth = (): AuthContextType => {
     const context = useContext(AuthContext);
     if (context === undefined) {
         throw new Error('useAuth must be used within an AuthProvider');

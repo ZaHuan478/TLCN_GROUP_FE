@@ -28,7 +28,7 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog, onEdit, onDelete }) =>
     const { user } = useAuth();
     const [showComments, setShowComments] = useState(false);
     const [reactions, setReactions] = useState<Reaction[]>([
-        { id: "like", emoji: "👍", count: 0, isLiked: false },
+        { id: "like", emoji: "", count: 0, isLiked: false },
     ]);
     const [comments, setComments] = useState<Comment[]>([]);
     const [totalComments, setTotalComments] = useState(0);
@@ -58,7 +58,7 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog, onEdit, onDelete }) =>
                 const likeInfo = await likeApi.getByBlogId(blog.id);
                 setReactions([{
                     id: "like",
-                    emoji: "👍",
+                    emoji: "",
                     count: likeInfo.count,
                     isLiked: false
                 }]);
@@ -72,13 +72,13 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog, onEdit, onDelete }) =>
             const likeInfo = await likeApi.getByBlogId(blog.id);
             setReactions([{
                 id: "like",
-                emoji: "👍",
+                emoji: "",
                 count: likeInfo.count,
                 isLiked: likeInfo.liked
             }]);
         } catch (error) {
             console.error('❌ Failed to load likes:', error);
-            setReactions([{ id: "like", emoji: "👍", count: 0, isLiked: false }]);
+            setReactions([{ id: "like", emoji: "", count: 0, isLiked: false }]);
         }
     };
 
@@ -111,7 +111,7 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog, onEdit, onDelete }) =>
 
         setReactions([{
             id: "like",
-            emoji: "👍",
+            emoji: "",
             count: wasLiked ? (currentReaction?.count || 1) - 1 : (currentReaction?.count || 0) + 1,
             isLiked: !wasLiked
         }]);
@@ -123,7 +123,7 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog, onEdit, onDelete }) =>
             // Sync lại với response từ server (đảm bảo consistency)
             setReactions([{
                 id: "like",
-                emoji: "👍",
+                emoji: "",
                 count: likeInfo.count,
                 isLiked: likeInfo.liked
             }]);
@@ -133,7 +133,7 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog, onEdit, onDelete }) =>
             // Rollback nếu API fail
             setReactions([{
                 id: "like",
-                emoji: "👍",
+                emoji: "",
                 count: currentReaction?.count || 0,
                 isLiked: wasLiked
             }]);
@@ -242,19 +242,20 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog, onEdit, onDelete }) =>
     const handleDeleteComment = async (commentId: string) => {
         try {
             await commentApi.delete(commentId);
+            let deletedCount = 0;
+            const countReplies = (c: Comment): number => {
+                let count = 1;
+                if (c.replies) {
+                    c.replies.forEach(r => count += countReplies(r));
+                }
+                return count;
+            };
 
             setComments(prev => {
                 const removeComment = (comments: Comment[]): Comment[] => {
                     return comments.filter(comment => {
                         if (comment.id === commentId) {
-                            const countReplies = (c: Comment): number => {
-                                let count = 1;
-                                if (c.replies) {
-                                    c.replies.forEach(r => count += countReplies(r));
-                                }
-                                return count;
-                            };
-                            setTotalComments(prev => prev - countReplies(comment));
+                            deletedCount = countReplies(comment);
                             return false;
                         }
                         if (comment.replies && comment.replies.length > 0) {
@@ -265,6 +266,9 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog, onEdit, onDelete }) =>
                 };
                 return removeComment(prev);
             });
+
+            // Update total count once after deletion
+            setTotalComments(prev => Math.max(0, prev - deletedCount));
         } catch (error: any) {
             console.error('Failed to delete comment:', error);
             alert('Failed to delete comment. Please try again.');

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import MainTemplate from "../../templates/MainTemplate/MainTemplate";
 import PostModal from "../../molecules/PostModal";
-import PostCreatorBar from "../../organisms/PostCreatorBar";
+import PostCreatorBar from "../../atoms/PostCreatorBar/index.tsx";
 import { Blog, blogApi } from "../../../api/blogApi";
 import { Toast } from "../../molecules/ToastNotification";
 import { BlogFeed } from "../../organisms/BlogFeed";
@@ -84,8 +84,6 @@ const BlogPage: React.FC = () => {
     return (
         <MainTemplate>
             <div className="max-w-2xl mx-auto mt-6 space-y-4">
-                
-                {/* Role-based message */}
                 {user && user.role === 'STUDENT' && (
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
                         <div className="flex items-center">
@@ -103,19 +101,10 @@ const BlogPage: React.FC = () => {
                     </div>
                 )}
 
-                {/* Show PostCreatorBar only for users who can create posts */}
                 {permissions.canCreate && (
                     <PostCreatorBar onOpen={() => setShowModal(true)} />
                 )}
 
-                {/* Show message for users who can't create posts but are logged in */}
-                {user && !permissions.canCreate && (
-                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center">
-                        <p className="text-gray-600">{permissions.roleMessage}</p>
-                    </div>
-                )}
-
-                {/* Show login prompt for non-logged in users */}
                 {!user && (
                     <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">
                         <p className="text-yellow-800">
