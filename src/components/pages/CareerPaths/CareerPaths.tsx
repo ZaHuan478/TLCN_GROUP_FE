@@ -21,6 +21,11 @@ const CareerPathsPage: React.FC = () => {
   const [loadingTests, setLoadingTests] = useState(false);
 
   const getDefaultView = (): ViewType => {
+    const params = new URLSearchParams(location.search);
+    const tabParam = params.get('tab');
+
+    if (tabParam === 'settings') return 'settings';
+    if (tabParam === 'profile') return 'profile';
     if (location.pathname === '/profile') return 'profile';
     if (location.pathname === '/settings') return 'settings';
     if (location.pathname === '/career-paths') {
@@ -35,14 +40,21 @@ const CareerPathsPage: React.FC = () => {
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'warning' } | null>(null);
 
   useEffect(() => {
-    if (location.pathname === '/profile') {
+    const params = new URLSearchParams(location.search);
+    const tabParam = params.get('tab');
+
+    if (tabParam === 'settings') {
+      setActiveView('settings');
+    } else if (tabParam === 'profile') {
+      setActiveView('profile');
+    } else if (location.pathname === '/profile') {
       setActiveView('profile');
     } else if (location.pathname === '/settings') {
       setActiveView('settings');
     } else if (location.pathname === '/career-paths') {
       setActiveView(user?.role === 'COMPANY' ? 'career-paths' : 'profile');
     }
-  }, [location.pathname, user?.role]);
+  }, [location.pathname, location.search, user?.role]);
 
   useEffect(() => {
     const loadTests = async () => {
@@ -112,7 +124,6 @@ const CareerPathsPage: React.FC = () => {
       case 'profile':
         return (
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-6">Profile</h1>
             <ProfileShell role={user?.role === 'COMPANY' ? 'COMPANY' : 'STUDENT'} />
           </div>
         );
@@ -120,7 +131,6 @@ const CareerPathsPage: React.FC = () => {
       case 'settings':
         return (
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-6">Settings</h1>
             <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-50">
               {user?.role === 'COMPANY' ? <CompanySettingsForm /> : <StudentSettingsForm />}
             </div>
@@ -194,7 +204,7 @@ const CareerPathsPage: React.FC = () => {
                         <button className="flex-1 px-3 py-2 text-sm text-blue-600 hover:bg-blue-50 rounded-lg font-medium transition-colors">
                           Xem chi tiết
                         </button>
-                        <button 
+                        <button
                           onClick={() => handleDeleteTest(test.id)}
                           className="px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg font-medium transition-colors"
                         >
@@ -235,8 +245,8 @@ const CareerPathsPage: React.FC = () => {
               <button
                 onClick={() => setActiveView('profile')}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all ${activeView === 'profile'
-                    ? 'bg-blue-50 text-blue-600 font-medium'
-                    : 'text-gray-700 hover:bg-gray-50'
+                  ? 'bg-blue-50 text-blue-600 font-medium'
+                  : 'text-gray-700 hover:bg-gray-50'
                   }`}
               >
                 <span className={activeView === 'profile' ? 'text-blue-600' : 'text-gray-400'}>
@@ -251,8 +261,8 @@ const CareerPathsPage: React.FC = () => {
               <button
                 onClick={() => setActiveView('settings')}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all ${activeView === 'settings'
-                    ? 'bg-blue-50 text-blue-600 font-medium'
-                    : 'text-gray-700 hover:bg-gray-50'
+                  ? 'bg-blue-50 text-blue-600 font-medium'
+                  : 'text-gray-700 hover:bg-gray-50'
                   }`}
               >
                 <span className={activeView === 'settings' ? 'text-blue-600' : 'text-gray-400'}>
@@ -269,8 +279,8 @@ const CareerPathsPage: React.FC = () => {
                 <button
                   onClick={() => setActiveView('career-paths')}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all ${activeView === 'career-paths'
-                      ? 'bg-blue-50 text-blue-600 font-medium'
-                      : 'text-gray-700 hover:bg-gray-50'
+                    ? 'bg-blue-50 text-blue-600 font-medium'
+                    : 'text-gray-700 hover:bg-gray-50'
                     }`}
                 >
                   <span className={activeView === 'career-paths' ? 'text-blue-600' : 'text-gray-400'}>

@@ -79,16 +79,13 @@ const Navbar: React.FC = () => {
         </div>
       </div>
 
-      {/* NavLinks - Center (Absolute positioning để luôn ở giữa) */}
       <div className="absolute left-1/2 transform -translate-x-1/2">
         <NavLinks />
       </div>
 
-      {/* Profile/Auth - Right */}
       <div className="flex-shrink-0 flex items-center gap-3 ml-auto">
         {isAuthenticated && user ? (
           <div className="relative" ref={dropdownRef}>
-            {/* Avatar circle */}
             <button
               onClick={() => setShowDropdown(!showDropdown)}
               className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold focus:outline-none hover:bg-blue-700 transition-colors"
@@ -113,6 +110,19 @@ const Navbar: React.FC = () => {
                     </Button>
                   </Link>
 
+                   <Link to="/settings" onClick={() => setShowDropdown(false)} className="block">
+                    <Button
+                      variant="unstyled"
+                      className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 rounded-none flex items-center gap-3"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M12 1v6m0 6v6M5.64 5.64l4.24 4.24m4.24 4.24l4.24 4.24M1 12h6m6 0h6M5.64 18.36l4.24-4.24m4.24-4.24l4.24-4.24"></path>
+                      </svg>
+                      Settings
+                    </Button>
+                  </Link>
+
                   {(user?.role === 'COMPANY' || user?.role === 'ADMIN') && (
                     <Link to="/career-paths" onClick={() => setShowDropdown(false)} className="block">
                       <Button
@@ -127,25 +137,10 @@ const Navbar: React.FC = () => {
                       </Button>
                     </Link>
                   )}
-
-                  <Link to="/settings" onClick={() => setShowDropdown(false)} className="block">
-                    <Button
-                      variant="unstyled"
-                      className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 rounded-none flex items-center gap-3"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500">
-                        <circle cx="12" cy="12" r="3"></circle>
-                        <path d="M12 1v6m0 6v6M5.64 5.64l4.24 4.24m4.24 4.24l4.24 4.24M1 12h6m6 0h6M5.64 18.36l4.24-4.24m4.24-4.24l4.24-4.24"></path>
-                      </svg>
-                      Settings
-                    </Button>
-                  </Link>
                 </div>
 
-                {/* Divider */}
                 <div className="border-t border-gray-100 my-1"></div>
 
-                {/* Logout */}
                 <div className="px-1">
                   <Button
                     variant="unstyled"
@@ -157,7 +152,7 @@ const Navbar: React.FC = () => {
                       <polyline points="16 17 21 12 16 7"></polyline>
                       <line x1="21" y1="12" x2="9" y2="12"></line>
                     </svg>
-                    Đăng xuất
+                    Log out
                   </Button>
                 </div>
               </div>

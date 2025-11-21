@@ -1,10 +1,11 @@
 export type User = {
-  id: string; // Keep original id for backward compatibility
-  studentId?: string; // For STUDENT role
-  companyId?: string; // For COMPANY role
+  id: string;
+  studentId?: string;
+  companyId?: string;
   fullName: string;
   username: string;
   email: string;
+  address?: string;
   role: "STUDENT" | "COMPANY" | "ADMIN" | null;
   isActive: boolean;
   createdAt: string;
@@ -17,6 +18,7 @@ export type CompanyProfile = {
   taxCode?: string;
   website?: string;
   address?: string;
+  industry?: string;
   description?: string;
   createdAt?: string;
   updatedAt?: string;
@@ -28,7 +30,30 @@ export type UpdateCompanyProfilePayload = {
   taxCode?: string;
   website?: string;
   address?: string;
+  industry?: string;
   description?: string;
+  password?: string;
+};
+
+export type StudentProfile = {
+  id: string;
+  studentId: string;
+  fullName: string;
+  username: string;
+  email: string;
+  major?: string;
+  school?: string;
+  bio?: string;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type UpdateStudentProfilePayload = {
+  fullName?: string;
+  email?: string;
+  major?: string;
+  school?: string;
+  bio?: string;
   password?: string;
 };
 
