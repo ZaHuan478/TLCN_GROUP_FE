@@ -10,6 +10,7 @@ import ProfilePage from "../../components/pages/Profile/Profile";
 import SettingsPage from "../../components/pages/Setting/Settings";
 import ConnectionsPage from "../../components/pages/Connections";
 import UserProfilePage from "../../components/pages/UserProfile";
+import AIChat from "../../components/pages/AIChat";
 
 const AppRoutes: React.FC = () => {
   const { isAuthenticated } = useAuth();
@@ -26,6 +27,7 @@ const AppRoutes: React.FC = () => {
       <Route path="/" element={<BlogPage />} />
       <Route path="/connections" element={<ConnectionsPage />} />
       <Route path="/users/:id" element={<UserProfilePage />} />
+      <Route path="/ai-chat" element={<AIChat />} />
 
       {/* Catch-all route */}
       <Route
