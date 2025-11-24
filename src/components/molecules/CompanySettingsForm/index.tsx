@@ -31,7 +31,6 @@ export const CompanySettingsForm: React.FC = () => {
       setIsLoadingProfile(true);
       try {
         const profile = await getCompanyProfile();
-        console.log('🔍 Fetched company profile:', profile);
         setCompanyProfile(profile);
         setCompanyName(profile.companyName ?? '');
         setTaxId(profile.taxCode ?? '');
@@ -42,7 +41,7 @@ export const CompanySettingsForm: React.FC = () => {
         setDescription(profile.description ?? '');
       } catch (error) {
         console.error('Failed to load company profile', error);
-        setToast({ message: 'Không thể tải thông tin công ty. Vui lòng thử lại!', type: 'error' });
+        setToast({ message: 'Unable to load company information. Please try again!', type: 'error' });
       } finally {
         setIsLoadingProfile(false);
       }
@@ -53,7 +52,7 @@ export const CompanySettingsForm: React.FC = () => {
 
   const handleSave = async () => {
     if (!companyName || companyName.trim() === '') {
-      setToast({ message: 'Tên công ty là bắt buộc', type: 'warning' });
+      setToast({ message: 'Company name is required', type: 'warning' });
       return;
     }
 

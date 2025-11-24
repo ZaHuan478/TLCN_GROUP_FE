@@ -14,7 +14,7 @@ const BlogPage: React.FC = () => {
     const [blogs, setBlogs] = useState<Blog[]>([]);
     const [loading, setLoading] = useState(true);
     const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "warning" } | null>(null);
-    
+
     const permissions = getUserBlogPermissions(user);
 
     useEffect(() => {
@@ -30,7 +30,7 @@ const BlogPage: React.FC = () => {
             // Response should be an array directly
             if (Array.isArray(response)) {
                 setBlogs(response);
-                
+
                 // Nếu database trống, clear cache và set empty array
                 if (response.length === 0) {
                     localStorage.removeItem('blogs_cache');
@@ -48,12 +48,12 @@ const BlogPage: React.FC = () => {
         }
     };
 
-    const handleAddPost = async (data: { content: string }) => {
+    const handleAddPost = async (data: { content: string; images?: File[] }) => {
         // Check permission before creating
         if (!permissions.canCreate) {
-            setToast({ 
-                message: "You don't have permission to create posts. Only companies can create posts.", 
-                type: "error" 
+            setToast({
+                message: "You don't have permission to create posts. Only companies can create posts.",
+                type: "error"
             });
             setShowModal(false);
             return;

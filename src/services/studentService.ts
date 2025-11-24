@@ -1,10 +1,8 @@
 import { apiClient } from "./apiClient";
-import { StudentProfile, UpdateStudentProfilePayload } from "../types/types";
+import { StudentProfile, UpdateStudentProfilePayload, StudentLearningResultsResponse } from "../types/types";
 
 export const getStudentProfile = async (): Promise<StudentProfile> => {
   const response = await apiClient.get<any>('/students/profile');
-  console.log('🔍 Raw student API response:', response);
-
   if (response.student) {
     return {
       id: response.id,
@@ -14,7 +12,6 @@ export const getStudentProfile = async (): Promise<StudentProfile> => {
       email: response.email,
       major: response.student.major,
       school: response.student.school,
-      bio: response.bio,
       createdAt: response.createdAt,
       updatedAt: response.updatedAt,
     };
@@ -36,11 +33,26 @@ export const updateStudentProfile = async (payload: UpdateStudentProfilePayload)
       email: response.email,
       major: response.student.major,
       school: response.student.school,
-      bio: response.bio,
       createdAt: response.createdAt,
       updatedAt: response.updatedAt,
     };
   }
 
   return response as StudentProfile;
+};
+
+export const getStudentLearningResults = async (): Promise<StudentLearningResultsResponse> => {
+  const response = await apiClient.get<any>('/students/enrolled-courses');
+  console.log('🔍 Enrolled courses response:', response);
+
+  const progress = response.progress || response.data || response || [];
+  const completedCourses = progress.filter((p: any) => p.status === 'COMPLETED').length;
+  const inProgressCourses = progress.filter((p: any) => p.status === 'IN_PROGRESS').length;
+
+  return {
+    progress,
+    totalCourses: progress.length,
+    completedCourses,
+    inProgressCourses,
+  };
 };

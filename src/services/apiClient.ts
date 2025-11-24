@@ -6,6 +6,8 @@ type ApiResponse<T> = { data: T };
 class ApiClient {
   private client: AxiosInstance;
   private baseURL: string;
+  private isRefreshing = false;
+  private failedQueue: { resolve: (token: string) => void; reject: (error: any) => void }[] = [];
 
   constructor() {
     this.baseURL = import.meta.env.VITE_API_BASE_URL;
@@ -15,6 +17,17 @@ class ApiClient {
       headers: { "Content-Type": "application/json" },
     });
     this.setupInterceptors();
+  }
+
+  private processQueue(error: any, token: string | null = null) {
+    this.failedQueue.forEach((prom) => {
+      if (error) {
+        prom.reject(error);
+      } else {
+        prom.resolve(token!);
+      }
+    });
+    this.failedQueue = [];
   }
 
   private setupInterceptors() {
@@ -32,15 +45,37 @@ class ApiClient {
         const originalRequest = error.config;
 
         if (error.response?.status === 401 && !originalRequest._retry) {
+          if (this.isRefreshing) {
+            return new Promise<string>((resolve, reject) => {
+              this.failedQueue.push({ resolve, reject });
+            })
+              .then((token) => {
+                originalRequest.headers.Authorization = `Bearer ${token}`;
+                return this.client(originalRequest);
+              })
+              .catch((err) => {
+                return Promise.reject(err);
+              });
+          }
+
           originalRequest._retry = true;
+          this.isRefreshing = true;
+
           try {
             const newToken = await this.refreshToken();
             if (newToken) {
+              this.processQueue(null, newToken);
               originalRequest.headers.Authorization = `Bearer ${newToken}`;
               return this.client(originalRequest);
+            } else {
+              throw new Error("Token refresh returned null");
             }
-          } catch {
+          } catch (err) {
+            this.processQueue(err, null);
             this.logoutOnAuthFailure();
+            return Promise.reject(err);
+          } finally {
+            this.isRefreshing = false;
           }
         }
         return Promise.reject(error);

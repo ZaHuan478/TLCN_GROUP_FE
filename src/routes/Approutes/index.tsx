@@ -8,9 +8,10 @@ import { useAuth } from "../../contexts/AuthContext";
 import BlogPage from "../../components/pages/BlogPage";
 import SourcePage from "../../components/pages/Source/SourcePage";
 import { AdminRoute } from "../../components/molecules/AdminRoute";
-import { AdminDashboard, StudentManagement, CompanyManagement, BlogManagement } from "../../components/pages/Admin";
+import { AdminDashboard, StudentManagement, CompanyManagement, BlogManagement, CareerPathManagement } from "../../components/pages/Admin";
 import { Unauthorized } from "../../components/pages/Unauthorized/Unauthorized";
 import CareerPathsPage from "../../components/pages/CareerPaths/CareerPaths";
+import CareerPathDetailsPage from "../../components/pages/CareerPathDetails/CareerPathDetails";
 import CoursesPage from "../../components/pages/CoursesPage";
 
 const AppRoutes: React.FC = () => {
@@ -24,6 +25,7 @@ const AppRoutes: React.FC = () => {
       <Route path="/signup" element={<SignUpPage />} />
       <Route path="/settings" element={<CareerPathsPage />} />
       <Route path="/career-paths" element={<CareerPathsPage />} />
+      <Route path="/career-paths/:id" element={<CareerPathDetailsPage />} />
       <Route path="/courses" element={<CoursesPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/oath-success" element={<OAuthSuccessPage />} />
@@ -37,6 +39,7 @@ const AppRoutes: React.FC = () => {
         <Route path="blogs" element={<BlogManagement />} />
         <Route path="students" element={<StudentManagement />} />
         <Route path="companies" element={<CompanyManagement />} />
+        <Route path="career-paths" element={<CareerPathManagement />} />
       </Route>
 
       {/* Unauthorized page */}

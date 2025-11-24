@@ -47,8 +47,6 @@ const transformBlogs = (blogs: any[]): Blog[] => {
     return blogs.map(transformBlog);
 };
 
-
-
 export const blogApi = {
     getAll: async (forceRefresh = false): Promise<Blog[]> => {
         try {
@@ -95,6 +93,7 @@ export const blogApi = {
             return [];
         }
     },
+
     getById: async (id: string): Promise<Blog | null> => {
         try {
             const response = await apiClient.get<any>(`/blogs/${id}`);
@@ -111,8 +110,9 @@ export const blogApi = {
                 const formData = new FormData();
                 formData.append('content', data.content);
 
+                console.log('Uploading images:', data.images.length);
                 data.images.forEach((image) => {
-                    formData.append(`images`, image);
+                    formData.append('images[]', image);
                 });
 
                 const response = await apiClient.postFormData<any>('/blogs', formData);

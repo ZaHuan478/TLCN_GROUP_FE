@@ -43,7 +43,7 @@ export type StudentProfile = {
   email: string;
   major?: string;
   school?: string;
-  bio?: string;
+  address?: string;
   createdAt?: string;
   updatedAt?: string;
 };
@@ -53,8 +53,49 @@ export type UpdateStudentProfilePayload = {
   email?: string;
   major?: string;
   school?: string;
-  bio?: string;
+  address?: string;
   password?: string;
+};
+
+export type StudentTestResult = {
+  id: string;
+  testId: string;
+  score: number;
+  submittedCode?: string;
+  startedAt?: string;
+  finishedAt?: string;
+  createdAt?: string;
+  test?: {
+    id: string;
+    title: string;
+    type: 'MINI' | 'FINAL_PATH';
+    maxScore: number;
+  };
+};
+
+export type StudentProgress = {
+  id: string;
+  studentId: string;
+  careerPathId: string;
+  status: 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED';
+  createdAt?: string;
+  updatedAt?: string;
+  careerPath?: {
+    id: string;
+    title: string;
+    description?: string;
+    company?: {
+      companyName: string;
+    };
+  };
+  testResults?: StudentTestResult[];
+};
+
+export type StudentLearningResultsResponse = {
+  progress: StudentProgress[];
+  totalCourses: number;
+  completedCourses: number;
+  inProgressCourses: number;
 };
 
 export type CareerTest = {
@@ -194,20 +235,13 @@ export type CommentListResponse = {
   comments: Comment[];
   currentPage: number;
   totalPages: number;
+}
+
+export type CreateTestPayload = {
+  lessonId?: string;
+  careerPathId?: string;
+  title: string;
+  order: number;
+  description?: string;
+  questions?: TestQuestion[];
 };
-
-export type CreateUserPayload = {
-    username: string;
-    fullName: string;
-    email: string;
-    password: string;
-    role: "STUDENT" | "COMPANY" | "ADMIN";
-}
-
-export type UpdateUserPayload = {
-    username?: string;
-    fullName?: string;
-    email?: string;
-    role?: "STUDENT" | "COMPANY" | "ADMIN";
-    isActive?: boolean;
-}

@@ -89,16 +89,16 @@ const CareerPathsPage: React.FC = () => {
         images: data.image,
       });
       setTests([newTest, ...tests]);
-      setToast({ message: 'Tạo bài test thành công!', type: 'success' });
+      setToast({ message: 'Test created successfully!', type: 'success' });
     } catch (error: any) {
       console.error('Failed to create career test:', error);
 
       if (error.response?.status === 403) {
-        setToast({ message: 'Bạn không có quyền tạo career path. Chỉ công ty hoặc admin mới có quyền này.', type: 'error' });
+        setToast({ message: 'You do not have permission to create a career path. Only companies or admins can create career paths.', type: 'error' });
       } else if (error.response?.status === 401) {
-        setToast({ message: 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.', type: 'error' });
+        setToast({ message: 'Your session has expired. Please log in again.', type: 'error' });
       } else {
-        const errorMessage = error.response?.data?.message || error.message || 'Tạo bài test thất bại. Vui lòng thử lại!';
+        const errorMessage = error.response?.data?.message || error.message || 'Failed to create career test. Please try again!';
         setToast({ message: errorMessage, type: 'error' });
       }
     } finally {
@@ -107,15 +107,15 @@ const CareerPathsPage: React.FC = () => {
   };
 
   const handleDeleteTest = async (testId: string) => {
-    if (!confirm('Bạn có chắc chắn muốn xóa bài test này?')) return;
+    if (!confirm('Are you sure you want to delete this test?')) return;
 
     try {
       await deleteCareerTest(testId);
       setTests(tests.filter(test => test.id !== testId));
-      setToast({ message: 'Xóa bài test thành công!', type: 'success' });
+      setToast({ message: 'Test deleted successfully!', type: 'success' });
     } catch (error) {
       console.error('Failed to delete career test:', error);
-      setToast({ message: 'Xóa bài test thất bại. Vui lòng thử lại!', type: 'error' });
+      setToast({ message: 'Failed to delete career test. Please try again!', type: 'error' });
     }
   };
 
@@ -172,47 +172,84 @@ const CareerPathsPage: React.FC = () => {
                   <line x1="16" y1="17" x2="8" y2="17"></line>
                   <polyline points="10 9 9 9 8 9"></polyline>
                 </svg>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Chưa có bài test nào</h3>
-                <p className="text-gray-500 mb-6">Bắt đầu bằng cách tạo bài test đánh giá nghề nghiệp đầu tiên</p>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No career tests found</h3>
+                <p className="text-gray-500 mb-6">Start by creating your first career test</p>
                 <Button variant="primary" onClick={() => setIsModalOpen(true)}>
-                  Tạo bài test đầu tiên
+                  Create your first career test
                 </Button>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {tests.map((test) => (
-                  <div key={test.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
-                    {test.imageUrl && (
-                      <div className="h-48 bg-gray-100">
+                  <div key={test.id} className="group bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col h-full">
+                    {/* Image Section */}
+                    <div className="h-48 overflow-hidden relative bg-gray-100">
+                      {test.imageUrl || (test as any).image ? (
                         <img
-                          src={test.imageUrl}
+                          src={test.imageUrl || (test as any).image}
                           alt={test.title}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = 'none';
+                            (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                          }}
                         />
+                      ) : null}
+
+                      {/* Fallback Gradient Placeholder */}
+                      <div className={`w-full h-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center ${test.imageUrl || (test as any).image ? 'hidden' : ''}`}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="opacity-80">
+                          <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+                          <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+                        </svg>
                       </div>
-                    )}
-                    <div className="p-6">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">{test.title}</h3>
-                      <p className="text-gray-600 text-sm mb-4 line-clamp-3">
-                        {test.description || 'Chưa có mô tả'}
+                    </div>
+
+                    {/* Content Section */}
+                    <div className="p-6 flex flex-col flex-1">
+                      <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-1 group-hover:text-blue-600 transition-colors">
+                        {test.title}
+                      </h3>
+
+                      <p className="text-gray-600 text-sm mb-4 line-clamp-2 flex-1">
+                        {test.description || 'Chưa có mô tả cho bài test này.'}
                       </p>
-                      <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
-                        <span>{new Date(test.createdAt).toLocaleDateString('vi-VN')}</span>
+
+                      <div className="flex items-center justify-between text-xs text-gray-500 mb-4 pt-4 border-t border-gray-100">
+                        <div className="flex items-center gap-1">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                          </svg>
+                          <span>{new Date(test.createdAt).toLocaleDateString('vi-VN')}</span>
+                        </div>
                       </div>
 
-                      <div className="flex items-center gap-2">
-                        <button className="flex-1 px-3 py-2 text-sm text-blue-600 hover:bg-blue-50 rounded-lg font-medium transition-colors">
-                          Xem chi tiết
-                        </button>
+                      <div className="flex items-center gap-3 mt-auto">
                         <button
-                          onClick={() => handleDeleteTest(test.id)}
-                          className="px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg font-medium transition-colors"
+                          onClick={() => {
+                            // Navigate to details page
+                            window.location.href = `/career-paths/${test.id}`;
+                          }}
+                          className="flex-1 px-4 py-2.5 bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700 rounded-lg font-semibold text-sm transition-colors flex items-center justify-center gap-2"
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                          </svg>
+                          Xem chi tiết
+                        </button>
+
+                        <button
+                          onClick={() => handleDeleteTest(test.id)}
+                          className="p-2.5 text-red-500 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors"
+                          title="Xóa bài test"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <polyline points="3 6 5 6 21 6"></polyline>
                             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                            <line x1="10" y1="11" x2="10" y2="17"></line>
-                            <line x1="14" y1="11" x2="14" y2="17"></line>
                           </svg>
                         </button>
                       </div>
