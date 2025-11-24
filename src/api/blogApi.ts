@@ -112,7 +112,7 @@ export const blogApi = {
 
                 console.log('Uploading images:', data.images.length);
                 data.images.forEach((image) => {
-                    formData.append('images[]', image);
+                    formData.append('images', image);
                 });
 
                 const response = await apiClient.postFormData<any>('/blogs', formData);

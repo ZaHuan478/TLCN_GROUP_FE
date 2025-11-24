@@ -23,8 +23,8 @@ export const TestDetailsModal: React.FC<TestDetailsModalProps> = ({ isOpen, onCl
     const [showAddTestModal, setShowAddTestModal] = useState(false);
     const [isAddingLessonTest, setIsAddingLessonTest] = useState(false);
 
-    const [lessonForm, setLessonForm] = useState({ title: '', order: 1 });
-    const [testForm, setTestForm] = useState({ title: '', description: '', order: 1 });
+    const [lessonForm, setLessonForm] = useState({ title: '', order: 1, content: '' });
+    const [testForm, setTestForm] = useState({ title: '', description: '', order: 1, type: 'MINI', maxScore: 100, content: '' });
     const [currentLessonId, setCurrentLessonId] = useState<string | null>(null);
 
     useEffect(() => {
@@ -56,7 +56,8 @@ export const TestDetailsModal: React.FC<TestDetailsModalProps> = ({ isOpen, onCl
         try {
             const response = await createLesson(testId, {
                 title: lessonForm.title,
-                order: lessonForm.order
+                order: lessonForm.order,
+                content: lessonForm.content
             });
 
             setToast({ message: 'Thêm bài học thành công!', type: 'success' });
@@ -68,7 +69,7 @@ export const TestDetailsModal: React.FC<TestDetailsModalProps> = ({ isOpen, onCl
                 setShowAddTestModal(true);
             }
 
-            setLessonForm({ title: '', order: lessonForm.order + 1 });
+            setLessonForm({ title: '', order: lessonForm.order + 1, content: '' });
         } catch (error) {
             console.error('Failed to add lesson:', error);
             setToast({ message: 'Thêm bài học thất bại.', type: 'error' });
@@ -82,7 +83,10 @@ export const TestDetailsModal: React.FC<TestDetailsModalProps> = ({ isOpen, onCl
                     lessonId: currentLessonId,
                     title: testForm.title,
                     order: testForm.order,
-                    description: testForm.description
+                    description: testForm.description,
+                    type: 'MINI',
+                    maxScore: testForm.maxScore,
+                    content: testForm.content
                 });
                 setToast({ message: 'Thêm bài kiểm tra cho bài học thành công!', type: 'success' });
             } else {
@@ -91,7 +95,10 @@ export const TestDetailsModal: React.FC<TestDetailsModalProps> = ({ isOpen, onCl
                         careerPathId: testId,
                         title: testForm.title,
                         order: testForm.order,
-                        description: testForm.description
+                        description: testForm.description,
+                        type: 'FINAL_PATH',
+                        maxScore: testForm.maxScore,
+                        content: testForm.content
                     });
                     setToast({ message: 'Thêm bài kiểm tra chung thành công!', type: 'success' });
                 }
@@ -99,7 +106,7 @@ export const TestDetailsModal: React.FC<TestDetailsModalProps> = ({ isOpen, onCl
             setShowAddTestModal(false);
             setIsAddingLessonTest(false);
             setCurrentLessonId(null);
-            setTestForm({ title: '', description: '', order: 1 });
+            setTestForm({ title: '', description: '', order: 1, type: 'MINI', maxScore: 100, content: '' });
         } catch (error) {
             console.error('Failed to add test:', error);
             setToast({ message: 'Thêm bài kiểm tra thất bại.', type: 'error' });
@@ -259,6 +266,15 @@ export const TestDetailsModal: React.FC<TestDetailsModalProps> = ({ isOpen, onCl
                                 />
                             </div>
                             <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Nội dung bài học</label>
+                                <textarea
+                                    value={lessonForm.content}
+                                    onChange={(e) => setLessonForm({ ...lessonForm, content: e.target.value })}
+                                    placeholder="Nhập nội dung bài học"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all min-h-[100px]"
+                                />
+                            </div>
+                            <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Thứ tự (Order)</label>
                                 <Input
                                     type="number"
@@ -298,6 +314,33 @@ export const TestDetailsModal: React.FC<TestDetailsModalProps> = ({ isOpen, onCl
                                     value={testForm.description}
                                     onChange={(e) => setTestForm({ ...testForm, description: e.target.value })}
                                     placeholder="Nhập mô tả"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Thứ tự (Order)</label>
+                                <Input
+                                    type="number"
+                                    value={testForm.order}
+                                    onChange={(e) => setTestForm({ ...testForm, order: parseInt(e.target.value) })}
+                                    placeholder="Nhập thứ tự"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Điểm tối đa</label>
+                                <Input
+                                    type="number"
+                                    value={testForm.maxScore}
+                                    onChange={(e) => setTestForm({ ...testForm, maxScore: parseInt(e.target.value) })}
+                                    placeholder="Nhập điểm tối đa"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Nội dung (JSON)</label>
+                                <textarea
+                                    value={testForm.content}
+                                    onChange={(e) => setTestForm({ ...testForm, content: e.target.value })}
+                                    placeholder='{"questions": []}'
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all min-h-[100px] font-mono text-sm"
                                 />
                             </div>
                             <div className="flex justify-end gap-2 mt-6">
