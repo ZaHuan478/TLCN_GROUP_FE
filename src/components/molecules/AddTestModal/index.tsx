@@ -80,12 +80,12 @@ export const AddTestModal: React.FC<AddTestModalProps> = ({ isOpen, onClose, onS
           {/* Title */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Tiêu đề <span className="text-red-500">*</span>
+              Title <span className="text-red-500">*</span>
             </label>
             <Input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Nhập tiêu đề bài test"
+              placeholder="Enter the test title"
               className="w-full"
               disabled={loading}
             />
@@ -94,12 +94,12 @@ export const AddTestModal: React.FC<AddTestModalProps> = ({ isOpen, onClose, onS
           {/* Description */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Mô tả
+              Description
             </label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Nhập mô tả bài test"
+              placeholder="Enter test description"
               rows={4}
               className="w-full rounded-md border border-gray-300 px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none disabled:bg-gray-100 disabled:cursor-not-allowed"
               disabled={loading}
@@ -109,7 +109,7 @@ export const AddTestModal: React.FC<AddTestModalProps> = ({ isOpen, onClose, onS
           {/* Image Upload */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Hình ảnh bài test
+              Image Test
             </label>
             <div className="space-y-3">
               <input
@@ -119,7 +119,7 @@ export const AddTestModal: React.FC<AddTestModalProps> = ({ isOpen, onClose, onS
                 onChange={handleImageChange}
                 className="hidden"
               />
-              
+
               <button
                 onClick={() => fileInputRef.current?.click()}
                 className="w-full flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-blue-400 hover:text-blue-600 transition-all disabled:bg-gray-100 disabled:cursor-not-allowed"
@@ -130,7 +130,7 @@ export const AddTestModal: React.FC<AddTestModalProps> = ({ isOpen, onClose, onS
                   <circle cx="8.5" cy="8.5" r="1.5"></circle>
                   <polyline points="21 15 16 10 5 21"></polyline>
                 </svg>
-                {image ? 'Đổi hình ảnh' : 'Tải lên hình ảnh'}
+                {image ? 'Change Image' : 'Upload Image'}
               </button>
 
               {imagePreview && (
@@ -161,15 +161,15 @@ export const AddTestModal: React.FC<AddTestModalProps> = ({ isOpen, onClose, onS
 
         {/* Footer */}
         <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200 bg-gray-50">
-          <Button 
-            variant="secondary" 
+          <Button
+            variant="secondary"
             onClick={handleClose}
             disabled={loading}
           >
-            Hủy
+            Cancel
           </Button>
-          <Button 
-            variant="primary" 
+          <Button
+            variant="primary"
             onClick={handleSubmit}
             disabled={loading}
             className="flex items-center gap-2"
@@ -177,10 +177,10 @@ export const AddTestModal: React.FC<AddTestModalProps> = ({ isOpen, onClose, onS
             {loading ? (
               <>
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                Đang tạo...
+                Creating...
               </>
             ) : (
-              'Tạo bài test'
+              'Create Test'
             )}
           </Button>
         </div>

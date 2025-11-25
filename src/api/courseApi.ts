@@ -24,6 +24,15 @@ export const courseApi = {
 	async getById(courseId: string): Promise<Course> {
 		return apiClient.get<Course>(`/career-paths/${courseId}`);
 	},
+
+	async updateStatus(courseId: string, status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED'): Promise<Course> {
+		return apiClient.patch<Course>(`/career-paths/${courseId}/status`, { status });
+	},
+
+	async getMyCourses(params?: CourseListParams): Promise<CourseListResponse> {
+		const query = buildQueryString(params);
+		return apiClient.get<CourseListResponse>(`/career-paths/my-courses${query}`);
+	},
 };
 
 

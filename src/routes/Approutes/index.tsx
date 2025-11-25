@@ -13,6 +13,8 @@ import { Unauthorized } from "../../components/pages/Unauthorized/Unauthorized";
 import CareerPathsPage from "../../components/pages/CareerPaths/CareerPaths";
 import CareerPathDetailsPage from "../../components/pages/CareerPathDetails/CareerPathDetails";
 import CoursesPage from "../../components/pages/CoursesPage";
+import CourseDetailPage from "../../components/pages/CourseDetailPage";
+import CourseLearnPage from "../../components/pages/CourseLearnPage/CourseLearnPage";
 
 const AppRoutes: React.FC = () => {
   const { isAuthenticated } = useAuth();
@@ -27,6 +29,8 @@ const AppRoutes: React.FC = () => {
       <Route path="/career-paths" element={<CareerPathsPage />} />
       <Route path="/career-paths/:id" element={<CareerPathDetailsPage />} />
       <Route path="/courses" element={<CoursesPage />} />
+      <Route path="/courses/:id" element={<CourseDetailPage />} />
+      <Route path="/courses/:id/learn" element={<CourseLearnPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/oath-success" element={<OAuthSuccessPage />} />
       <Route path="/" element={<BlogPage />} />

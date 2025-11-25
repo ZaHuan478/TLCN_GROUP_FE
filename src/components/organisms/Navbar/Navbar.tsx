@@ -124,18 +124,20 @@ const Navbar: React.FC = () => {
                   </Link>
 
                   {(user?.role === 'COMPANY' || user?.role === 'ADMIN') && (
-                    <Link to="/career-paths" onClick={() => setShowDropdown(false)} className="block">
-                      <Button
-                        variant="unstyled"
-                        className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 rounded-none flex items-center gap-3"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500">
-                          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-                        </svg>
-                        Career Paths
-                      </Button>
-                    </Link>
+                    <>
+                      <Link to="/career-paths" onClick={() => setShowDropdown(false)} className="block">
+                        <Button
+                          variant="unstyled"
+                          className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 rounded-none flex items-center gap-3"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500">
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                          </svg>
+                          Career Paths
+                        </Button>
+                      </Link>
+                    </>
                   )}
                 </div>
 

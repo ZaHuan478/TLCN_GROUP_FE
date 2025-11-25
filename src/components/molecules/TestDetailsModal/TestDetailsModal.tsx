@@ -5,6 +5,7 @@ import { createLesson } from '../../../api/lessonApi';
 import { createTest } from '../../../api/testApi';
 import { Button } from '../../atoms/Button/Button';
 import { Input } from '../../atoms/Input/Input';
+import { Textarea } from '../../atoms/Textarea/Textarea';
 import { Toast } from '../../molecules/ToastNotification';
 
 interface TestDetailsModalProps {
@@ -215,7 +216,7 @@ export const TestDetailsModal: React.FC<TestDetailsModalProps> = ({ isOpen, onCl
                                         <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
                                         <line x1="12" y1="17" x2="12.01" y2="17"></line>
                                     </svg>
-                                    Danh sách câu hỏi ({questions.length})
+                                    List of Test ({questions.length})
                                 </h3>
 
                                 {questions.length > 0 ? (
@@ -267,11 +268,11 @@ export const TestDetailsModal: React.FC<TestDetailsModalProps> = ({ isOpen, onCl
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Nội dung bài học</label>
-                                <textarea
+                                <Textarea
                                     value={lessonForm.content}
                                     onChange={(e) => setLessonForm({ ...lessonForm, content: e.target.value })}
                                     placeholder="Nhập nội dung bài học"
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all min-h-[100px]"
+                                    className="min-h-[100px]"
                                 />
                             </div>
                             <div>
@@ -297,11 +298,11 @@ export const TestDetailsModal: React.FC<TestDetailsModalProps> = ({ isOpen, onCl
                 <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black bg-opacity-50">
                     <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-xl">
                         <h3 className="text-xl font-bold mb-4">
-                            {isAddingLessonTest ? 'Thêm bài kiểm tra cho bài học' : 'Thêm bài kiểm tra'}
+                            {isAddingLessonTest ? 'Add a test to the lesson' : 'Add a test'}
                         </h3>
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Tiêu đề bài kiểm tra</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Test title</label>
                                 <Input
                                     value={testForm.title}
                                     onChange={(e) => setTestForm({ ...testForm, title: e.target.value })}
@@ -336,11 +337,11 @@ export const TestDetailsModal: React.FC<TestDetailsModalProps> = ({ isOpen, onCl
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Nội dung (JSON)</label>
-                                <textarea
+                                <Textarea
                                     value={testForm.content}
                                     onChange={(e) => setTestForm({ ...testForm, content: e.target.value })}
                                     placeholder='{"questions": []}'
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all min-h-[100px] font-mono text-sm"
+                                    className="min-h-[100px] font-mono text-sm"
                                 />
                             </div>
                             <div className="flex justify-end gap-2 mt-6">
