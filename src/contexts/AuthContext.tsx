@@ -29,39 +29,59 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const [notifications, setNotifications] = useState<any[]>([]);
 
     useEffect(() => {
+        let cancelled = false;
+        
         const initializeAuth = async () => {
             try {
                 const oauthResult = authService.handleOAuthCallback();
+                
+                if (cancelled) return;
                 
                 if (oauthResult) {
                     // Fix: Get user info after setting tokens
                     try {
                         const response = await apiClient.get<{ user: User }>('/auth/me');
-                        setUser(response.user);
-                        localStorage.setItem("user", JSON.stringify(response.user));
+                        if (!cancelled) {
+                            setUser(response.user);
+                            localStorage.setItem("user", JSON.stringify(response.user));
+                            // Clear URL only after successful fetch
+                            window.history.replaceState({}, "", window.location.pathname);
+                        }
                     } catch (error) {
                         console.error('Failed to get user info after OAuth:', error);
-                        // Fallback: try to get from localStorage
-                        await refreshUser();
+                        if (!cancelled) {
+                            // Fallback: try to get from localStorage
+                            await refreshUser();
+                        }
                     }
                 } else {
                     const savedUser = await authService.getCurrentUser();
-                    if (savedUser && authService.isAuthenticated()) {
-                        setUser(savedUser);
-                        // socket connection + handler registration done in separate effect when `user` state is set
-                    } else {
-                        authService.clearSession();
+                    if (!cancelled) {
+                        if (savedUser && authService.isAuthenticated()) {
+                            setUser(savedUser);
+                            // socket connection + handler registration done in separate effect when `user` state is set
+                        } else {
+                            authService.clearSession();
+                        }
                     }
                 }
             } catch (error) {
                 console.error('Auth initialization error:', error);
-                authService.clearSession();
+                if (!cancelled) {
+                    authService.clearSession();
+                }
             } finally {
-                setIsLoading(false);
+                if (!cancelled) {
+                    setIsLoading(false);
+                }
             }
         };
 
         initializeAuth();
+        
+        return () => {
+            cancelled = true;
+        };
     }, []);
 
     const login = async (username: string, password: string): Promise<void> => {
