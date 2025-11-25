@@ -23,7 +23,7 @@ const AppRoutes: React.FC = () => {
       <Route path="/signup" element={<SignUpPage />} />
       <Route path="/settings" element={<SettingsPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-      <Route path="/oath-success" element={<OAuthSuccessPage />} />
+      <Route path="/oauth-success" element={<OAuthSuccessPage />} />
       <Route path="/" element={<BlogPage />} />
       <Route path="/connections" element={<ConnectionsPage />} />
       <Route path="/users/:id" element={<UserProfilePage />} />

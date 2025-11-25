@@ -32,12 +32,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const initializeAuth = async () => {
             try {
                 const oauthResult = authService.handleOAuthCallback();
+                
                 if (oauthResult) {
                     // Fix: Get user info after setting tokens
                     try {
-                        const response = await apiClient.get<{ data: { user: User } }>('/auth/me');
-                        setUser(response.data.user);
-                        localStorage.setItem("user", JSON.stringify(response.data.user));
+                        const response = await apiClient.get<{ user: User }>('/auth/me');
+                        setUser(response.user);
+                        localStorage.setItem("user", JSON.stringify(response.user));
                     } catch (error) {
                         console.error('Failed to get user info after OAuth:', error);
                         // Fallback: try to get from localStorage

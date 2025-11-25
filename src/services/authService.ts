@@ -62,7 +62,7 @@ class AuthService {
 
   // OAuth
   initiateGoogleLogin(): void {
-    const baseUrl = import.meta.env.VITE_API_URL;
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL;
     window.location.href = `${baseUrl}/auth/google`;
   }
 
