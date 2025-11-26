@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Blog } from "../../../api/blogApi";
 import { Button } from "../../atoms/Button/Button";
 import { Avatar } from "../../atoms/Avatar";
@@ -19,6 +20,7 @@ export const BlogHeader: React.FC<BlogHeaderProps> = ({
 }) => {
     const [showDropdown, setShowDropdown] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -54,10 +56,38 @@ export const BlogHeader: React.FC<BlogHeaderProps> = ({
         return blog.author?.[0]?.toUpperCase() || 'U';
     };
 
+    const getAuthorId = () => {
+        if (typeof blog.author === 'object') {
+            return blog.author?.id;
+        }
+        return null;
+    };
+
+    const getAuthorAvatar = () => {
+        if (typeof blog.author === 'object') {
+            return blog.author?.avatar;
+        }
+        return undefined;
+    };
+
+    const handleAuthorClick = () => {
+        const authorId = getAuthorId();
+        if (authorId) {
+            navigate(`/users/${authorId}`);
+        }
+    };
+
     return (
         <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-                <Avatar name={getAuthorInitial()} size="md" />
+            <div 
+                className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
+                onClick={handleAuthorClick}
+            >
+                <Avatar 
+                    src={getAuthorAvatar()} 
+                    name={getAuthorInitial()} 
+                    size="sm" 
+                />
                 <div>
                     <p className="font-medium text-sm">{getAuthorName()}</p>
                     <p className="text-xs text-gray-500">

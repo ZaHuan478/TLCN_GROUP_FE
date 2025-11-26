@@ -74,8 +74,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             // Try to get fresh user data from backend
             if (authService.isAuthenticated()) {
                 try {
-                    const response = await apiClient.get<{ data: { user: User } }>('/auth/me');
-                    const updatedUser = response.data.user;
+                    // apiClient.get already extracts .data, so response = { user: User }
+                    const response = await apiClient.get<{ user: User }>('/auth/me');
+                    const updatedUser = response.user;
+                    console.log('Refreshed user data:', updatedUser);
                     setUser(updatedUser);
                     localStorage.setItem("user", JSON.stringify(updatedUser));
                 } catch (apiError) {

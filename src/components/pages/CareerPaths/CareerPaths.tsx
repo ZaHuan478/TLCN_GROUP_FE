@@ -6,7 +6,6 @@ import { ProtectedRoute } from '../../ProtectedRoute';
 import StudentSettingsForm from '../../molecules/StudentSettingsForm';
 import CompanySettingsForm from '../../molecules/CompanySettingsForm';
 import { useAuth } from '../../../contexts/AuthContext';
-import { ProfileShell } from '../../organisms/ProfileShell';
 import { useLocation } from 'react-router-dom';
 import { getMyCareerTests, createCareerTest, deleteCareerTest } from '../../../api/careerPathApi';
 import { CareerTest } from '../../../types/types';
@@ -121,12 +120,6 @@ const CareerPathsPage: React.FC = () => {
 
   const renderContent = () => {
     switch (activeView) {
-      case 'profile':
-        return (
-          <div>
-            <ProfileShell role={user?.role === 'COMPANY' ? 'COMPANY' : 'STUDENT'} />
-          </div>
-        );
 
       case 'settings':
         return (
@@ -228,7 +221,8 @@ const CareerPathsPage: React.FC = () => {
                       </div>
 
                       <div className="flex items-center gap-3 mt-auto">
-                        <button
+                        <Button
+                          variant="unstyled"
                           onClick={() => {
                             // Navigate to details page
                             window.location.href = `/career-paths/${test.id}`;
@@ -240,9 +234,10 @@ const CareerPathsPage: React.FC = () => {
                             <circle cx="12" cy="12" r="3"></circle>
                           </svg>
                           Xem chi tiết
-                        </button>
+                        </Button>
 
-                        <button
+                        <Button
+                          variant="unstyled"
                           onClick={() => handleDeleteTest(test.id)}
                           className="p-2.5 text-red-500 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors"
                           title="Xóa bài test"
@@ -251,7 +246,7 @@ const CareerPathsPage: React.FC = () => {
                             <polyline points="3 6 5 6 21 6"></polyline>
                             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                           </svg>
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   </div>
@@ -279,23 +274,8 @@ const CareerPathsPage: React.FC = () => {
             <h2 className="text-lg font-semibold text-gray-800 mb-6">Navigation</h2>
 
             <nav className="space-y-2 flex-1">
-              <button
-                onClick={() => setActiveView('profile')}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all ${activeView === 'profile'
-                  ? 'bg-blue-50 text-blue-600 font-medium'
-                  : 'text-gray-700 hover:bg-gray-50'
-                  }`}
-              >
-                <span className={activeView === 'profile' ? 'text-blue-600' : 'text-gray-400'}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="12" cy="7" r="4"></circle>
-                  </svg>
-                </span>
-                <span>Profile</span>
-              </button>
-
-              <button
+              <Button
+                variant="unstyled"
                 onClick={() => setActiveView('settings')}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all ${activeView === 'settings'
                   ? 'bg-blue-50 text-blue-600 font-medium'
@@ -309,11 +289,12 @@ const CareerPathsPage: React.FC = () => {
                   </svg>
                 </span>
                 <span>Settings</span>
-              </button>
+              </Button>
 
               {/* Career Paths - Only for COMPANY role */}
               {user?.role === 'COMPANY' && (
-                <button
+                <Button
+                  variant="unstyled"
                   onClick={() => setActiveView('career-paths')}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all ${activeView === 'career-paths'
                     ? 'bg-blue-50 text-blue-600 font-medium'
@@ -327,13 +308,14 @@ const CareerPathsPage: React.FC = () => {
                     </svg>
                   </span>
                   <span>Career Paths</span>
-                </button>
+                </Button>
               )}
             </nav>
 
             {/* Logout button at bottom */}
             <div className="mt-auto pt-4 border-t border-gray-200">
-              <button
+              <Button
+                variant="unstyled"
                 onClick={() => {
                   logout();
                   window.location.href = '/signin';
@@ -346,7 +328,7 @@ const CareerPathsPage: React.FC = () => {
                   <line x1="21" y1="12" x2="9" y2="12"></line>
                 </svg>
                 <span>Logout</span>
-              </button>
+              </Button>
             </div>
           </div>
         </div>

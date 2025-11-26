@@ -1,5 +1,5 @@
 import { apiClient } from "../services/apiClient";
-import { User, CreateUserPayload, UpdateUserPayload } from "../types/types";
+import { User } from "../types/types";
 
 export const userApi = {
     async getAll(role?: "STUDENT" | "COMPANY" | "ADMIN"): Promise<User[]> {
@@ -16,15 +16,22 @@ export const userApi = {
 
     async getById(id: string): Promise<User> {
         try {
-            const response = await apiClient.get<{ data: User }>(`/users/${id}`);
-            return response.data;
+            const response = await apiClient.get<any>(`/users/${id}`);
+            console.log('API Response for getById:', response);
+            console.log('Response.data:', response.data);
+            // Backend returns { status, message, data: User }
+            // apiClient already extracts .data, so response = { status, message, data }
+            // We need response.data which is the User object
+            const userData = response.data || response;
+            console.log('Extracted user data:', userData);
+            return userData;
         } catch (error) {
             console.error(`Failed to fetch user ${id}:`, error);
             throw error;
         }
     },
 
-    async create(userData: CreateUserPayload): Promise<User> {
+    async create(userData: any): Promise<User> {
         try {
             const response = await apiClient.post<{ data: User }>('/users', userData);
             return response.data;
@@ -34,7 +41,7 @@ export const userApi = {
         }
     },
 
-    async update(id: string, userData: UpdateUserPayload): Promise<User> {
+    async update(id: string, userData: any): Promise<User> {
         try {
             const response = await apiClient.put<{ data: User }>(`/users/${id}`, userData);
             return response.data;
@@ -49,6 +56,22 @@ export const userApi = {
             await apiClient.put(`/users/${id}`, { isActive: false });
         } catch (error) {
             console.error(`Failed to delete user ${id}:`, error);
+            throw error;
+        }
+    },
+
+    async updateAvatar(id: string, file: File): Promise<User> {
+        try {
+            const formData = new FormData();
+            formData.append('avatar', file);
+
+            const response = await apiClient.putFormData<User>(
+                `/users/${id}/avatar`,
+                formData
+            );
+            return response;
+        } catch (error) {
+            console.error(`Failed to update avatar for user ${id}:`, error);
             throw error;
         }
     }

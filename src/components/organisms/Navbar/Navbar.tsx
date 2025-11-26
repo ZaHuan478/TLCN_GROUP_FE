@@ -5,11 +5,18 @@ import { Button } from "../../atoms/Button/Button";
 import { useAuth } from "../../../contexts/AuthContext";
 
 const Navbar: React.FC = () => {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, logout, refreshUser } = useAuth();
   const [showDropdown, setShowDropdown] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Refresh user data on mount to get latest avatar
+  useEffect(() => {
+    if (isAuthenticated && refreshUser) {
+      refreshUser().catch(err => console.error('Failed to refresh user:', err));
+    }
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -41,6 +48,17 @@ const Navbar: React.FC = () => {
     return "U";
   };
 
+  // Debug: Log user avatar
+  useEffect(() => {
+    if (user) {
+      console.log('Navbar user data:', { 
+        id: user.id, 
+        avatar: user.avatar, 
+        fullName: user.fullName 
+      });
+    }
+  }, [user]);
+
   return (
     <nav className="relative flex items-center px-4 sm:px-10 py-4 border-b border-[#F3D94B] bg-white">
       {/* Search Bar - Left */}
@@ -65,15 +83,16 @@ const Navbar: React.FC = () => {
               className="w-full pl-10 pr-4 py-2 bg-transparent border-none outline-none text-sm text-gray-900 placeholder-gray-500 rounded-full"
             />
             {searchQuery && (
-              <button
+              <Button
+                variant="unstyled"
                 onClick={() => setSearchQuery("")}
-                className="absolute right-3 flex items-center justify-center w-6 h-6 rounded-full hover:bg-gray-200 transition-colors"
+                className="absolute right-3 flex items-center justify-center w-6 h-6 rounded-full hover:bg-gray-200 transition-colors p-0"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500">
                   <line x1="18" y1="6" x2="6" y2="18"></line>
                   <line x1="6" y1="6" x2="18" y2="18"></line>
                 </svg>
-              </button>
+              </Button>
             )}
           </div>
         </div>
@@ -86,18 +105,23 @@ const Navbar: React.FC = () => {
       <div className="flex-shrink-0 flex items-center gap-3 ml-auto">
         {isAuthenticated && user ? (
           <div className="relative" ref={dropdownRef}>
-            <button
+            <Button
+              variant="unstyled"
               onClick={() => setShowDropdown(!showDropdown)}
-              className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold focus:outline-none hover:bg-blue-700 transition-colors"
+              className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold focus:outline-none hover:bg-blue-700 transition-colors p-0 overflow-hidden"
             >
-              {getInitials()}
-            </button>
+              {user?.avatar ? (
+                <img src={user.avatar} alt={user.fullName || user.username} className="w-full h-full object-cover" />
+              ) : (
+                getInitials()
+              )}
+            </Button>
 
             {showDropdown && (
               <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-2 z-50 border border-gray-200">
                 {/* Menu Items */}
                 <div className="py-1">
-                  <Link to="/profile" onClick={() => setShowDropdown(false)} className="block">
+                  <Link to={`/users/${user?.id}`} onClick={() => setShowDropdown(false)} className="block">
                     <Button
                       variant="unstyled"
                       className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 rounded-none flex items-center gap-3"
@@ -106,7 +130,7 @@ const Navbar: React.FC = () => {
                         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                         <circle cx="12" cy="7" r="4"></circle>
                       </svg>
-                      Profile
+                      My Profile
                     </Button>
                   </Link>
 

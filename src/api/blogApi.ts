@@ -6,7 +6,8 @@ export type Blog = {
     content: string;
     author: string | {
         id: string;
-        username: string
+        username: string;
+        avatar?: string;
     };
     images?: string[];
     media?: Array<{

@@ -5,6 +5,7 @@ export type User = {
   fullName: string;
   username: string;
   email: string;
+  avatar?: string;
   address?: string;
   role: "STUDENT" | "COMPANY" | "ADMIN" | null;
   isActive: boolean;
