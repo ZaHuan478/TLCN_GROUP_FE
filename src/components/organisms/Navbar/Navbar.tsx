@@ -1,11 +1,17 @@
 import React, { useState, useRef, useEffect } from "react";
 import NavLinks from "../../molecules/NavLinks/NavLinks";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "../../atoms/Button/Button";
 import { useAuth } from "../../../contexts/AuthContext";
 
 const Navbar: React.FC = () => {
   const { user, isAuthenticated, logout, refreshUser, unreadMessages, resetUnread, notifications, clearNotifications } = useAuth() as any;
+  const location = useLocation();
+
+  // Hide Navbar on authentication pages
+  if (['/signin', '/signup', '/forgot-password'].includes(location.pathname)) {
+    return null;
+  }
   const navigate = useNavigate();
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [showNotifDropdown, setShowNotifDropdown] = useState(false);
@@ -13,7 +19,7 @@ const Navbar: React.FC = () => {
   const profileRef = useRef<HTMLDivElement | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
-  
+
 
   // Refresh user data on mount to get latest avatar
   useEffect(() => {
@@ -42,6 +48,7 @@ const Navbar: React.FC = () => {
     try {
       await logout();
       setShowProfileDropdown(false);
+      navigate('/'); // Redirect to home page after logout
     } catch (error) {
       console.error('Logout error:', error);
     }
@@ -59,10 +66,10 @@ const Navbar: React.FC = () => {
   // Debug: Log user avatar
   useEffect(() => {
     if (user) {
-      console.log('Navbar user data:', { 
-        id: user.id, 
-        avatar: user.avatar, 
-        fullName: user.fullName 
+      console.log('Navbar user data:', {
+        id: user.id,
+        avatar: user.avatar,
+        fullName: user.fullName
       });
     }
   }, [user]);
@@ -72,9 +79,8 @@ const Navbar: React.FC = () => {
       {/* Search Bar - Left */}
       <div className="flex-shrink-0">
         <div className="relative w-64">
-          <div className={`relative flex items-center rounded-full bg-gray-100 transition-all duration-200 ${
-            isSearchFocused ? 'bg-white shadow-md ring-2 ring-blue-500' : ''
-          }`}>
+          <div className={`relative flex items-center rounded-full bg-gray-100 transition-all duration-200 ${isSearchFocused ? 'bg-white shadow-md ring-2 ring-blue-500' : ''
+            }`}>
             <div className="absolute left-4 flex items-center pointer-events-none">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500">
                 <circle cx="11" cy="11" r="8"></circle>
@@ -83,7 +89,7 @@ const Navbar: React.FC = () => {
             </div>
             <input
               type="text"
-              placeholder="Tìm kiếm trên trang..."
+              placeholder="Search on page..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => setIsSearchFocused(true)}
@@ -116,13 +122,13 @@ const Navbar: React.FC = () => {
             <div className="mr-3 flex items-center relative" ref={notifRef}>
               <button
                 title="Notifications"
-                onClick={() => { setShowNotifDropdown((s) => !s); try { resetUnread && resetUnread(); } catch(e){} }}
+                onClick={() => { setShowNotifDropdown((s) => !s); try { resetUnread && resetUnread(); } catch (e) { } }}
                 className="relative w-10 h-10 rounded-full bg-gray-100 text-gray-700 flex items-center justify-center font-semibold focus:outline-none hover:bg-gray-200 transition-colors"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-                { (unreadMessages || 0) > 0 && (
+                {(unreadMessages || 0) > 0 && (
                   <span className="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">{unreadMessages}</span>
-                ) }
+                )}
               </button>
 
               {/** Notifications dropdown (small) */}
@@ -130,9 +136,9 @@ const Navbar: React.FC = () => {
                 <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-md shadow-lg py-2 z-20 border border-gray-200">
                   <div className="px-4 py-2 text-sm text-gray-700">You have {unreadMessages || 0} new message{(unreadMessages || 0) > 1 ? 's' : ''}.</div>
                   <div className="max-h-48 overflow-auto">
-                    { (notifications && notifications.length > 0) ? (
-                        notifications.map((n: any, idx: number) => (
-                        <div key={idx} className="px-3 py-2 border-t text-sm cursor-pointer hover:bg-gray-50" onClick={() => { try { resetUnread && resetUnread(); clearNotifications && clearNotifications(); navigate(`/connections?conversationId=${n.conversationId}`); setShowNotifDropdown(false); } catch(e){} }}>
+                    {(notifications && notifications.length > 0) ? (
+                      notifications.map((n: any, idx: number) => (
+                        <div key={idx} className="px-3 py-2 border-t text-sm cursor-pointer hover:bg-gray-50" onClick={() => { try { resetUnread && resetUnread(); clearNotifications && clearNotifications(); navigate(`/connections?conversationId=${n.conversationId}`); setShowNotifDropdown(false); } catch (e) { } }}>
                           <div className="font-medium">{n.message?.sender?.fullName || n.message?.sender?.username || 'Someone'}</div>
                           <div className="text-xs text-gray-600 truncate">{n.message?.content}</div>
                         </div>
@@ -142,7 +148,7 @@ const Navbar: React.FC = () => {
                     )}
                   </div>
                   <div className="px-2 py-2 border-t">
-                    <button className="w-full text-left text-sm text-blue-600 px-3 py-1 hover:bg-gray-50" onClick={() => { try { resetUnread && resetUnread(); clearNotifications && clearNotifications(); navigate('/connections'); setShowNotifDropdown(false); } catch(e){} }}>
+                    <button className="w-full text-left text-sm text-blue-600 px-3 py-1 hover:bg-gray-50" onClick={() => { try { resetUnread && resetUnread(); clearNotifications && clearNotifications(); navigate('/connections'); setShowNotifDropdown(false); } catch (e) { } }}>
                       View messages
                     </button>
                   </div>
@@ -153,51 +159,87 @@ const Navbar: React.FC = () => {
             <div className="relative">
               <button
                 onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-                className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold focus:outline-none hover:bg-blue-700 transition-colors"
+                className="w-10 h-10 rounded-full bg-gray-700 text-white flex items-center justify-center font-semibold focus:outline-none hover:bg-gray-800 transition-colors overflow-hidden"
               >
-                {getInitials()}
+                {user?.avatar ? (
+                  <img
+                    src={user.avatar}
+                    alt={user.fullName || user.username || 'User'}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      // Fallback to initials if image fails to load
+                      e.currentTarget.style.display = 'none';
+                      e.currentTarget.parentElement!.textContent = getInitials();
+                    }}
+                  />
+                ) : (
+                  getInitials()
+                )}
               </button>
 
               {showProfileDropdown && (
-                <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 border border-gray-200">
-                  <Link to="/profile" onClick={() => setShowProfileDropdown(false)}>
-                    <Button
-                      variant="unstyled"
-                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-none flex items-center gap-2"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="12" cy="7" r="4"></circle>
-                      </svg>
-                      Profile
-                    </Button>
-                  </Link>
+                <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-lg shadow-lg overflow-hidden z-20 border border-gray-200 animate-slideDown">
+                  {/* User Info Header */}
+                  <div className="px-4 py-3 border-b border-gray-100">
+                    <p className="text-gray-900 font-medium text-sm truncate">
+                      {user?.fullName || user?.username || 'User'}
+                    </p>
+                    <p className="text-gray-500 text-xs truncate mt-0.5">
+                      {user?.email || ''}
+                    </p>
+                  </div>
 
-                  <Link to="/settings" onClick={() => setShowProfileDropdown(false)}>
-                    <Button
-                      variant="unstyled"
-                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-none flex items-center gap-2"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="12" cy="12" r="3"></circle>
-                        <path d="M12 1v6m0 6v6M5.64 5.64l4.24 4.24m4.24 4.24l4.24 4.24M1 12h6m6 0h6M5.64 18.36l4.24-4.24m4.24-4.24l4.24-4.24"></path>
-                      </svg>
-                      Settings
-                    </Button>
-                  </Link>
+                  {/* Menu Items */}
+                  <div className="py-1">
+                    <Link to="/profile" onClick={() => setShowProfileDropdown(false)}>
+                      <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center gap-2 group">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500 group-hover:text-blue-600 transition-colors">
+                          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                          <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                        <span>Profile</span>
+                      </button>
+                    </Link>
 
-                  <Button
-                    variant="unstyled"
-                    onClick={handleLogout}
-                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 rounded-none flex items-center gap-2"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                      <polyline points="16 17 21 12 16 7"></polyline>
-                      <line x1="21" y1="12" x2="9" y2="12"></line>
-                    </svg>
-                    Log out
-                  </Button>
+                    <Link to="/settings" onClick={() => setShowProfileDropdown(false)}>
+                      <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors flex items-center gap-2 group">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500 group-hover:text-gray-900 transition-colors">
+                          <circle cx="12" cy="12" r="3"></circle>
+                          <path d="M12 1v6m0 6v6M5.64 5.64l4.24 4.24m4.24 4.24l4.24 4.24M1 12h6m6 0h6M5.64 18.36l4.24-4.24m4.24-4.24l4.24-4.24"></path>
+                        </svg>
+                        <span>Settings</span>
+                      </button>
+                    </Link>
+
+                    {user?.role === 'COMPANY' && (
+                      <Link to="/career-paths" onClick={() => setShowProfileDropdown(false)}>
+                        <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors flex items-center gap-2 group">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500 group-hover:text-purple-600 transition-colors">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                          </svg>
+                          <span>Career Paths</span>
+                        </button>
+                      </Link>
+                    )}
+
+                    {/* Divider */}
+                    <div className="my-1 border-t border-gray-100"></div>
+
+                    <button
+                      onClick={handleLogout}
+                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors flex items-center gap-2 group"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500 group-hover:text-red-600 transition-colors">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                      </svg>
+                      <span>Log out</span>
+                    </button>
+                  </div>
                 </div>
               )}
             </div>

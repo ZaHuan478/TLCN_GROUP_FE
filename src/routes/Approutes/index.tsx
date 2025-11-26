@@ -22,15 +22,15 @@ import UserProfilePage from "../../components/pages/UserProfile";
 import AIChat from "../../components/pages/AIChat";
 
 const AppRoutes: React.FC = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
 
   return (
     <Routes>
       {/* Public routes */}
       <Route path="/signin" element={<SignInPage />} />
-      <Route path="/profile" element={<CareerPathsPage />} />
+      <Route path="/profile" element={user ? <Navigate to={`/users/${user.id}`} replace /> : <Navigate to="/signin" replace />} />
       <Route path="/signup" element={<SignUpPage />} />
-      <Route path="/settings" element={<CareerPathsPage />} />
+      <Route path="/settings" element={<SettingsPage />} />
       <Route path="/career-paths" element={<CareerPathsPage />} />
       <Route path="/career-paths/:id" element={<CareerPathDetailsPage />} />
       <Route path="/courses" element={<CoursesPage />} />
