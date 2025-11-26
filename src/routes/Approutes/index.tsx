@@ -16,6 +16,10 @@ import CoursesPage from "../../components/pages/CoursesPage";
 import CourseDetailPage from "../../components/pages/CourseDetailPage";
 import CourseLearnPage from "../../components/pages/CourseLearnPage/CourseLearnPage";
 import UserWallPage from "../../components/pages/UserWallPage";
+import SettingsPage from "../../components/pages/Setting/Settings";
+import ConnectionsPage from "../../components/pages/Connections";
+import UserProfilePage from "../../components/pages/UserProfile";
+import AIChat from "../../components/pages/AIChat";
 
 const AppRoutes: React.FC = () => {
   const { isAuthenticated } = useAuth();
@@ -34,7 +38,7 @@ const AppRoutes: React.FC = () => {
       <Route path="/courses/:id/learn" element={<CourseLearnPage />} />
       <Route path="/users/:userId" element={<UserWallPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-      <Route path="/oath-success" element={<OAuthSuccessPage />} />
+      <Route path="/oauth-success" element={<OAuthSuccessPage />} />
       <Route path="/" element={<BlogPage />} />
       <Route path="/source" element={<SourcePage />} />
 
@@ -50,6 +54,9 @@ const AppRoutes: React.FC = () => {
 
       {/* Unauthorized page */}
       <Route path="/unauthorized" element={<Unauthorized />} />
+      <Route path="/connections" element={<ConnectionsPage />} />
+      <Route path="/users/:id" element={<UserProfilePage />} />
+      <Route path="/ai-chat" element={<AIChat />} />
 
       {/* Catch-all route */}
       <Route

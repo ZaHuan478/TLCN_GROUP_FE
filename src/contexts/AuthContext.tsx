@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState, ReactNode } from
 import { authService } from "../services/authService";
 import { User } from "../types/types";
 import { apiClient } from "../services/apiClient";
+import socketService from "../services/socket";
 
 type AuthContextType = {
     user: User | null;
@@ -11,6 +12,8 @@ type AuthContextType = {
     register: (userData: any) => Promise<any>;
     logout: () => Promise<void>;
     refreshUser: () => Promise<void>;
+    unreadMessages?: number;
+    resetUnread?: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -21,33 +24,68 @@ type AuthProviderProps = {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
-    const [isLoading, setIsLoading] = useState(true); // Start with true while checking auth
+    const [isLoading, setIsLoading] = useState(true);
+    const [unreadMessages, setUnreadMessages] = useState<number>(0);
+    const [notifications, setNotifications] = useState<any[]>([]);
 
     // Restore user on mount
     useEffect(() => {
-        const initAuth = async () => {
+        let cancelled = false;
+        
+        const initializeAuth = async () => {
             try {
-                if (authService.isAuthenticated()) {
-                    const currentUser = await authService.getCurrentUser();
-                    setUser(currentUser);
+                const oauthResult = authService.handleOAuthCallback();
+                
+                if (cancelled) return;
+                
+                if (oauthResult) {
+                    // Fix: Get user info after setting tokens
+                    try {
+                        const response = await apiClient.get<{ user: User }>('/auth/me');
+                        if (!cancelled) {
+                            setUser(response.user);
+                            localStorage.setItem("user", JSON.stringify(response.user));
+                            // Clear URL only after successful fetch
+                            window.history.replaceState({}, "", window.location.pathname);
+                        }
+                    } catch (error) {
+                        console.error('Failed to get user info after OAuth:', error);
+                    }
+                } else {
+                    const savedUser = await authService.getCurrentUser();
+                    if (!cancelled) {
+                        if (savedUser && authService.isAuthenticated()) {
+                            setUser(savedUser);
+                        } else {
+                            authService.clearSession();
+                        }
+                    }
                 }
             } catch (error) {
-                console.error('Failed to restore auth:', error);
-                setUser(null);
+                console.error('Auth initialization error:', error);
+                if (!cancelled) {
+                    authService.clearSession();
+                }
             } finally {
-                setIsLoading(false);
+                if (!cancelled) {
+                    setIsLoading(false);
+                }
             }
         };
 
-        initAuth();
+        initializeAuth();
+        
+        return () => {
+            cancelled = true;
+        };
     }, []);
 
-    const login = async (username: string, password: string): Promise<User> => {
+    const login = async (username: string, password: string): Promise<void> => {
         try {
             setIsLoading(true);
             const response = await authService.login({ username, password });
-            setUser(response.user);
-            return response.user;
+                setUser(response.user);
+                // socket handler registration done in user-effect
         } catch (error) {
             throw error;
         } finally {
@@ -59,6 +97,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         try {
             setIsLoading(true);
             await authService.logout();
+            // disconnect socket when logging out
+            try { socketService.disconnectSocket(); } catch (e) {}
             setUser(null);
         } catch (error) {
             console.error('Logout error:', error);
@@ -79,6 +119,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                     const updatedUser = response.user;
                     console.log('Refreshed user data:', updatedUser);
                     setUser(updatedUser);
+                    // socket handler registration done in user-effect
                     localStorage.setItem("user", JSON.stringify(updatedUser));
                 } catch (apiError) {
                     console.warn('Failed to refresh from API, using cached data:', apiError);
@@ -116,16 +157,54 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
     };
 
-    const value: AuthContextType = {
-        user,
-        isAuthenticated: authService.isAuthenticated() && !!user, // 👈 Production mode: check token + user
-        // isAuthenticated: !!user, // 🔥 DEV MODE: Simplified check
-        isLoading,
-        login,
+    const resetUnread = () => setUnreadMessages(0);
+
+    // Register a single global socket handler when `user` becomes available
+    useEffect(() => {
+        let off: any = null;
+        if (user) {
+            try {
+                socketService.connectSocket(user.id);
+                off = socketService.onNewMessage((payload: any) => {
+                    if (!payload) return;
+                    const { message, conversationId } = payload;
+                    if (message && message.sender && String(message.sender.id) === String(user.id)) return;
+                    setUnreadMessages((v) => v + 1);
+                    // add to notifications (most recent first), keep max 20
+                    setNotifications((prev) => {
+                        const next = [{ message, conversationId, receivedAt: Date.now() }, ...prev];
+                        return next.slice(0, 20);
+                    });
+                });
+            } catch (e) {
+                console.error('Failed to connect socket or register handler', e);
+            }
+        } else {
+            // ensure disconnect when no user
+            try { socketService.disconnectSocket(); } catch (e) {}
+            setUnreadMessages(0);
+        }
+
+        return () => {
+            try { if (off && typeof off === 'function') off(); } catch (e) {}
+        };
+    }, [user]);
+
+    const clearNotifications = () => setNotifications([]);
+
+    const value: AuthContextType = { 
+        user, 
+        isAuthenticated: authService.isAuthenticated() && !!user,
+        isLoading, 
+        login, 
         register,
-        logout,
-        refreshUser
-    };
+        logout, 
+        refreshUser,
+        unreadMessages,
+        resetUnread,
+        notifications,
+        clearNotifications,
+    } as any;
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 };

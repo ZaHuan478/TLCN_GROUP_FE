@@ -3,6 +3,7 @@ import { Blog } from "../../../api/blogApi";
 import { Button } from "../../atoms/Button/Button";
 import { Textarea } from "../../atoms/Textarea/Textarea";
 import { useAuth } from "../../../contexts/AuthContext";
+import { canUserCreateBlog } from "../../../utils/userUtils";
 
 type PostModalProps = {
     onClose: () => void;
@@ -62,6 +63,13 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onPost, initialData }) =
     };
 
     const handlePost = () => {
+        // Defensive check: ensure current user is allowed to create posts
+        if (!canUserCreateBlog(user as any)) {
+            alert("You don't have permission to create posts.");
+            onClose();
+            return;
+        }
+
         if (!content.trim() && selectedImages.length === 0) return;
         onPost({ content, images: selectedImages });
         setContent("");

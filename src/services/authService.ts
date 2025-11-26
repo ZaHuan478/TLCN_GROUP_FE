@@ -62,7 +62,7 @@ class AuthService {
 
   // OAuth
   initiateGoogleLogin(): void {
-    const baseUrl = import.meta.env.VITE_API_URL;
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL;
     window.location.href = `${baseUrl}/auth/google`;
   }
 
@@ -73,7 +73,7 @@ class AuthService {
 
     if (accessToken && refreshToken) {
       this.setSession({ accessToken, refreshToken, user: userStorage.getUser()! });
-      window.history.replaceState({}, "", window.location.pathname);
+      // Don't clear URL here - let AuthContext handle it after successful fetch
       return { accessToken, refreshToken };
     }
     return null;

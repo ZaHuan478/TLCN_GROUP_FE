@@ -4,24 +4,40 @@ import { useAuth } from "../../../contexts/AuthContext";
 
 export const OAuthSuccessPage: React.FC = () => {
     const navigate = useNavigate();
-    const { refreshUser } = useAuth();
+    const { user, isLoading } = useAuth();
 
     useEffect(() => {
-        const handleOAuthSuccess = async () => {
-            try {
-                await refreshUser();
+        // Check if URL has tokens
+        const params = new URLSearchParams(window.location.search);
+        const hasTokens = params.has('accessToken') && params.has('refreshToken');
+        
+        console.log('[OAuthSuccessPage] State:', { 
+            isLoading, 
+            hasUser: !!user,
+            hasTokensInUrl: hasTokens,
+            url: window.location.href 
+        });
+        
+        // Đợi AuthContext initialize xong
+        if (isLoading) {
+            console.log('[OAuthSuccessPage] Waiting for auth initialization...');
+            return;
+        }
 
-                setTimeout(() => {
-                    navigate('/', {replace: true});
-                }, 2000);
-            } catch (error) {
-                console.log('OAuth success handling error:', error);
-                navigate('/signin?error=oauth_failed', { replace: true });
-            }
-        };
-
-        handleOAuthSuccess();
-    }, [navigate, refreshUser]);
+        // Nếu đã có user (từ initializeAuth) -> redirect
+        if (user) {
+            console.log('[OAuthSuccessPage] ✓ User authenticated, redirecting to home...');
+            setTimeout(() => {
+                navigate('/', { replace: true });
+            }, 1500);
+        } else {
+            // Không có user sau khi init -> OAuth failed
+            console.error('[OAuthSuccessPage] ✗ No user after OAuth initialization');
+            setTimeout(() => {
+                navigate('/?error=oauth_failed', { replace: true });
+            }, 1000);
+        }
+    }, [user, isLoading, navigate]);
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50">

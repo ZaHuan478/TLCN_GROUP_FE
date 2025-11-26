@@ -156,7 +156,9 @@ class ApiClient {
 
   // Auth helpers
   setAuthTokens(accessToken: string, refreshToken: string) {
+    console.log('[apiClient] Setting auth tokens');
     tokenStorage.setTokens(accessToken, refreshToken);
+    console.log('[apiClient] Tokens saved to storage');
   }
 
   clearAuthTokens() {
