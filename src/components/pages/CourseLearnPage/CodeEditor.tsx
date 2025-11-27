@@ -86,10 +86,22 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ selectedItem, itemType }) => {
                 });
                 setOutput('✓ Lesson submitted successfully!');
             } else if (itemType === 'test') {
-                // Student submits test answer
-                const score = itemData?.maxScore || 100; // TODO: Calculate actual score
-                await submitTest(selectedItem, score, code);
-                setOutput('✓ Test submitted successfully!');
+                // Student submits test answer - AI will grade it
+                const answers = [{
+                    questionId: '1', // Default for single question tests
+                    answer: code
+                }];
+                
+                const result = await submitTest(selectedItem, answers) as any;
+                const resultData = result.data || result;
+                
+                setOutput(
+                    `✓ Test submitted successfully!\n\n` +
+                    `Score: ${resultData.score || 0}/100\n` +
+                    `Status: ${resultData.passed ? 'PASSED ✓' : 'FAILED ✗'}\n\n` +
+                    `Feedback: ${resultData.feedback || 'No feedback'}\n\n` +
+                    `${resultData.suggestions ? `Suggestions: ${resultData.suggestions}` : ''}`
+                );
             }
 
             setTimeout(() => setOutput(''), 3000);
