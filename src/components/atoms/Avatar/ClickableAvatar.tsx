@@ -30,6 +30,18 @@ const ClickableAvatar: React.FC<Props> = ({ userId, username, fullName, avatarUr
 
   const otherName = fullName || username || "User";
 
+  // Size mapping to match Avatar component sizes
+  const getSizeClass = () => {
+    switch (size) {
+      case "sm":
+        return "w-10 h-10"; // Match Avatar sm size
+      case "md":
+        return "w-16 h-16"; // Match Avatar md size
+      default:
+        return "w-10 h-10";
+    }
+  };
+
   const handleViewProfile = () => {
     setOpen(false);
     navigate(`/users/${userId}`);
@@ -72,7 +84,11 @@ const ClickableAvatar: React.FC<Props> = ({ userId, username, fullName, avatarUr
     <div className={`relative inline-block ${className}`} ref={ref}>
       <button onClick={() => setOpen((s) => !s)} aria-label={`Open actions for ${otherName}`}>
         {avatarUrl ? (
-          <img src={avatarUrl} alt={otherName} className={`rounded-full ${size === "sm" ? "w-6 h-6" : "w-8 h-8"} object-cover`} />
+          <img 
+            src={avatarUrl} 
+            alt={otherName} 
+            className={`${getSizeClass()} rounded-full object-cover border-4 border-white shadow-lg`} 
+          />
         ) : (
           <Avatar name={otherName} size={size} />
         )}

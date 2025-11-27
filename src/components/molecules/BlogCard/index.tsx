@@ -9,7 +9,7 @@ import { BlogHeader } from "../BlogHeader";
 import { BlogContent } from "../BlogContent";
 import { BlogStats } from "../BlogStats";
 import { BlogActions } from "../BlogActions";
-import { CommentSection } from "../../organisms/CommentSection";
+import { BlogModal } from "../BlogModal";
 
 type BlogCardProps = {
     blog: Blog;
@@ -26,7 +26,7 @@ type Reaction = {
 
 export const BlogCard: React.FC<BlogCardProps> = ({ blog, onEdit, onDelete }) => {
     const { user } = useAuth();
-    const [showComments, setShowComments] = useState(false);
+    const [showModal, setShowModal] = useState(false);
     const [reactions, setReactions] = useState<Reaction[]>([
         { id: "like", emoji: "", count: 0, isLiked: false },
     ]);
@@ -46,10 +46,10 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog, onEdit, onDelete }) =>
     }, [blog.id]);
 
     useEffect(() => {
-        if (showComments && comments.length === 0) {
+        if (showModal && comments.length === 0) {
             loadComments();
         }
-    }, [showComments]);
+    }, [showModal]);
 
     const loadLikes = async () => {
         if (!user) {
@@ -291,21 +291,28 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog, onEdit, onDelete }) =>
             <BlogActions
                 reactions={reactions}
                 onReaction={handleReaction}
-                onToggleComments={() => setShowComments(!showComments)}
+                onToggleComments={() => setShowModal(true)}
             />
 
-            {showComments && (
-                <CommentSection
-                    comments={comments}
-                    loading={loadingComments}
-                    user={user}
-                    canComment={canUserCreateBlog(user) && !!user}
-                    onAddComment={handleAddComment}
-                    onReplyComment={handleReplyComment}
-                    onEditComment={handleEditComment}
-                    onDeleteComment={handleDeleteComment}
-                />
-            )}
+            {/* Blog Modal */}
+            <BlogModal
+                isOpen={showModal}
+                onClose={() => setShowModal(false)}
+                blog={blog}
+                currentUser={user}
+                reactions={reactions}
+                totalComments={totalComments}
+                comments={comments}
+                loadingComments={loadingComments}
+                canComment={canUserCreateBlog(user) && !!user}
+                onReaction={handleReaction}
+                onAddComment={handleAddComment}
+                onReplyComment={handleReplyComment}
+                onEditComment={handleEditComment}
+                onDeleteComment={handleDeleteComment}
+                onEdit={onEdit}
+                onDelete={onDelete}
+            />
         </div>
     );
 };

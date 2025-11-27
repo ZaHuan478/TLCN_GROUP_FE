@@ -85,13 +85,12 @@ export const CommentItem: React.FC<CommentItemProps> = ({
 
     return (
         <div className="flex gap-2">
-                {/* Clickable avatar shows actions: view profile or chat */}
                 <ClickableAvatar
                     userId={comment.author?.id || ''}
                     username={comment.author?.username}
                     fullName={comment.author?.fullName}
+                    avatarUrl={comment.author?.avatar}
                     size="sm"
-                    className="bg-gray-300"
                 />
             <div className="flex-1">
                 {isEditing ? (
@@ -109,7 +108,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({
                                 disabled={!editContent.trim()}
                                 className="px-3 py-1 text-xs bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:bg-gray-300"
                             >
-                                Lưu
+                                Save
                             </Button>
                             <Button
                                 onClick={() => {
@@ -118,7 +117,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({
                                 }}
                                 className="px-3 py-1 text-xs bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
                             >
-                                Hủy
+                                Cancel
                             </Button>
                         </div>
                     </div>
@@ -187,7 +186,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({
                             onClick={() => setShowReplyInput(!showReplyInput)}
                             className="text-xs font-semibold text-blue-600 hover:underline"
                         >
-                            {showReplyInput ? 'Hủy' : 'Trả lời'}
+                            {showReplyInput ? 'Cancel' : 'Reply'}
                         </button>
                     )}
 

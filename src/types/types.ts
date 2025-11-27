@@ -185,6 +185,7 @@ export type CommentAuthor = {
   id: string;
   username: string;
   fullName?: string;
+  avatar?: string;
 };
 
 export type Comment = {
