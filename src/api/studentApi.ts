@@ -1,10 +1,9 @@
 import { apiClient } from '../services/apiClient';
 
-export const submitTest = async (testId: string, score: number, code?: string) => {
+export const submitTest = async (testId: string, answers: Array<{ questionId: string; answer: string }>) => {
     return apiClient.post('/students/submit-test', {
         testId,
-        score,
-        code
+        answers
     });
 };
 
