@@ -1,22 +1,44 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { Brain } from 'lucide-react';
+import { House } from 'lucide-react';
+import { BookA } from 'lucide-react';
 
 const links = [
-	{ to: "/", label: "Home" },
-	{ to: "/courses", label: "Courses" },
-	{ to: "/connections", label: "Connections" },
-	{ to: "/ai-chat", label: "AI Chat" },
-	// { to: "/mentor", label: "Mentor" },
-	// { to: "/about", label: "About" },
-	// { to: "/blog", label: "Blog" },
+	{
+		to: "/",
+		label: "Home",
+		icon: (
+			<House />
+		)
+	},
+	{
+		to: "/courses",
+		label: "Courses",
+		icon: (
+			<BookA />
+		)
+	},
+	{
+		to: "/ai-chat",
+		label: "AI Chat",
+		icon: (
+			<Brain />
+		)
+	},
 ];
 
 const NavLinks: React.FC<{ className?: string }> = ({ className = "" }) => (
-	<ul className={`hidden md:flex space-x-8 text-sm font-semibold ${className}`}>
+	<ul className={`hidden md:flex items-center space-x-12 text-xs font-semibold ${className}`}>
 		{links.map((l) => (
 			<li key={l.to}>
-				<Link className="hover:text-yellow-400" to={l.to}>
-					{l.label}
+				<Link
+					className="flex flex-col items-center gap-1 hover:text-yellow-400 transition-colors"
+					to={l.to}
+					title={l.label}
+				>
+					{l.icon}
+					<span>{l.label}</span>
 				</Link>
 			</li>
 		))}

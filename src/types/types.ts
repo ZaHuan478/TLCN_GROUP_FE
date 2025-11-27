@@ -278,3 +278,49 @@ export type Test = {
   createdAt: string;
   updatedAt?: string;
 };
+
+export type ChatMessage = {
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: string;
+};
+
+export type ChatSession = {
+  sessionId: number;
+  title: string;
+  messages: ChatMessage[];
+  createdAt: string;
+};
+
+export type StudentAssessment = {
+  assessment: string;
+  studentContext: any;
+  generatedAt: string;
+};
+
+export type UserProfile = {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  type: 'student' | 'company';
+  avatar?: string;
+  coverColor?: string;
+  school?: string;
+  major?: string;
+  companyName?: string;
+  industry?: string;
+  yearEstablished?: number;
+  website?: string;
+  address?: string;
+  courses?: number;
+  followers?: number;
+  points?: number;
+  // Enrolled courses
+  enrolledCourses?: {
+    id: string;
+    title: string;
+    status: 'COMPLETED' | 'IN_PROGRESS' | 'NOT_STARTED';
+    progress?: number;
+  }[];
+};

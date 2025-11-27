@@ -9,33 +9,8 @@ import { UserAboutSection } from '../../organisms/UserAboutSection';
 import { UserCoursesSection } from '../../organisms/UserCoursesSection';
 import { NavTabs } from '../../molecules/NavTabs';
 import { BlogCard } from '../../molecules/BlogCard';
-
-type UserProfile = {
-    id: string;
-    name: string;
-    email: string;
-    role: string;
-    type: 'student' | 'company';
-    avatar?: string;
-    coverColor?: string;
-    school?: string;
-    major?: string;
-    companyName?: string;
-    industry?: string;
-    yearEstablished?: number;
-    website?: string;
-    address?: string;
-    courses?: number;
-    followers?: number;
-    points?: number;
-    // Enrolled courses
-    enrolledCourses?: {
-        id: string;
-        title: string;
-        status: 'COMPLETED' | 'IN_PROGRESS' | 'NOT_STARTED';
-        progress?: number;
-    }[];
-};
+import { UserProfile } from '../../../types/types';
+import { Toast } from '../../molecules/ToastNotification';
 
 const UserWallPage: React.FC = () => {
     const { userId } = useParams<{ userId: string }>();
@@ -46,6 +21,7 @@ const UserWallPage: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [userBlogs, setUserBlogs] = useState<Blog[]>([]);
     const [blogsLoading, setBlogsLoading] = useState(false);
+    const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'warning' } | null>(null);
 
     useEffect(() => {
         fetchUserProfile();
@@ -107,6 +83,11 @@ const UserWallPage: React.FC = () => {
         console.log('Follow clicked');
     };
 
+    const handleChatClick = () => {
+        console.log('Chat clicked');
+        setToast({ message: 'Chat feature coming soon!', type: 'warning' });
+    };
+
     const handleAvatarChange = async (file: File) => {
         if (!userId) return;
 
@@ -127,9 +108,10 @@ const UserWallPage: React.FC = () => {
             }
 
             console.log('Avatar updated successfully');
+            setToast({ message: 'Avatar updated successfully!', type: 'success' });
         } catch (error) {
             console.error('Failed to update avatar:', error);
-            alert('Failed to update avatar. Please try again.');
+            setToast({ message: 'Failed to update avatar. Please try again.', type: 'error' });
         }
     };
 
@@ -245,6 +227,7 @@ const UserWallPage: React.FC = () => {
                     }}
                     isOwnProfile={isOwnProfile}
                     onFollowClick={handleFollowClick}
+                    onChatClick={handleChatClick}
                     onAvatarChange={isOwnProfile ? handleAvatarChange : undefined}
                 />
 
@@ -333,6 +316,15 @@ const UserWallPage: React.FC = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Toast Notification */}
+            {toast && (
+                <Toast
+                    message={toast.message}
+                    type={toast.type}
+                    onClose={() => setToast(null)}
+                />
+            )}
         </MainTemplate>
     );
 };
