@@ -6,7 +6,6 @@ export const getAllCareerTests = async (): Promise<CareerTest[]> => {
     return Array.isArray(response) ? response : (response as any).data || [];
 };
 
-// Get career paths created by current user (COMPANY only)
 export const getMyCareerTests = async (): Promise<CareerTest[]> => {
     const response = await apiClient.get<CareerTest[]>('/career-paths/my-courses');
     return Array.isArray(response) ? response : (response as any).data || [];

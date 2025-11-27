@@ -1,9 +1,5 @@
 import { apiClient } from "../services/apiClient";
-
-export type LikeInfo = {
-  liked: boolean;
-  count: number;
-};
+import { LikeInfo } from "../types/types";
 
 export const likeApi = {
   getByBlogId: async (blogId: string): Promise<LikeInfo> => {

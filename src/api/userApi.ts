@@ -19,9 +19,6 @@ export const userApi = {
             const response = await apiClient.get<any>(`/users/${id}`);
             console.log('API Response for getById:', response);
             console.log('Response.data:', response.data);
-            // Backend returns { status, message, data: User }
-            // apiClient already extracts .data, so response = { status, message, data }
-            // We need response.data which is the User object
             const userData = response.data || response;
             console.log('Extracted user data:', userData);
             return userData;

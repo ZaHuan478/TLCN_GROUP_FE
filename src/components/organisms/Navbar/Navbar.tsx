@@ -4,6 +4,9 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "../../atoms/Button/Button";
 import { useAuth } from "../../../contexts/AuthContext";
 import { MessageCircle, Bell } from 'lucide-react';
+import searchApi, { } from '../../../api/searchApi';
+import { SearchAllResponse } from '../../../types/types';
+import { Input } from "../../atoms/Input/Input";
 
 
 const Navbar: React.FC = () => {
@@ -19,8 +22,13 @@ const Navbar: React.FC = () => {
   const [showNotifDropdown, setShowNotifDropdown] = useState(false);
   const notifRef = useRef<HTMLDivElement | null>(null);
   const profileRef = useRef<HTMLDivElement | null>(null);
+  const searchRef = useRef<HTMLDivElement | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [searchResults, setSearchResults] = useState<SearchAllResponse | null>(null);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [showSearchDropdown, setShowSearchDropdown] = useState(false);
+  const searchTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (isAuthenticated && refreshUser) {
@@ -37,12 +45,15 @@ const Navbar: React.FC = () => {
       if (notifRef.current && !notifRef.current.contains(target) && showNotifDropdown) {
         setShowNotifDropdown(false);
       }
+      if (searchRef.current && !searchRef.current.contains(target) && showSearchDropdown) {
+        setShowSearchDropdown(false);
+      }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, []);
+  }, [showProfileDropdown, showNotifDropdown, showSearchDropdown]);
 
   const handleLogout = async () => {
     try {
@@ -74,32 +85,73 @@ const Navbar: React.FC = () => {
     }
   }, [user]);
 
+  // Search with debounce
+  useEffect(() => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    if (searchQuery.trim().length < 2) {
+      setSearchResults(null);
+      setShowSearchDropdown(false);
+      return;
+    }
+
+    setSearchLoading(true);
+    searchTimeoutRef.current = setTimeout(async () => {
+      try {
+        const results = await searchApi.searchAll(searchQuery.trim(), 5);
+        setSearchResults(results);
+        setShowSearchDropdown(true);
+      } catch (error) {
+        setSearchResults(null);
+        setShowSearchDropdown(false);
+      } finally {
+        setSearchLoading(false);
+      }
+    }, 300);
+
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, [searchQuery]);
+
   return (
     <nav className="relative flex items-center px-4 sm:px-10 py-4 border-b border-[#F3D94B] bg-white">
       {/* Search Bar - Left */}
       <div className="flex-shrink-0">
-        <div className="relative w-64">
+        <div className="relative w-64" ref={searchRef}>
           <div className={`relative flex items-center rounded-full bg-gray-100 transition-all duration-200 ${isSearchFocused ? 'bg-white shadow-md ring-2 ring-blue-500' : ''
             }`}>
             <div className="absolute left-4 flex items-center pointer-events-none">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500">
-                <circle cx="11" cy="11" r="8"></circle>
-                <path d="m21 21-4.35-4.35"></path>
-              </svg>
+              {searchLoading ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-500 border-t-transparent"></div>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <path d="m21 21-4.35-4.35"></path>
+                </svg>
+              )}
             </div>
-            <input
+            <Input
               type="text"
-              placeholder="Search on page..."
+              placeholder="Search information..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => setIsSearchFocused(true)}
-              onBlur={() => setIsSearchFocused(false)}
+              overrideDefaultStyles={true}
               className="w-full pl-10 pr-4 py-2 bg-transparent border-none outline-none text-sm text-gray-900 placeholder-gray-500 rounded-full"
             />
             {searchQuery && (
               <Button
                 variant="unstyled"
-                onClick={() => setSearchQuery("")}
+                onClick={() => {
+                  setSearchQuery("");
+                  setSearchResults(null);
+                  setShowSearchDropdown(false);
+                }}
                 className="absolute right-3 flex items-center justify-center w-6 h-6 rounded-full hover:bg-gray-200 transition-colors p-0"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500">
@@ -109,6 +161,135 @@ const Navbar: React.FC = () => {
               </Button>
             )}
           </div>
+
+          {/* Search Results Dropdown */}
+          {showSearchDropdown && searchResults && (
+            <div 
+              className="absolute left-0 top-full mt-2 w-80 bg-white rounded-md shadow-lg border border-gray-200 z-50 max-h-96 overflow-hidden"
+              onMouseDown={(e) => e.preventDefault()}
+            >
+              <div className="max-h-96 overflow-y-auto">
+              {/* Users Section */}
+              {searchResults.users && searchResults.users.length > 0 && (
+                <div className="py-1">
+                  <div className="px-3 py-1.5 text-xs font-medium text-gray-500 uppercase">
+                    Users
+                  </div>
+                  {searchResults.users.map((user) => (
+                    <Link
+                      key={user.id}
+                      to={`/users/${user.id}`}
+                      onClick={() => {
+                        setShowSearchDropdown(false);
+                        setSearchQuery("");
+                      }}
+                      className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 cursor-pointer"
+                    >
+                      <div className="w-8 h-8 rounded-full bg-gray-600 text-white flex items-center justify-center text-xs font-medium overflow-hidden flex-shrink-0">
+                        {user.avatar ? (
+                          <img src={user.avatar} alt={user.fullName || user.username} className="w-full h-full object-cover" />
+                        ) : (
+                          <span>{(user.fullName || user.username).charAt(0).toUpperCase()}</span>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">{user.fullName || user.username}</p>
+                        <p className="text-xs text-gray-500 truncate">@{user.username}</p>
+                      </div>
+                      {user.role && (
+                        <span className="text-xs text-gray-500">{user.role}</span>
+                      )}
+                    </Link>
+                  ))}
+                </div>
+              )}
+
+              {/* Companies Section */}
+              {searchResults.companies && searchResults.companies.length > 0 && (
+                <div className="py-1 border-t border-gray-100">
+                  <div className="px-3 py-1.5 text-xs font-medium text-gray-500 uppercase">
+                    Companies
+                  </div>
+                  {searchResults.companies.map((company) => (
+                    <Link
+                      key={company.id}
+                      to={`/users/${company.id}`}
+                      onClick={() => {
+                        setShowSearchDropdown(false);
+                        setSearchQuery("");
+                      }}
+                      className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 cursor-pointer"
+                    >
+                      <div className="w-8 h-8 rounded-full bg-gray-600 text-white flex items-center justify-center overflow-hidden flex-shrink-0">
+                        {company.avatar ? (
+                          <img src={company.avatar} alt={company.companyName} className="w-full h-full object-cover" />
+                        ) : (
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                          </svg>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">{company.companyName}</p>
+                        {company.industry && <p className="text-xs text-gray-500 truncate">{company.industry}</p>}
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
+
+              {/* Courses Section */}
+              {searchResults.courses && searchResults.courses.length > 0 && (
+                <div className="py-1 border-t border-gray-100">
+                  <div className="px-3 py-1.5 text-xs font-medium text-gray-500 uppercase">
+                    Courses
+                  </div>
+                  {searchResults.courses.map((course) => (
+                    <Link
+                      key={course.id}
+                      to={`/courses/${course.id}`}
+                      onClick={() => {
+                        setShowSearchDropdown(false);
+                        setSearchQuery("");
+                      }}
+                      className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 cursor-pointer"
+                    >
+                      <div className="w-8 h-8 rounded bg-gray-600 text-white flex items-center justify-center overflow-hidden flex-shrink-0">
+                        {course.thumbnail ? (
+                          <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover" />
+                        ) : (
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                          </svg>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">{course.title}</p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          {course.level && <span className="text-xs text-gray-500">{course.level}</span>}
+                          {course.price !== undefined && course.price !== null && (
+                            <span className="text-xs text-gray-600">{course.price === 0 ? 'Free' : `$${course.price}`}</span>
+                          )}
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
+
+              {/* No Results */}
+              {(!searchResults.users || searchResults.users.length === 0) &&
+                (!searchResults.companies || searchResults.companies.length === 0) &&
+                (!searchResults.courses || searchResults.courses.length === 0) && (
+                  <div className="px-3 py-8 text-center text-gray-500">
+                    <p className="text-sm">No results found</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

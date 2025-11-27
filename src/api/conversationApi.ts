@@ -1,9 +1,6 @@
 import { apiClient } from "../services/apiClient";
 import { ConversationListItem, GetOrCreateConversationResponse, GetMessagesParams, Message, SendMessageResponse } from "../types/types";
 
-// Types
-
-
 export const conversationApi = {
   listConversations: async (): Promise<ConversationListItem[]> => {
     return apiClient.get<ConversationListItem[]>(`/conversations`);

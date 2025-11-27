@@ -50,7 +50,6 @@ const ClickableAvatar: React.FC<Props> = ({ userId, username, fullName, avatarUr
   const handleChat = async () => {
     try {
       setOpen(false);
-      // If not authenticated, redirect to signin first
       if (!authService.isAuthenticated()) {
         navigate("/signin");
         return;
@@ -63,11 +62,9 @@ const ClickableAvatar: React.FC<Props> = ({ userId, username, fullName, avatarUr
       // convo may be object with id in different shapes; pick likely fields
       const id = convo?.id || convo?.conversation?.id || convo?.data?.id || convo?.conversationId || convo?.conversation?.conversationId;
 
-      // If API returned 401 or similar it should throw; but defensively handle missing id
       if (id) {
         navigate(`/connections?conversationId=${id}`);
       } else {
-        // Fallback: open connections list and let user pick
         navigate(`/connections`);
       }
     } catch (err) {
@@ -84,10 +81,10 @@ const ClickableAvatar: React.FC<Props> = ({ userId, username, fullName, avatarUr
     <div className={`relative inline-block ${className}`} ref={ref}>
       <button onClick={() => setOpen((s) => !s)} aria-label={`Open actions for ${otherName}`}>
         {avatarUrl ? (
-          <img 
-            src={avatarUrl} 
-            alt={otherName} 
-            className={`${getSizeClass()} rounded-full object-cover border-4 border-white shadow-lg`} 
+          <img
+            src={avatarUrl}
+            alt={otherName}
+            className={`${getSizeClass()} rounded-full object-cover border-4 border-white shadow-lg`}
           />
         ) : (
           <Avatar name={otherName} size={size} />

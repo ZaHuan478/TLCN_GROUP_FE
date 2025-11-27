@@ -1,10 +1,5 @@
 import { apiClient } from "../services/apiClient";
-import { Course, CourseListResponse } from "../types/types";
-
-type CourseListParams = {
-	page?: number;
-	limit?: number;
-};
+import { Course, CourseListResponse, CourseListParams } from "../types/types";
 
 const buildQueryString = (params?: CourseListParams) => {
 	if (!params) return "";

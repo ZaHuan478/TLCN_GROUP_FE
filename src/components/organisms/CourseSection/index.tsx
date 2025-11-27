@@ -95,100 +95,82 @@ export const CourseSection: React.FC<CourseSectionProps> = ({
 		}
 	}, [categories]);
 
-	const scroll = (direction: 'left' | 'right') => {
-		if (scrollContainerRef.current) {
-			const scrollAmount = 200;
-			scrollContainerRef.current.scrollBy({
-				left: direction === 'left' ? -scrollAmount : scrollAmount,
-				behavior: 'smooth'
-			});
-		}
-	};
-
 	return (
-		<section className="w-full py-8">
-			{/* Navigation with Titles */}
-			<div className="mb-8">
-				{/* Titles in Navigation */}
-				<div className="mb-6">
-					<div className="flex items-center gap-2 mb-2">
-						<span className="text-xs font-bold uppercase text-yellow-600 tracking-wider">
-							{badgeText}
-						</span>
-					</div>
-					<div className="flex items-center justify-between">
-						<div>
-							<h2 className="text-2xl font-bold text-gray-900">{title}</h2>
-							<p className="text-sm text-gray-600 mt-1">{subtitle}</p>
+		<section className="w-full py-12 bg-gradient-to-b  to-white">
+			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+				{/* Header Section */}
+				<div className="mb-10">
+					<div className="flex items-center justify-between mb-6">
+						<div className="space-y-2">
+							<div className="inline-flex items-center gap-2 px-3 py-1 bg-yellow-50 border border-yellow-200 rounded-full">
+								<div className="w-1.5 h-1.5 bg-yellow-500 rounded-full animate-pulse"></div>
+								<span className="text-xs font-semibold text-yellow-700 uppercase tracking-wide">
+									{badgeText}
+								</span>
+							</div>
+							<h2 className="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">{title}</h2>
+							<p className="text-base text-gray-600">{subtitle}</p>
 						</div>
-						<div className="text-sm text-gray-500">
-							<span className="font-semibold text-gray-900">{filteredCourses.length}</span> courses
+						<div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-white rounded-xl shadow-sm border border-gray-100">
+							<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400">
+								<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+								<path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+							</svg>
+							<span className="text-2xl font-bold text-gray-900">{filteredCourses.length}</span>
+							<span className="text-sm text-gray-500">courses</span>
 						</div>
 					</div>
+
+					{/* Category Pills */}
+					{categories.length > 1 && (
+						<div className="relative">
+							<div
+								ref={scrollContainerRef}
+								className="flex gap-3 overflow-x-auto scrollbar-hide scroll-smooth pb-2"
+								style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+							>
+								{categories.map((category) => {
+									const isActive = selectedCategory === category;
+									return (
+										<Button
+											key={category}
+											onClick={() => setSelectedCategory(category)}
+											variant="unstyled"
+											className={`flex items-center gap-2 px-5 py-2.5 rounded-full whitespace-nowrap transition-all duration-200 ${isActive
+													? "bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg shadow-blue-500/30 scale-105"
+													: "bg-white text-gray-700 border border-gray-200 hover:border-gray-300 hover:shadow-md"
+												}`}
+										>
+											<span className={isActive ? "text-white" : "text-gray-400"}>
+												{categoryIcons[category]}
+											</span>
+											<span className="font-medium">{categoryLabels[category]}</span>
+										</Button>
+									);
+								})}
+							</div>
+
+							{/* Scroll Indicators */}
+							{canScrollLeft && (
+								<div className="absolute left-0 top-0 bottom-2 w-12 bg-gradient-to-r from-gray-50 to-transparent pointer-events-none" />
+							)}
+							{canScrollRight && (
+								<div className="absolute right-0 top-0 bottom-2 w-12 bg-gradient-to-l from-white to-transparent pointer-events-none" />
+							)}
+						</div>
+					)}
 				</div>
 
-				{/* Category Navigation */}
-				{categories.length > 1 && (
-					<div className="relative">
-						{canScrollLeft && (
-							<Button
-								onClick={() => scroll('left')}
-								variant="icon"
-								className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white rounded-full shadow-md border border-gray-200"
-								aria-label="Scroll left"
-							>
-								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-									<polyline points="15 18 9 12 15 6"></polyline>
-								</svg>
-							</Button>
-						)}
-
-						<div
-							ref={scrollContainerRef}
-							className="flex gap-2 overflow-x-auto scrollbar-hide scroll-smooth px-10"
-							style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-						>
-							{categories.map((category) => {
-								const isActive = selectedCategory === category;
-								return (
-									<Button
-										key={category}
-										onClick={() => setSelectedCategory(category)}
-										variant={isActive ? "primary" : "outline"}
-										className={`flex items-center gap-2 whitespace-nowrap transition-all ${isActive ? "shadow-sm" : ""
-											}`}
-									>
-										{categoryIcons[category]}
-										{categoryLabels[category]}
-									</Button>
-								);
-							})}
-						</div>
-
-						{canScrollRight && (
-							<Button
-								onClick={() => scroll('right')}
-								variant="icon"
-								className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white rounded-full shadow-md border border-gray-200"
-								aria-label="Scroll right"
-							>
-								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-									<polyline points="9 18 15 12 9 6"></polyline>
-								</svg>
-							</Button>
-						)}
-					</div>
-				)}
-			</div>
-
-			{/* Centered Courses Grid */}
-			<div className="max-w-7xl mx-auto">
+				{/* Courses Grid */}
 				<div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 					{loading ? (
-						<div className="col-span-full flex justify-center py-16">
-							<div className="flex flex-col items-center gap-3">
-								<div className="h-10 w-10 animate-spin rounded-full border-4 border-yellow-500 border-t-transparent" />
-								<p className="text-sm text-gray-500">Loading courses...</p>
+						<div className="col-span-full flex justify-center py-20">
+							<div className="flex flex-col items-center gap-4">
+								<div className="relative">
+									<div className="h-12 w-12 animate-spin rounded-full border-4 border-gray-200 border-t-blue-600" />
+									<div className="absolute inset-0 h-12 w-12 animate-ping rounded-full border-4 border-blue-600 opacity-20" />
+								</div>
+								<p className="text-sm font-medium text-gray-600">Loading amazing courses...</p>
 							</div>
 						</div>
 					) : filteredCourses.length > 0 ? (
@@ -196,16 +178,32 @@ export const CourseSection: React.FC<CourseSectionProps> = ({
 							<CourseCard key={course.id} {...course} />
 						))
 					) : (
-						<div className="col-span-full rounded-lg border-2 border-dashed border-gray-200 bg-gray-50 p-10 text-center">
-							<div className="flex flex-col items-center gap-2">
-								<div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
-									<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400">
-										<circle cx="11" cy="11" r="8"></circle>
-										<path d="m21 21-4.35-4.35"></path>
-									</svg>
+						<div className="col-span-full">
+							<div className="rounded-2xl border-2 border-dashed border-gray-200 bg-white p-12 text-center">
+								<div className="flex flex-col items-center gap-4">
+									<div className="relative">
+										<div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center">
+											<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400">
+												<circle cx="11" cy="11" r="8"></circle>
+												<path d="m21 21-4.35-4.35"></path>
+											</svg>
+										</div>
+										<div className="absolute -top-1 -right-1 w-5 h-5 bg-yellow-400 rounded-full flex items-center justify-center">
+											<span className="text-xs">!</span>
+										</div>
+									</div>
+									<div className="space-y-1">
+										<p className="text-lg font-semibold text-gray-900">No courses found</p>
+										<p className="text-sm text-gray-500">Try selecting a different category to explore more courses</p>
+									</div>
+									<Button
+										onClick={() => setSelectedCategory("all")}
+										variant="outline"
+										className="mt-2"
+									>
+										View All Courses
+									</Button>
 								</div>
-								<p className="text-gray-600 font-medium">No courses found</p>
-								<p className="text-sm text-gray-500">Try selecting a different category</p>
 							</div>
 						</div>
 					)}

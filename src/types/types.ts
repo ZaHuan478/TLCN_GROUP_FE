@@ -371,3 +371,103 @@ export type GetOrCreateConversationResponse = {
   participants: Participant[];
   messages: Message[];
 };
+
+export type FollowInfo = {
+  isFollowing: boolean;
+  followerCount: number;
+  followingCount: number;
+}
+
+export type FollowerUser = {
+  id: string;
+  username: string;
+  fullName?: string;
+  avatar?: string;
+  role?: string;
+}
+
+export type FollowersResponse = {
+  followers: FollowerUser[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export type FollowingResponse = {
+  following: FollowerUser[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+
+export type SearchUser = {
+  id: string;
+  username: string;
+  fullName?: string;
+  avatar?: string;
+  role?: string;
+  email?: string;
+}
+
+export type SearchCompany = {
+  id: string;
+  companyName: string;
+  industry?: string;
+  avatar?: string;
+  website?: string;
+}
+
+export type SearchCourse = {
+  id: string;
+  title: string;
+  description?: string;
+  thumbnail?: string;
+  level?: string;
+  price?: number;
+}
+
+export type SearchAllResponse = {
+  users: SearchUser[];
+  companies: SearchCompany[];
+  courses: SearchCourse[];
+}
+
+export type SearchParams = {
+  q: string;
+  type?: 'all' | 'users' | 'companies' | 'courses';
+  limit?: number;
+}
+
+export type CourseListParams = {
+	page?: number;
+	limit?: number;
+};
+
+export type LikeInfo = {
+  liked: boolean;
+  count: number;
+};
+
+export type NotificationType =
+    | 'FOLLOW'
+    | 'LIKE'
+    | 'COMMENT'
+    | 'MESSAGE'
+    | 'SYSTEM'
+    | 'COURSE_UPDATE'
+    | 'ACHIEVEMENT';
+
+export type Notification = {
+    id: string;
+    userId: string;
+    type: NotificationType;
+    title: string;
+    message: string;
+    data?: Record<string, any>;
+    isRead: boolean;
+    createdAt: string;
+    updatedAt: string;
+};

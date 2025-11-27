@@ -4,6 +4,8 @@ import { useAuth } from '../../../contexts/AuthContext';
 import { userApi } from '../../../api/userApi';
 import conversationApi from '../../../api/conversationApi';
 import { blogApi, Blog } from '../../../api/blogApi';
+import followApi from '../../../api/followApi';
+import { FollowInfo } from '../../../types/types';
 import MainTemplate from '../../templates/MainTemplate/MainTemplate';
 import { UserWallHeader } from '../../organisms/UserWallHeader';
 import { UserAboutSection } from '../../organisms/UserAboutSection';
@@ -24,6 +26,8 @@ const UserWallPage: React.FC = () => {
     const [userBlogs, setUserBlogs] = useState<Blog[]>([]);
     const [blogsLoading, setBlogsLoading] = useState(false);
     const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'warning' } | null>(null);
+    const [followInfo, setFollowInfo] = useState<FollowInfo | null>(null);
+    const [followLoading, setFollowLoading] = useState(false);
 
     useEffect(() => {
         fetchUserProfile();
@@ -34,6 +38,12 @@ const UserWallPage: React.FC = () => {
             fetchUserBlogs();
         }
     }, [userProfile]);
+
+    useEffect(() => {
+        if (userId) {
+            fetchFollowInfo();
+        }
+    }, [userId]);
 
     const fetchUserProfile = async () => {
         setLoading(true);
@@ -81,8 +91,37 @@ const UserWallPage: React.FC = () => {
         }
     };
 
-    const handleFollowClick = () => {
-        console.log('Follow clicked');
+    const fetchFollowInfo = async () => {
+        if (!userId) return;
+
+        try {
+            const info = await followApi.getFollowInfo(userId);
+            setFollowInfo(info);
+        } catch (error) {
+            console.error('Failed to fetch follow info:', error);
+        }
+    };
+
+    const handleFollowClick = async () => {
+        if (!userId || followLoading) return;
+
+        setFollowLoading(true);
+        try {
+            const updatedInfo = await followApi.toggleFollow(userId);
+            setFollowInfo(updatedInfo);
+            setToast({
+                message: updatedInfo.isFollowing ? 'Following user successfully!' : 'Unfollowed user successfully!',
+                type: 'success',
+            });
+        } catch (error: any) {
+            console.error('Failed to toggle follow:', error);
+            setToast({
+                message: error?.response?.data?.message || 'Failed to follow/unfollow user. Please try again.',
+                type: 'error',
+            });
+        } finally {
+            setFollowLoading(false);
+        }
     };
 
     const handleChatClick = async () => {
@@ -234,10 +273,12 @@ const UserWallPage: React.FC = () => {
                     type={userProfile.type}
                     stats={{
                         courses: userProfile.courses,
-                        followers: userProfile.followers,
+                        followers: followInfo?.followerCount ?? userProfile.followers,
                         points: userProfile.points,
                     }}
                     isOwnProfile={isOwnProfile}
+                    isFollowing={followInfo?.isFollowing ?? false}
+                    followLoading={followLoading}
                     onFollowClick={handleFollowClick}
                     onChatClick={handleChatClick}
                     onAvatarChange={isOwnProfile ? handleAvatarChange : undefined}

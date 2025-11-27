@@ -2,14 +2,13 @@ import { apiClient } from "../services/apiClient";
 import { userApi } from "./userApi";
 import { CommentAuthor, Comment, CreateCommentPayload, UpdateCommentPayload, CommentListResponse, RawCommentListResponse, RawComment, RawCommentAuthor } from "../types/types";
 
-// Cache to avoid fetching same user multiple times
 const avatarCache = new Map<string, string | undefined>();
 
 const fetchUserAvatar = async (userId: string): Promise<string | undefined> => {
     if (avatarCache.has(userId)) {
         return avatarCache.get(userId);
     }
-    
+
     try {
         const user = await userApi.getById(userId);
         const avatar = user?.avatar;
@@ -25,7 +24,7 @@ const fetchUserAvatar = async (userId: string): Promise<string | undefined> => {
 const normalizeAuthor = async (raw: RawCommentAuthor | undefined): Promise<CommentAuthor> => {
     const userId = raw?.id ?? "";
     const avatar = userId ? await fetchUserAvatar(userId) : undefined;
-    
+
     return {
         id: userId,
         username: raw?.username ?? "Unknown",
@@ -36,10 +35,10 @@ const normalizeAuthor = async (raw: RawCommentAuthor | undefined): Promise<Comme
 
 const normalizeComment = async (raw: RawComment): Promise<Comment> => {
     const author = await normalizeAuthor(raw?.author ?? raw?.User);
-    const replies = Array.isArray(raw?.replies) 
-        ? await Promise.all(raw.replies.map(normalizeComment)) 
+    const replies = Array.isArray(raw?.replies)
+        ? await Promise.all(raw.replies.map(normalizeComment))
         : [];
-    
+
     return {
         id: raw?.id ?? "",
         blogId: raw?.blogId ?? raw?.postId ?? "",
@@ -56,8 +55,8 @@ export const commentApi = {
     getByBlogId: async (blogId: string, params?: { page?: number; limit?: number }): Promise<CommentListResponse> => {
         try {
             const res = await apiClient.get<RawCommentListResponse>(`/comments/${blogId}`, { params });
-            const normalizedComments = Array.isArray(res?.comments) 
-                ? await Promise.all(res.comments.map(normalizeComment)) 
+            const normalizedComments = Array.isArray(res?.comments)
+                ? await Promise.all(res.comments.map(normalizeComment))
                 : [];
 
             return {
