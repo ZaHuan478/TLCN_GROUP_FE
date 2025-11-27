@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
 import { userApi } from '../../../api/userApi';
+import conversationApi from '../../../api/conversationApi';
 import { blogApi, Blog } from '../../../api/blogApi';
 import MainTemplate from '../../templates/MainTemplate/MainTemplate';
 import { UserWallHeader } from '../../organisms/UserWallHeader';
@@ -15,6 +16,7 @@ import { Toast } from '../../molecules/ToastNotification';
 const UserWallPage: React.FC = () => {
     const { userId } = useParams<{ userId: string }>();
     const { user: currentUser, refreshUser } = useAuth();
+    const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('about');
     const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
     const [loading, setLoading] = useState(true);
@@ -83,9 +85,19 @@ const UserWallPage: React.FC = () => {
         console.log('Follow clicked');
     };
 
-    const handleChatClick = () => {
-        console.log('Chat clicked');
-        setToast({ message: 'Chat feature coming soon!', type: 'warning' });
+    const handleChatClick = async () => {
+        if (!userId) return;
+
+        try {
+            // Call API to get or create conversation with this user
+            const conversationData = await conversationApi.getOrCreateConversation(userId);
+
+            // Navigate to connections page with the conversation ID
+            navigate(`/connections?conversationId=${conversationData.conversation.id}`);
+        } catch (error: any) {
+            console.error('Failed to create conversation:', error);
+            setToast({ message: 'Failed to start chat. Please try again.', type: 'error' });
+        }
     };
 
     const handleAvatarChange = async (file: File) => {
@@ -273,14 +285,6 @@ const UserWallPage: React.FC = () => {
                         )}
                         {activeTab === 'about' && (
                             <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-8">
-                                <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-                                    </svg>
-                                    Timeline
-                                </h3>
-
                                 {userProfile.type === 'company' ? (
                                     blogsLoading ? (
                                         <div className="flex items-center justify-center py-12">

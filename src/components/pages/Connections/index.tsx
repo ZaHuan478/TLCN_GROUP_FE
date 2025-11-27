@@ -1,8 +1,11 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useLocation } from "react-router-dom";
+import { Send, Search, MoreVertical, Phone, Video } from 'lucide-react';
 import socketService from "../../../services/socket";
 import { useAuth } from "../../../contexts/AuthContext";
-import conversationApi, { ConversationListItem } from "../../../api/conversationApi";
+import conversationApi from "../../../api/conversationApi";
+import { ConversationListItem } from "../../../types/types";
+import { Button } from "../../atoms/Button/Button";
 
 const ConnectionsPage: React.FC = () => {
   const { user } = useAuth();
@@ -12,11 +15,12 @@ const ConnectionsPage: React.FC = () => {
   const [selected, setSelected] = useState<ConversationListItem | null>(null);
   const [messages, setMessages] = useState<any[]>([]);
   const [messageText, setMessageText] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     fetchConversations();
-    try { resetUnread(); } catch (e) {}
+    try { resetUnread(); } catch (e) { }
   }, []);
 
   // handle possible conversationId in query params to auto-select
@@ -42,8 +46,8 @@ const ConnectionsPage: React.FC = () => {
             socketService.joinConversationRoom(selected.conversation.id);
           } else {
             const onConn = () => {
-              try { socketService.joinConversationRoom(selected.conversation.id); } catch (e) {}
-              try { (sock as any).off('connect', onConn); } catch (e) {}
+              try { socketService.joinConversationRoom(selected.conversation.id); } catch (e) { }
+              try { (sock as any).off('connect', onConn); } catch (e) { }
             };
             (sock as any).on('connect', onConn);
           }
@@ -60,7 +64,7 @@ const ConnectionsPage: React.FC = () => {
     if (selected) prevId = selected.conversation.id;
     return () => {
       if (prevId) {
-        try { socketService.leaveConversationRoom(prevId); } catch (e) {}
+        try { socketService.leaveConversationRoom(prevId); } catch (e) { }
       }
     };
   }, [selected]);
@@ -96,7 +100,7 @@ const ConnectionsPage: React.FC = () => {
     return () => {
       try {
         if (off && typeof off === 'function') off();
-      } catch (e) {}
+      } catch (e) { }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected]);
@@ -146,71 +150,195 @@ const ConnectionsPage: React.FC = () => {
     return item.participants.find((p) => p.id !== user.id) || item.participants[0];
   };
 
-  return (
-    <div className="flex h-[calc(100vh-80px)]">
-      {/* Left: list */}
-      <div className="w-80 border-r bg-white overflow-auto">
-        <div className="p-4 font-semibold">Connections</div>
-        {conversations.length === 0 && <div className="p-4 text-sm text-gray-500">Không có cuộc trò chuyện</div>}
-        <ul>
-          {conversations.map((c) => {
-            const other = otherParticipant(c);
-            return (
-              <li
-                key={c.conversation.id}
-                onClick={() => handleSelect(c)}
-                className={`p-3 cursor-pointer hover:bg-gray-50 flex items-center gap-3 ${selected?.conversation.id === c.conversation.id ? 'bg-gray-100' : ''}`}
-              >
-                <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-                  {other?.avatar ? (
-                    <img src={other.avatar} alt={other.username || other.fullName} className="w-full h-full object-cover" />
-                  ) : (
-                    <span className="text-sm font-semibold">{(other?.fullName || other?.username || 'U').charAt(0).toUpperCase()}</span>
-                  )}
-                </div>
-                <div className="flex-1">
-                  <div className="text-sm font-medium">{other?.fullName || other?.username || 'Unknown'}</div>
-                  <div className="text-xs text-gray-500 truncate">{c.lastMessage?.content || 'No messages yet'}</div>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
+  const filteredConversations = conversations.filter((c) => {
+    const other = otherParticipant(c);
+    const name = (other?.fullName || other?.username || '').toLowerCase();
+    return name.includes(searchQuery.toLowerCase());
+  });
 
-      {/* Right: chat */}
-      <div className="flex-1 flex flex-col">
-        {selected ? (
-          <>
-            <div className="p-4 border-b font-semibold">{otherParticipant(selected)?.fullName || otherParticipant(selected)?.username}</div>
-            <div className="flex-1 overflow-auto p-4 bg-gray-50">
-              <div className="space-y-3">
-                {messages.map((m) => (
-                  <div key={m.id} className={`flex ${m.senderId === user?.id ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-[70%] p-3 rounded ${m.senderId === user?.id ? 'bg-blue-600 text-white' : 'bg-white border'}`}>
-                      <div className="text-sm">{m.content}</div>
-                      <div className="text-[10px] text-gray-400 mt-1 text-right">{new Date(m.createdAt).toLocaleString()}</div>
+  return (
+    <div className="flex h-[calc(100vh-80px)] bg-gray-50">
+      {/* Left Sidebar: Conversations List */}
+      <div className="w-96 bg-white border-r flex flex-col">
+        {/* Header */}
+        <div className="px-6 py-4 border-b">
+          <h1 className="text-xl font-bold text-gray-900 mb-4">Messages</h1>
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search conversations..."
+              className="w-full pl-10 pr-4 py-2 bg-gray-100 border-0 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+        </div>
+
+        {/* Conversations List */}
+        <div className="flex-1 overflow-auto">
+          {filteredConversations.length === 0 && (
+            <div className="p-6 text-center text-gray-500 text-sm">
+              {searchQuery ? 'No conversations found' : 'No conversations yet'}
+            </div>
+          )}
+          <ul>
+            {filteredConversations.map((c) => {
+              const other = otherParticipant(c);
+              const isSelected = selected?.conversation.id === c.conversation.id;
+              return (
+                <li
+                  key={c.conversation.id}
+                  onClick={() => handleSelect(c)}
+                  className={`px-4 py-3 cursor-pointer transition-colors ${isSelected ? 'bg-blue-50 border-l-4 border-blue-600' : 'hover:bg-gray-50'
+                    }`}
+                >
+                  <div className="flex items-center gap-3">
+                    {/* Avatar */}
+                    <div className="relative">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center overflow-hidden">
+                        {other?.avatar ? (
+                          <img src={other.avatar} alt={(other.username || other.fullName) ?? ''} className="w-full h-full object-cover" />
+                        ) : (
+                          <span className="text-white font-semibold text-lg">
+                            {(other?.fullName || other?.username || 'U').charAt(0).toUpperCase()}
+                          </span>
+                        )}
+                      </div>
+                      <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm font-semibold text-gray-900 truncate">
+                          {other?.fullName || other?.username || 'Unknown'}
+                        </span>
+                        {c.lastMessage && (
+                          <span className="text-xs text-gray-500">
+                            {new Date(c.lastMessage.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-gray-600 truncate">
+                        {c.lastMessage?.content || 'Start a conversation'}
+                      </p>
                     </div>
                   </div>
-                ))}
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      </div>
+
+      {/* Right: Chat Area */}
+      <div className="flex-1 flex flex-col bg-white">
+        {selected ? (
+          <>
+            {/* Chat Header */}
+            <div className="px-6 py-4 border-b bg-white flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center overflow-hidden">
+                  {otherParticipant(selected)?.avatar ? (
+                    <img
+                      src={otherParticipant(selected)?.avatar ?? ''}
+                      alt={(otherParticipant(selected)?.username || otherParticipant(selected)?.fullName) ?? ''}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-white font-semibold">
+                      {(otherParticipant(selected)?.fullName || otherParticipant(selected)?.username || 'U').charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                </div>
+                <div>
+                  <h2 className="text-base font-semibold text-gray-900">
+                    {otherParticipant(selected)?.fullName || otherParticipant(selected)?.username}
+                  </h2>
+                  <p className="text-xs text-green-600">Active now</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <button className="w-9 h-9 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-600 transition-colors">
+                  <Phone className="w-5 h-5" />
+                </button>
+                <button className="w-9 h-9 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-600 transition-colors">
+                  <Video className="w-5 h-5" />
+                </button>
+                <button className="w-9 h-9 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-600 transition-colors">
+                  <MoreVertical className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Messages */}
+            <div className="flex-1 overflow-auto p-6 bg-gray-50">
+              <div className="space-y-4 max-w-4xl mx-auto">
+                {messages.map((m) => {
+                  const isMine = m.senderId === user?.id;
+                  return (
+                    <div key={m.id} className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}>
+                      <div className={`max-w-[70%] ${isMine ? '' : 'flex items-start gap-2'}`}>
+                        {!isMine && (
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center flex-shrink-0">
+                            <span className="text-white text-xs font-semibold">
+                              {(otherParticipant(selected)?.fullName || 'U').charAt(0).toUpperCase()}
+                            </span>
+                          </div>
+                        )}
+                        <div>
+                          <div className={`px-4 py-2 rounded-2xl ${isMine
+                            ? 'bg-blue-600 text-white rounded-br-sm'
+                            : 'bg-white border border-gray-200 rounded-bl-sm'
+                            }`}>
+                            <p className="text-sm">{m.content}</p>
+                          </div>
+                          <div className={`text-[10px] text-gray-500 mt-1 ${isMine ? 'text-right' : 'text-left'}`}>
+                            {new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
                 <div ref={messagesEndRef} />
               </div>
             </div>
 
-            <div className="p-4 border-t flex items-center gap-3 bg-white">
-              <input
-                type="text"
-                value={messageText}
-                onChange={(e) => setMessageText(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter') handleSend(); }}
-                placeholder="Gửi tin nhắn..."
-                className="flex-1 border rounded px-3 py-2"
-              />
-              <button onClick={handleSend} className="px-4 py-2 bg-blue-600 text-white rounded">Send</button>
+            {/* Input Area */}
+            <div className="px-6 py-4 border-t bg-white">
+              <div className="flex items-center gap-3 max-w-4xl mx-auto">
+                <input
+                  type="text"
+                  value={messageText}
+                  onChange={(e) => setMessageText(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
+                  placeholder="Type a message..."
+                  className="flex-1 px-4 py-2 bg-gray-100 border-0 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <Button
+                  onClick={handleSend}
+                  disabled={!messageText.trim()}
+                  variant="primary"
+                  className="w-10 h-10 rounded-full flex items-center justify-center disabled:opacity-50"
+                >
+                  <Send className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
           </>
         ) : (
-          <div className="flex-1 flex items-center justify-center text-gray-500">Chọn một connection để bắt đầu trò chuyện</div>
+          <div className="flex-1 flex flex-col items-center justify-center text-gray-500">
+            <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold text-gray-700 mb-2">Your Messages</h3>
+            <p className="text-sm text-gray-500">Select a conversation to start chatting</p>
+          </div>
         )}
       </div>
     </div>

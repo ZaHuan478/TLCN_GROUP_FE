@@ -324,3 +324,49 @@ export type UserProfile = {
     progress?: number;
   }[];
 };
+
+export type Participant = {
+  id: string;
+  username?: string | null;
+  fullName?: string | null;
+  avatar?: string | null;
+};
+
+export type Message = {
+  id: string;
+  conversationId: string;
+  senderId: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+  sender?: Participant;
+};
+
+export type Conversation = {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type ConversationListItem = {
+  conversation: Conversation;
+  lastMessage: Message | null;
+  participants: Participant[];
+};
+
+export type GetMessagesParams = {
+  limit?: number;
+  beforeId?: string;
+};
+
+export type SendMessagePayload = {
+  content: string;
+};
+
+export type SendMessageResponse = Message;
+
+export type GetOrCreateConversationResponse = {
+  conversation: Conversation;
+  participants: Participant[];
+  messages: Message[];
+};
