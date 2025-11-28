@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Editor from '@monaco-editor/react';
 import { getLessonById, updateLesson } from '../../../api/lessonApi';
-import { getTestById, updateTest } from '../../../api/testApi';
+import { getTestById } from '../../../api/testApi';
 import { submitTest } from '../../../api/studentApi';
 import { Button } from '../../atoms/Button/Button';
 
@@ -91,10 +91,10 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ selectedItem, itemType }) => {
                     questionId: '1', // Default for single question tests
                     answer: code
                 }];
-                
+
                 const result = await submitTest(selectedItem, answers) as any;
                 const resultData = result.data || result;
-                
+
                 setOutput(
                     `✓ Test submitted successfully!\n\n` +
                     `Score: ${resultData.score || 0}/100\n` +
@@ -103,8 +103,6 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ selectedItem, itemType }) => {
                     `${resultData.suggestions ? `Suggestions: ${resultData.suggestions}` : ''}`
                 );
             }
-
-            setTimeout(() => setOutput(''), 3000);
         } catch (error) {
             console.error('Failed to submit:', error);
             setOutput(`✗ Submit failed: ${error instanceof Error ? error.message : String(error)}`);
@@ -155,7 +153,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ selectedItem, itemType }) => {
                         onClick={handleRunCode}
                         disabled={isRunning}
                         variant="unstyled"
-                        className="flex items-center gap-2 rounded-lg bg-green-600 px-6 py-3 text-white font-semibold transition-all hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
+                        className="flex items-center justify-center gap-2 rounded-lg bg-gray-700 px-6 py-3 min-w-[140px] h-[44px] text-white font-medium transition-all hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {isRunning ? (
                             <>
@@ -179,7 +177,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ selectedItem, itemType }) => {
                         onClick={handleSubmit}
                         disabled={isSubmitting}
                         variant="unstyled"
-                        className="flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-3 text-white font-semibold transition-all hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
+                        className="flex items-center justify-center gap-2 rounded-lg bg-gray-800 px-6 py-3 min-w-[140px] h-[44px] text-white font-medium transition-all hover:bg-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {isSubmitting ? (
                             <>
@@ -202,7 +200,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ selectedItem, itemType }) => {
                     <Button
                         onClick={handleReset}
                         variant="unstyled"
-                        className="flex items-center gap-2 rounded-lg bg-gray-600 px-6 py-3 text-white font-semibold transition-all hover:bg-gray-700 shadow-md hover:shadow-lg"
+                        className="flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-6 py-3 min-w-[140px] h-[44px] text-gray-700 font-medium transition-all hover:bg-gray-50"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <polyline points="23 4 23 10 17 10"></polyline>

@@ -96,6 +96,15 @@ export type StudentProgress = {
       companyName: string;
     };
   };
+  // API also returns 'course' field which is the same as careerPath
+  course?: {
+    id: string;
+    title: string;
+    description?: string;
+    company?: {
+      companyName: string;
+    };
+  };
   testResults?: StudentTestResult[];
 };
 
@@ -443,8 +452,8 @@ export type SearchParams = {
 }
 
 export type CourseListParams = {
-	page?: number;
-	limit?: number;
+  page?: number;
+  limit?: number;
 };
 
 export type LikeInfo = {
@@ -453,22 +462,22 @@ export type LikeInfo = {
 };
 
 export type NotificationType =
-    | 'FOLLOW'
-    | 'LIKE'
-    | 'COMMENT'
-    | 'MESSAGE'
-    | 'SYSTEM'
-    | 'COURSE_UPDATE'
-    | 'ACHIEVEMENT';
+  | 'FOLLOW'
+  | 'LIKE'
+  | 'COMMENT'
+  | 'MESSAGE'
+  | 'SYSTEM'
+  | 'COURSE_UPDATE'
+  | 'ACHIEVEMENT';
 
 export type Notification = {
-    id: string;
-    userId: string;
-    type: NotificationType;
-    title: string;
-    message: string;
-    data?: Record<string, any>;
-    isRead: boolean;
-    createdAt: string;
-    updatedAt: string;
+  id: string;
+  userId: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  data?: Record<string, any>;
+  isRead: boolean;
+  createdAt: string;
+  updatedAt: string;
 };

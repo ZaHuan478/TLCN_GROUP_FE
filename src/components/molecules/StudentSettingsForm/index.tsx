@@ -3,7 +3,7 @@ import { Input } from '../../atoms/Input/Input';
 import { Button } from '../../atoms/Button/Button';
 import { useAuth } from '../../../contexts/AuthContext';
 import { getStudentProfile, updateStudentProfile } from '../../../services/studentService';
-import { StudentProfile, UpdateStudentProfilePayload } from '../../../types/types';
+import { StudentProfile } from '../../../types/types';
 import { Toast } from '../ToastNotification';
 import { StudentLearningResults } from '../StudentLearningResults';
 

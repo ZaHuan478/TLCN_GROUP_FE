@@ -1,8 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
+import { Button } from "../Button/Button";
 import { useNavigate } from "react-router-dom";
 import { authService } from "../../../services/authService";
 import { Avatar } from "./index";
 import conversationApi from "../../../api/conversationApi";
+import { User } from 'lucide-react';
+import { MessageCircle } from 'lucide-react';
 
 type Props = {
   userId: string;
@@ -29,14 +32,12 @@ const ClickableAvatar: React.FC<Props> = ({ userId, username, fullName, avatarUr
   }, []);
 
   const otherName = fullName || username || "User";
-
-  // Size mapping to match Avatar component sizes
   const getSizeClass = () => {
     switch (size) {
       case "sm":
-        return "w-10 h-10"; // Match Avatar sm size
+        return "w-10 h-10";
       case "md":
-        return "w-16 h-16"; // Match Avatar md size
+        return "w-16 h-16";
       default:
         return "w-10 h-10";
     }
@@ -55,11 +56,7 @@ const ClickableAvatar: React.FC<Props> = ({ userId, username, fullName, avatarUr
         return;
       }
 
-      console.log("ClickableAvatar: creating/getting conversation with user", userId);
       const convo: any = await conversationApi.getOrCreateConversation(userId);
-      console.log("ClickableAvatar: convo response", convo);
-
-      // convo may be object with id in different shapes; pick likely fields
       const id = convo?.id || convo?.conversation?.id || convo?.data?.id || convo?.conversationId || convo?.conversation?.conversationId;
 
       if (id) {
@@ -69,7 +66,6 @@ const ClickableAvatar: React.FC<Props> = ({ userId, username, fullName, avatarUr
       }
     } catch (err) {
       console.error("Create conversation failed", err);
-      // If unauthorized, go to signin
       const status = (err as any)?.response?.status;
       if (status === 401 || status === 403) {
         navigate("/signin");
@@ -79,7 +75,11 @@ const ClickableAvatar: React.FC<Props> = ({ userId, username, fullName, avatarUr
 
   return (
     <div className={`relative inline-block ${className}`} ref={ref}>
-      <button onClick={() => setOpen((s) => !s)} aria-label={`Open actions for ${otherName}`}>
+      <Button
+        onClick={() => setOpen((s) => !s)}
+        aria-label={`Open actions for ${otherName}`}
+        className="rounded-full"
+      >
         {avatarUrl ? (
           <img
             src={avatarUrl}
@@ -89,12 +89,30 @@ const ClickableAvatar: React.FC<Props> = ({ userId, username, fullName, avatarUr
         ) : (
           <Avatar name={otherName} size={size} />
         )}
-      </button>
+      </Button>
 
       {open && (
-        <div className="absolute z-20 right-0 mt-2 w-40 bg-white border border-gray-200 rounded shadow-lg py-1">
-          <button onClick={handleViewProfile} className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50">Xem tường nhà</button>
-          <button onClick={handleChat} className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50">Nhắn tin</button>
+        <div className="absolute z-50 top-full left-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg py-2">
+          <div className="px-4 py-3 border-b border-gray-100">
+            <p className="font-semibold text-gray-900 text-sm truncate">{otherName}</p>
+            <p className="text-xs text-gray-500">@{username || 'user'}</p>
+          </div>
+          <div className="py-1">
+            <Button
+              onClick={handleViewProfile}
+              className="w-full text-left px-4 py-3 text-sm text-gray-700 transition-colors flex items-center gap-2"
+            >
+              <User className="w-4 h-4" />
+              View Profile
+            </Button>
+            <Button
+              onClick={handleChat}
+              className="w-full text-left px-4 py-3 text-sm text-gray-700 transition-colors flex items-center gap-2"
+            >
+              <MessageCircle className="w-4 h-4" />
+              Chat
+            </Button>
+          </div>
         </div>
       )}
     </div>
