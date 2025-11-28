@@ -94,6 +94,7 @@ const Navbar: React.FC = () => {
     if (searchQuery.trim().length < 2) {
       setSearchResults(null);
       setShowSearchDropdown(false);
+      setSearchLoading(false); // Stop loading nếu query quá ngắn
       return;
     }
 
@@ -123,11 +124,10 @@ const Navbar: React.FC = () => {
       {/* Search Bar - Left */}
       <div className="flex-shrink-0">
         <div className="relative w-64" ref={searchRef}>
-          <div className={`relative flex items-center rounded-full bg-gray-100 transition-all duration-200 ${isSearchFocused ? 'bg-white shadow-md ring-2 ring-blue-500' : ''
-            }`}>
+          <div className="relative flex items-center rounded-full bg-gray-100 transition-all duration-200">
             <div className="absolute left-4 flex items-center pointer-events-none">
               {searchLoading ? (
-                <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-500 border-t-transparent"></div>
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-500 border-t-transparent"></div>
               ) : (
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500">
                   <circle cx="11" cy="11" r="8"></circle>
