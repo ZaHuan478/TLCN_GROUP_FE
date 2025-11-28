@@ -5,6 +5,7 @@ import { Toast } from '../ToastNotification';
 
 export const StudentLearningResults: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState<StudentProgress[]>([]);
   const [totalCourses, setTotalCourses] = useState(0);
   const [completedCourses, setCompletedCourses] = useState(0);
@@ -18,6 +19,7 @@ export const StudentLearningResults: React.FC = () => {
 
   const fetchLearningResults = async () => {
     setIsLoading(true);
+    setError(null);
     try {
       const results = await getStudentLearningResults();
       setProgress(results.progress);
@@ -26,6 +28,7 @@ export const StudentLearningResults: React.FC = () => {
       setInProgressCourses(results.inProgressCourses);
     } catch (error) {
       console.error('Failed to load learning results', error);
+      setError('Could not load learning results. Please try again!');
       setToast({ message: 'Could not load learning results. Please try again!', type: 'error' });
     } finally {
       setIsLoading(false);
@@ -72,6 +75,33 @@ export const StudentLearningResults: React.FC = () => {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-8">
+        <h3 className="text-lg font-bold text-gray-900 mb-4">Learning Results</h3>
+        <div className="text-center py-8">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="48"
+            height="48"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="mx-auto text-red-400 mb-3"
+          >
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          <p className="text-red-500">{error}</p>
+        </div>
       </div>
     );
   }
@@ -169,24 +199,24 @@ export const StudentLearningResults: React.FC = () => {
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <h5 className="text-lg font-semibold text-gray-900">
-                          {courseProgress.careerPath?.title || 'Untitled Course'}
+                          {courseProgress.course?.title || courseProgress.careerPath?.title || 'Untitled Course'}
                         </h5>
                         <span className={`px-3 py-1 text-xs font-medium rounded-full border ${getStatusColor(courseProgress.status)}`}>
                           {getStatusLabel(courseProgress.status)}
                         </span>
                       </div>
-                      {courseProgress.careerPath?.company?.companyName && (
+                      {(courseProgress.course?.company?.companyName || courseProgress.careerPath?.company?.companyName) && (
                         <p className="text-sm text-gray-600 flex items-center gap-1 mb-2">
                           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                             <polyline points="9 22 9 12 15 12 15 22"></polyline>
                           </svg>
-                          {courseProgress.careerPath.company.companyName}
+                          {courseProgress.course?.company?.companyName || courseProgress.careerPath?.company?.companyName}
                         </p>
                       )}
-                      {courseProgress.careerPath?.description && (
+                      {(courseProgress.course?.description || courseProgress.careerPath?.description) && (
                         <p className="text-sm text-gray-500 line-clamp-2">
-                          {courseProgress.careerPath.description}
+                          {courseProgress.course?.description || courseProgress.careerPath?.description}
                         </p>
                       )}
                     </div>
@@ -242,11 +272,10 @@ export const StudentLearningResults: React.FC = () => {
                                 {result.test?.title || 'Test'}
                               </p>
                               <div className="flex items-center gap-3 mt-1">
-                                <span className={`text-xs px-2 py-1 rounded ${
-                                  result.test?.type === 'FINAL_PATH' 
-                                    ? 'bg-purple-100 text-purple-700'
-                                    : 'bg-blue-100 text-blue-700'
-                                }`}>
+                                <span className={`text-xs px-2 py-1 rounded ${result.test?.type === 'FINAL_PATH'
+                                  ? 'bg-purple-100 text-purple-700'
+                                  : 'bg-blue-100 text-blue-700'
+                                  }`}>
                                   {result.test?.type === 'FINAL_PATH' ? 'Final Test' : 'Mini Test'}
                                 </span>
                                 {result.finishedAt && (
@@ -257,11 +286,10 @@ export const StudentLearningResults: React.FC = () => {
                               </div>
                             </div>
                             <div className="text-right">
-                              <p className={`text-2xl font-bold ${
-                                result.score >= 80 ? 'text-green-600' :
+                              <p className={`text-2xl font-bold ${result.score >= 80 ? 'text-green-600' :
                                 result.score >= 60 ? 'text-amber-600' :
-                                'text-red-600'
-                              }`}>
+                                  'text-red-600'
+                                }`}>
                                 {result.score}%
                               </p>
                               <p className="text-xs text-gray-500">

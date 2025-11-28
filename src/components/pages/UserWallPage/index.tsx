@@ -276,7 +276,6 @@ const UserWallPage: React.FC = () => {
                     stats={{
                         courses: userProfile.courses,
                         followers: followInfo?.followerCount ?? userProfile.followers,
-                        points: userProfile.points,
                     }}
                     isOwnProfile={isOwnProfile}
                     isFollowing={followInfo?.isFollowing ?? false}
@@ -324,7 +323,7 @@ const UserWallPage: React.FC = () => {
                     {/* Main Content */}
                     <div className="lg:col-span-2">
                         {activeTab === 'courses' && (
-                            <UserCoursesSection courses={userProfile.enrolledCourses || []} />
+                            <UserCoursesSection userId={userProfile.id} />
                         )}
                         {activeTab === 'about' && (
                             <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-8">

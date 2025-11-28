@@ -4,7 +4,7 @@ import { commentApi } from "../../../api/commentApi";
 import { likeApi } from "../../../api/likeApi";
 import { Comment } from "../../../types/types.ts";
 import { useAuth } from "../../../contexts/AuthContext";
-import { canUserCreateBlog } from "../../../utils/userUtils.ts";
+import { canUserCreateBlog, canUserComment } from "../../../utils/userUtils.ts";
 import { BlogHeader } from "../BlogHeader";
 import { BlogContent } from "../BlogContent";
 import { BlogStats } from "../BlogStats";
@@ -35,7 +35,6 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog, onEdit, onDelete }) =>
     const [totalComments, setTotalComments] = useState(0);
     const [loadingComments, setLoadingComments] = useState(false);
 
-    // Load likes từ backend khi component mount
     useEffect(() => {
         loadLikes();
     }, [blog.id]);
@@ -145,7 +144,6 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog, onEdit, onDelete }) =>
 
         if (reactionId !== 'like') return;
 
-        // Optimistic update - cập nhật UI ngay lập tức
         const currentReaction = reactions.find(r => r.id === 'like');
         const wasLiked = currentReaction?.isLiked || false;
 
@@ -157,10 +155,8 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog, onEdit, onDelete }) =>
         }]);
 
         try {
-            // Gọi API để toggle like
             const likeInfo = await likeApi.toggleLike(blog.id);
 
-            // Sync lại với response từ server (đảm bảo consistency)
             setReactions([{
                 id: "like",
                 emoji: "",
@@ -169,8 +165,6 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog, onEdit, onDelete }) =>
             }]);
         } catch (error: any) {
             console.error('❌ Failed to toggle like:', error);
-
-            // Rollback nếu API fail
             setReactions([{
                 id: "like",
                 emoji: "",
@@ -179,9 +173,9 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog, onEdit, onDelete }) =>
             }]);
 
             if (error.response?.status === 401) {
-                alert('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+                alert('Your session has expired. Please log in again..');
             } else {
-                alert('Không thể like bài viết. Vui lòng thử lại.');
+                alert('Unable to like this post. Please try again.');
             }
         }
     };
@@ -349,7 +343,6 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog, onEdit, onDelete }) =>
                 onToggleComments={() => setShowModal(true)}
             />
 
-            {/* Blog Modal */}
             <BlogModal
                 isOpen={showModal}
                 onClose={() => setShowModal(false)}
@@ -359,7 +352,7 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog, onEdit, onDelete }) =>
                 totalComments={totalComments}
                 comments={comments}
                 loadingComments={loadingComments}
-                canComment={canUserCreateBlog(user) && !!user}
+                canComment={canUserComment(user) && !!user}
                 onReaction={handleReaction}
                 onAddComment={handleAddComment}
                 onReplyComment={handleReplyComment}
