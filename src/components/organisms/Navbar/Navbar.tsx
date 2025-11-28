@@ -27,6 +27,7 @@ const Navbar: React.FC = () => {
   const [searchLoading, setSearchLoading] = useState(false);
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
   const searchTimeoutRef = useRef<number | null>(null);
+  const [activeDropdown, setActiveDropdown] = useState<'message' | 'notification' | null>(null);
 
   useEffect(() => {
     if (isAuthenticated && refreshUser) {
@@ -79,6 +80,17 @@ const Navbar: React.FC = () => {
       });
     }
   }, [user]);
+
+  // Close other dropdowns when one opens
+  useEffect(() => {
+    if (activeDropdown === 'message') {
+      setShowProfileDropdown(false);
+      setShowSearchDropdown(false);
+    } else if (activeDropdown === 'notification') {
+      setShowProfileDropdown(false);
+      setShowSearchDropdown(false);
+    }
+  }, [activeDropdown]);
 
   // Search with debounce
   useEffect(() => {
@@ -296,9 +308,13 @@ const Navbar: React.FC = () => {
         {isAuthenticated && user ? (
           <div className="relative flex items-center" ref={profileRef}>
             <div className="mr-3 flex items-center gap-2">
-              <MessageDropdown />
+              <MessageDropdown 
+                onToggle={(isOpen) => setActiveDropdown(isOpen ? 'message' : null)}
+              />
 
-              <NotificationDropdown />
+              <NotificationDropdown 
+                onToggle={(isOpen) => setActiveDropdown(isOpen ? 'notification' : null)}
+              />
             </div>
 
             <div className="relative">

@@ -6,7 +6,11 @@ import { useNavigate } from 'react-router-dom';
 import { Bell } from 'lucide-react';
 import { Button } from '../../atoms/Button/Button';
 
-const NotificationDropdown: React.FC = () => {
+type NotificationDropdownProps = {
+  onToggle?: (isOpen: boolean) => void;
+}
+
+const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ onToggle }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
@@ -118,10 +122,28 @@ const NotificationDropdown: React.FC = () => {
     return `${Math.floor(diffInSeconds / 86400)}d ago`;
   };
 
+  // Close dropdown when clicked outside
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest('[data-dropdown="notification"]')) {
+        setIsOpen(false);
+        onToggle?.(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen, onToggle]);
+
   return (
-    <div className="relative">
+    <div className="relative" data-dropdown="notification">
       <Button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => {
+          const newIsOpen = !isOpen;
+          setIsOpen(newIsOpen);
+          onToggle?.(newIsOpen);
+        }}
         className="relative p-2 text-gray-600 hover:text-gray-900 focus:outline-none"
       >
          <Bell className='w-6 h-6'/>

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Lesson, Test } from '../../../types/types';
 
-interface LessonViewerProps {
+type LessonViewerProps = {
     lesson: Lesson;
     lessonTests: Test[];
     onSelectTest: (testId: string) => void;

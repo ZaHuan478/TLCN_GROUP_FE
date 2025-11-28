@@ -5,7 +5,7 @@ import { Toast } from "../ToastNotification";
 import TestResultModal from "../TestResultModal";
 import { FileText } from "lucide-react";
 
-interface CareerTestModalProps {
+type CareerTestModalProps = {
     isOpen: boolean;
     onClose: () => void;
     onComplete: (result: TestResult) => void;

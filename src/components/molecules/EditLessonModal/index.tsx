@@ -3,7 +3,7 @@ import { Button } from '../../atoms/Button/Button';
 import { Input } from '../../atoms/Input/Input';
 import { Textarea } from '../../atoms/Textarea/Textarea';
 
-interface EditLessonModalProps {
+type EditLessonModalProps = {
     isOpen: boolean;
     onClose: () => void;
     onSubmit: () => void;

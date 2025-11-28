@@ -3,7 +3,7 @@ import { Button } from "../../atoms/Button/Button";
 import { TestResult } from "../../../api/careerTestApi";
 import { CheckCircle, User, FileText, Users, Briefcase } from "lucide-react";
 
-interface TestResultModalProps {
+type TestResultModalProps = {
     isOpen: boolean;
     onClose: () => void;
     result: TestResult | null;

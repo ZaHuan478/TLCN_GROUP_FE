@@ -282,14 +282,23 @@ const ConnectionsPage: React.FC = () => {
 
             {/* Input Area */}
             <div className="px-6 py-4 border-t bg-white">
-              <div className="flex items-center gap-3 max-w-4xl mx-auto">
-                <Input
-                  type="text"
+              <div className="flex items-end gap-3 max-w-4xl mx-auto">
+                <textarea
                   value={messageText}
                   onChange={(e) => setMessageText(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
                   placeholder="Type a message..."
-                  className="flex-1 px-4 py-2 bg-gray-100 border-0 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  rows={1}
+                  className="flex-1 px-4 py-3 bg-gray-100 border-0 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none min-h-[44px] max-h-32 overflow-y-auto"
+                  style={{
+                    height: 'auto',
+                    minHeight: '44px'
+                  }}
+                  onInput={(e) => {
+                    const target = e.target as HTMLTextAreaElement;
+                    target.style.height = 'auto';
+                    target.style.height = Math.min(target.scrollHeight, 128) + 'px';
+                  }}
                 />
                 <Button
                   onClick={handleSend}

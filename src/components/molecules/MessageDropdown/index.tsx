@@ -4,10 +4,31 @@ import { MessageCircle } from 'lucide-react';
 import { Button } from '../../atoms/Button/Button';
 import { useAuth } from '../../../contexts/AuthContext';
 
-const MessageDropdown: React.FC = () => {
+type MessageDropdownProps = {
+  onToggle?: (isOpen: boolean) => void;
+}
+
+const MessageDropdown: React.FC<MessageDropdownProps> = ({ onToggle }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { unreadMessages, resetUnread, notifications, clearNotifications } = useAuth() as any;
   const navigate = useNavigate();
+
+  // Filter only message notifications
+  const messageNotifications = notifications?.filter((n: any) => n.type === 'MESSAGE' || n.conversationId) || [];
+
+  // Close dropdown when parent tells us to
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest('[data-dropdown="message"]')) {
+        setIsOpen(false);
+        onToggle?.(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen, onToggle]);
 
   const handleMessageClick = (conversationId: string) => {
     try {
@@ -43,10 +64,12 @@ const MessageDropdown: React.FC = () => {
   };
 
   return (
-    <div className="relative">
+    <div className="relative" data-dropdown="message">
       <Button
         onClick={() => {
-          setIsOpen(!isOpen);
+          const newIsOpen = !isOpen;
+          setIsOpen(newIsOpen);
+          onToggle?.(newIsOpen);
           try {
             resetUnread && resetUnread();
           } catch (e) {
@@ -74,8 +97,8 @@ const MessageDropdown: React.FC = () => {
           </div>
 
           <div className="max-h-96 overflow-y-auto">
-            {notifications && notifications.length > 0 ? (
-              notifications.map((notification: any, index: number) => (
+            {messageNotifications && messageNotifications.length > 0 ? (
+              messageNotifications.map((notification: any, index: number) => (
                 <div
                   key={index}
                   onClick={() => handleMessageClick(notification.conversationId)}

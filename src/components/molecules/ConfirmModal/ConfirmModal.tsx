@@ -1,7 +1,7 @@
 import React, { ReactNode } from "react";
 import { Button } from "../../atoms/Button/Button";
 
-interface ConfirmModalProps {
+type ConfirmModalProps = {
   isOpen: boolean;
   title: string;
   message: string;

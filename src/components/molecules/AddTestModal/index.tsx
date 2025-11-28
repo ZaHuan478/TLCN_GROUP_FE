@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Button } from '../../atoms/Button/Button';
 import { Input } from '../../atoms/Input/Input';
 
-interface AddTestModalProps {
+type AddTestModalProps = {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: { title: string; description: string; image: File | null }) => void;

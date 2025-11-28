@@ -8,7 +8,7 @@ import { Input } from '../../atoms/Input/Input';
 import { Textarea } from '../../atoms/Textarea/Textarea';
 import { Toast } from '../../molecules/ToastNotification';
 
-interface TestDetailsModalProps {
+type TestDetailsModalProps = {
     isOpen: boolean;
     onClose: () => void;
     testId: string | null;

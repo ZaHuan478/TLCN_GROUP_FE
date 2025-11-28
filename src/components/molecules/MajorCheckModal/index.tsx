@@ -5,7 +5,7 @@ import TestResultModal from "../TestResultModal";
 import { Button } from "../../atoms/Button/Button";
 import { User, FileText, Clock } from "lucide-react";
 
-interface MajorCheckModalProps {
+type MajorCheckModalProps = {
     isOpen: boolean;
     onClose: () => void;
     onHasMajor: () => void;

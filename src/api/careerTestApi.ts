@@ -1,6 +1,6 @@
 import { apiClient } from "../services/apiClient";
 
-export interface CareerTestQuestion {
+export type CareerTestQuestion = {
   questionIndex: number;
   question: string;
   options: {
@@ -11,17 +11,17 @@ export interface CareerTestQuestion {
   };
 }
 
-export interface CareerTest {
+export type CareerTest = {
   id: string;
   questions: CareerTestQuestion[];
 }
 
-export interface TestAnswer {
+export type TestAnswer = {
   questionIndex: number;
   option: 'A' | 'B' | 'C' | 'D';
 }
 
-export interface TestResult {
+export type TestResult = {
   bestCareer: string;
   scores: {
     BACKEND: number;

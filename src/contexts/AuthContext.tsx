@@ -170,9 +170,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                     const { message, conversationId } = payload;
                     if (message && message.sender && String(message.sender.id) === String(user.id)) return;
                     setUnreadMessages((v) => v + 1);
-                    // add to notifications (most recent first), keep max 20
+                    // add to messages notifications (separate from system notifications)
                     setNotifications((prev) => {
-                        const next = [{ message, conversationId, receivedAt: Date.now() }, ...prev];
+                        const next = [{ message, conversationId, receivedAt: Date.now(), type: 'MESSAGE' }, ...prev];
                         return next.slice(0, 20);
                     });
                 });

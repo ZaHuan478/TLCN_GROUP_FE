@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { getTestById } from '../../../api/testApi';
 import { Test } from '../../../types/types';
 
-interface TestViewerProps {
+type TestViewerProps =  {
     testId: string;
 }
 

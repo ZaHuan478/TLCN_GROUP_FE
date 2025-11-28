@@ -4,7 +4,7 @@ import MajorCheckModal from "../components/molecules/MajorCheckModal";
 import { getStudentProfile } from "../services/studentService";
 
 
-interface MajorCheckWrapperProps {
+type MajorCheckWrapperProps = {
   children: React.ReactNode;
 }
 

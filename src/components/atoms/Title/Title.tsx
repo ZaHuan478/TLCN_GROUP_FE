@@ -1,6 +1,6 @@
 import React from "react";
 
-interface TitleProps {
+type TitleProps = {
   children: React.ReactNode;
   className?: string;
   level?: 1 | 2 | 3;
