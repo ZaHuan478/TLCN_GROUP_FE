@@ -66,12 +66,13 @@ export const BlogFeed: React.FC<BlogFeedProps> = ({ blogs: externalBlogs, onBlog
             {/* Danh sách bài viết */}
             {blogs.length > 0 ? (
                 blogs.map((blog) => (
-                    <BlogCard
-                        key={blog.id}
-                        blog={blog}
-                        onEdit={handleEdit}
-                        onDelete={handleDelete}
-                    />
+                    <div key={blog.id} id={`blog-${blog.id}`}>
+                        <BlogCard
+                            blog={blog}
+                            onEdit={handleEdit}
+                            onDelete={handleDelete}
+                        />
+                    </div>
                 ))
             ) : (
                 <div className="text-center text-gray-500 py-8">

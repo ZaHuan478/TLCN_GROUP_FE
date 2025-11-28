@@ -10,6 +10,7 @@ import { BlogContent } from "../BlogContent";
 import { BlogStats } from "../BlogStats";
 import { BlogActions } from "../BlogActions";
 import { BlogModal } from "../BlogModal";
+import { joinBlogRoom, leaveBlogRoom, onNewComment } from "../../../services/socket";
 
 type BlogCardProps = {
     blog: Blog;
@@ -49,7 +50,46 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog, onEdit, onDelete }) =>
         if (showModal && comments.length === 0) {
             loadComments();
         }
-    }, [showModal]);
+
+        // Join blog room when modal opens
+        if (showModal) {
+            joinBlogRoom(blog.id);
+
+            // Listen for new comments
+            const unsubscribe = onNewComment((payload) => {
+                if (payload.blogId === blog.id && payload.comment) {
+                    setComments(prev => {
+                        // Check if comment already exists to avoid duplicates
+                        const exists = prev.some(c => c.id === payload.comment.id);
+                        if (exists) return prev;
+
+                        // Check if this is a reply to an existing comment
+                        if (payload.comment.parentId) {
+                            // Handle replies by updating the parent comment
+                            return prev.map(comment => {
+                                if (comment.id === payload.comment.parentId) {
+                                    return {
+                                        ...comment,
+                                        replies: [...(comment.replies || []), payload.comment]
+                                    };
+                                }
+                                return comment;
+                            });
+                        } else {
+                            // Add new top-level comment
+                            return [payload.comment, ...prev];
+                        }
+                    });
+                    setTotalComments(prev => prev + 1);
+                }
+            });
+
+            return () => {
+                unsubscribe?.();
+                leaveBlogRoom(blog.id);
+            };
+        }
+    }, [showModal, blog.id]);
 
     const loadLikes = async () => {
         if (!user) {
@@ -156,8 +196,14 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog, onEdit, onDelete }) =>
             };
 
             const newCommentResult = await commentApi.create(commentData);
-            setComments(prev => [newCommentResult, ...prev]);
-            setTotalComments(prev => prev + 1);
+            
+            // Don't update comments here if we're listening to real-time updates
+            // The socket listener will handle adding the comment
+            if (!showModal) {
+                // Only update if modal is not open (no real-time listening)
+                setComments(prev => [newCommentResult, ...prev]);
+                setTotalComments(prev => prev + 1);
+            }
         } catch (error: any) {
             console.error('Failed to add comment:', error);
 
@@ -183,31 +229,35 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog, onEdit, onDelete }) =>
 
             const newReply = await commentApi.create(replyData);
 
-            setComments(prev => {
-                const addReplyToComment = (comments: Comment[]): Comment[] => {
-                    return comments.map(comment => {
-                        if (comment.id === parentId) {
-                            return {
-                                ...comment,
-                                replies: [...(comment.replies || []), newReply]
-                            };
-                        }
-                        if (comment.replies && comment.replies.length > 0) {
-                            return {
-                                ...comment,
-                                replies: addReplyToComment(comment.replies)
-                            };
-                        }
-                        return comment;
-                    });
-                };
-                return addReplyToComment(prev);
-            });
-
-            setTotalComments(prev => prev + 1);
+            // Don't update comments here if we're listening to real-time updates
+            // The socket listener will handle adding the reply
+            if (!showModal) {
+                // Only update if modal is not open (no real-time listening)
+                setComments(prev => {
+                    const addReplyToComment = (comments: Comment[]): Comment[] => {
+                        return comments.map(comment => {
+                            if (comment.id === parentId) {
+                                return {
+                                    ...comment,
+                                    replies: [...(comment.replies || []), newReply]
+                                };
+                            }
+                            if (comment.replies && comment.replies.length > 0) {
+                                return {
+                                    ...comment,
+                                    replies: addReplyToComment(comment.replies)
+                                };
+                            }
+                            return comment;
+                        });
+                    };
+                    return addReplyToComment(prev);
+                });
+                setTotalComments(prev => prev + 1);
+            }
         } catch (error: any) {
-            console.error('Failed to add reply:', error);
-            alert('Failed to add reply. Please try again.');
+            console.error('Failed to reply to comment:', error);
+            alert('Failed to reply. Please try again.');
         }
     };
 
@@ -284,7 +334,12 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog, onEdit, onDelete }) =>
                 onDelete={onDelete}
             />
 
-            <BlogContent blog={blog} />
+            <div 
+                className="blog-card-clickable cursor-pointer" 
+                onClick={() => setShowModal(true)}
+            >
+                <BlogContent blog={blog} />
+            </div>
 
             <BlogStats reactions={reactions} totalComments={totalComments} />
 

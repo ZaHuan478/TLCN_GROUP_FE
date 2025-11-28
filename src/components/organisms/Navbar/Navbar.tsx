@@ -3,10 +3,11 @@ import NavLinks from "../../molecules/NavLinks/NavLinks";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "../../atoms/Button/Button";
 import { useAuth } from "../../../contexts/AuthContext";
-import { MessageCircle, Bell } from 'lucide-react';
+import { MessageCircle } from 'lucide-react';
 import searchApi, { } from '../../../api/searchApi';
 import { SearchAllResponse } from '../../../types/types';
 import { Input } from "../../atoms/Input/Input";
+import NotificationDropdown from "../../molecules/NotificationDropdown";
 
 
 const Navbar: React.FC = () => {
@@ -339,14 +340,8 @@ const Navbar: React.FC = () => {
                 )}
               </div>
 
-              {/* Notifications Button (Simplified) */}
-              <Link
-                to="/notifications"
-                title="Notifications"
-                className="relative w-10 h-10 rounded-full bg-gray-100 text-gray-700 flex items-center justify-center font-semibold focus:outline-none hover:bg-gray-200 transition-colors"
-              >
-                <Bell />
-              </Link>
+              {/* Notifications Button */}
+              <NotificationDropdown />
             </div>
 
             <div className="relative">

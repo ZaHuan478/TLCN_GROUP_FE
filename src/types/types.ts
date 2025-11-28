@@ -456,19 +456,55 @@ export type NotificationType =
     | 'FOLLOW'
     | 'LIKE'
     | 'COMMENT'
+    | 'REPLY'
     | 'MESSAGE'
     | 'SYSTEM'
     | 'COURSE_UPDATE'
     | 'ACHIEVEMENT';
 
+export type NotificationActor = {
+    id: string;
+    username: string;
+    fullName?: string;
+    avatar?: string;
+};
+
+export type NotificationBlog = {
+    id: string;
+    content: string;
+};
+
+export type NotificationComment = {
+    id: string;
+    content: string;
+};
+
 export type Notification = {
     id: string;
     userId: string;
     type: NotificationType;
-    title: string;
     message: string;
-    data?: Record<string, any>;
+    blogId?: string | null;
+    commentId?: string | null;
+    actorId?: string | null;
     isRead: boolean;
     createdAt: string;
     updatedAt: string;
+    // Populated relations
+    actor?: NotificationActor;
+    blog?: NotificationBlog;
+    comment?: NotificationComment;
+};
+
+export type NotificationListResponse = {
+    notifications: Notification[];
+    unreadCount: number;
+};
+
+export type UnreadCountResponse = {
+    unreadCount: number;
+};
+
+export type MarkAsReadPayload = {
+    ids: string[];
 };

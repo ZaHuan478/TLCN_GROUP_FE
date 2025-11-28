@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import MainTemplate from "../../templates/MainTemplate/MainTemplate";
 import PostModal from "../../molecules/PostModal";
 import PostCreatorBar from "../../atoms/PostCreatorBar/index.tsx";
@@ -10,6 +11,7 @@ import { getUserBlogPermissions } from "../../../utils/userUtils.ts";
 
 const BlogPage: React.FC = () => {
     const { user } = useAuth();
+    const location = useLocation();
     const [showModal, setShowModal] = useState(false);
     const [blogs, setBlogs] = useState<Blog[]>([]);
     const [loading, setLoading] = useState(true);
@@ -20,6 +22,24 @@ const BlogPage: React.FC = () => {
     useEffect(() => {
         fetchBlogs();
     }, []);
+
+    // Handle scroll to specific blog from notification
+    useEffect(() => {
+        if (location.state?.scrollToBlogId && blogs.length > 0) {
+            const blogId = location.state.scrollToBlogId;
+            setTimeout(() => {
+                const blogElement = document.getElementById(`blog-${blogId}`);
+                if (blogElement) {
+                    blogElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    // Highlight the blog briefly
+                    blogElement.style.border = '2px solid #3B82F6';
+                    setTimeout(() => {
+                        blogElement.style.border = '';
+                    }, 3000);
+                }
+            }, 100);
+        }
+    }, [location.state, blogs]);
 
     const fetchBlogs = async (forceRefresh = true) => {
         try {
