@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
+import { Button } from '../../atoms/Button/Button';
 
 type SidebarProps = {
   className?: string;
@@ -50,7 +51,7 @@ export const UserSidebar: React.FC<SidebarProps> = ({ className = '' }) => {
         
         <nav className="space-y-2">
           {menuItems.map((item) => (
-            <button
+            <Button
               key={item.id}
               onClick={() => navigate(item.path)}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all ${
@@ -63,10 +64,10 @@ export const UserSidebar: React.FC<SidebarProps> = ({ className = '' }) => {
                 {item.icon}
               </span>
               <span>{item.label}</span>
-            </button>
+            </Button>
           ))}
 
-          <button
+          <Button
             onClick={handleLogout}
             className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left text-red-600 hover:bg-red-50 transition-all mt-4"
           >
@@ -76,7 +77,7 @@ export const UserSidebar: React.FC<SidebarProps> = ({ className = '' }) => {
               <line x1="21" y1="12" x2="9" y2="12"></line>
             </svg>
             <span>Logout</span>
-          </button>
+          </Button>
         </nav>
       </div>
     </div>

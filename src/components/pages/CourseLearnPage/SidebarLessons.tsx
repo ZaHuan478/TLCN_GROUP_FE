@@ -1,4 +1,5 @@
 import React from 'react';
+import { Button } from '../../atoms/Button/Button';
 
 type Lesson = {
     id: string;
@@ -47,7 +48,7 @@ const SidebarLessons: React.FC<SidebarLessonsProps> = ({
                             Lessons
                         </h3>
                         {lessons.map((lesson, index) => (
-                            <button
+                            <Button
                                 key={lesson.id}
                                 onClick={() => onSelectLesson(lesson.id)}
                                 className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-200 ${
@@ -90,7 +91,7 @@ const SidebarLessons: React.FC<SidebarLessonsProps> = ({
                                         </svg>
                                     )}
                                 </div>
-                            </button>
+                            </Button>
                         ))}
                     </div>
 
@@ -101,7 +102,7 @@ const SidebarLessons: React.FC<SidebarLessonsProps> = ({
                                 Current Lesson Tests
                             </h3>
                             {lessonTests.map((test, index) => (
-                                <button
+                                <Button
                                     key={test.id}
                                     onClick={() => onSelectTest(test.id)}
                                     className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-200 ${
@@ -144,7 +145,7 @@ const SidebarLessons: React.FC<SidebarLessonsProps> = ({
                                             </svg>
                                         )}
                                     </div>
-                                </button>
+                                </Button>
                             ))}
                         </div>
                     )}
@@ -156,7 +157,7 @@ const SidebarLessons: React.FC<SidebarLessonsProps> = ({
                                 Final Tests
                             </h3>
                             {finalTests.map((test) => (
-                                <button
+                                <Button
                                     key={test.id}
                                     onClick={() => onSelectTest(test.id)}
                                     className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-200 ${
@@ -212,7 +213,7 @@ const SidebarLessons: React.FC<SidebarLessonsProps> = ({
                                             </svg>
                                         )}
                                     </div>
-                                </button>
+                                </Button>
                             ))}
                         </div>
                     )}

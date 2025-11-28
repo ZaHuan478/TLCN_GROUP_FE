@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Button } from "../Button/Button";
 
 type InputProps = React.InputHTMLAttributes<HTMLInputElement> & {
     isPassword?: boolean;
@@ -24,13 +25,13 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
                     {...props}
                 />
                 {isPassword && (
-                    <button
+                    <Button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
                         className="absolute inset-y-0 right-3 flex items-center text-sm text-black hover:text-blue-500"
                     >
                         {showPassword ? "Hide" : "Show"}
-                    </button>
+                    </Button>
                 )}
             </div>
         );

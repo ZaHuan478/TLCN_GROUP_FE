@@ -6,6 +6,7 @@ import { useAuth } from "../../../contexts/AuthContext";
 import conversationApi from "../../../api/conversationApi";
 import { ConversationListItem } from "../../../types/types";
 import { Button } from "../../atoms/Button/Button";
+import { Input } from "../../atoms/Input/Input";
 
 const ConnectionsPage: React.FC = () => {
   const { user } = useAuth();
@@ -23,12 +24,10 @@ const ConnectionsPage: React.FC = () => {
     try { resetUnread(); } catch (e) { }
   }, []);
 
-  // handle possible conversationId in query params to auto-select
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const convoId = params.get("conversationId");
     if (!convoId) return;
-    // once conversations loaded, select matching conversation
     if (conversations.length > 0) {
       const found = conversations.find((c) => c.conversation.id === convoId);
       if (found) setSelected(found);
@@ -38,7 +37,6 @@ const ConnectionsPage: React.FC = () => {
   useEffect(() => {
     if (selected) {
       fetchMessages(selected.conversation.id);
-      // ensure socket is connected and join conversation room for real-time updates
       try {
         const sock = socketService.connectSocket(user?.id || '');
         if (sock) {
@@ -58,7 +56,6 @@ const ConnectionsPage: React.FC = () => {
     }
   }, [selected]);
 
-  // leave conversation room when switching or unmounting
   useEffect(() => {
     let prevId: string | null = null;
     if (selected) prevId = selected.conversation.id;
@@ -69,22 +66,18 @@ const ConnectionsPage: React.FC = () => {
     };
   }, [selected]);
 
-  // subscribe to new_message socket events
   useEffect(() => {
     const off = socketService.onNewMessage((payload: any) => {
       try {
         if (!payload) return;
         const { conversationId, message } = payload;
-        // ignore messages sent by ourselves to avoid duplicate (we already append REST response)
         if (message && message.sender && user && String(message.sender.id) === String(user.id)) {
           return;
         }
-        // only append if it's for the currently selected conversation
         if (selected && selected.conversation.id === conversationId) {
           setMessages((s) => [...s, message]);
           scrollToBottom();
         } else {
-          // optionally update conversation list preview (lastMessage)
           setConversations((prev) => prev.map((c) => {
             if (c.conversation.id === conversationId) {
               return { ...c, lastMessage: message };
@@ -102,7 +95,6 @@ const ConnectionsPage: React.FC = () => {
         if (off && typeof off === 'function') off();
       } catch (e) { }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected]);
 
   const fetchConversations = async () => {
@@ -158,22 +150,10 @@ const ConnectionsPage: React.FC = () => {
 
   return (
     <div className="flex h-[calc(100vh-80px)] bg-gray-50">
-      {/* Left Sidebar: Conversations List */}
       <div className="w-96 bg-white border-r flex flex-col">
         {/* Header */}
         <div className="px-6 py-4 border-b">
           <h1 className="text-xl font-bold text-gray-900 mb-4">Messages</h1>
-          {/* Search */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search conversations..."
-              className="w-full pl-10 pr-4 py-2 bg-gray-100 border-0 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
         </div>
 
         {/* Conversations List */}
@@ -209,7 +189,6 @@ const ConnectionsPage: React.FC = () => {
                       <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
                     </div>
 
-                    {/* Content */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-sm font-semibold text-gray-900 truncate">
@@ -261,15 +240,9 @@ const ConnectionsPage: React.FC = () => {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <button className="w-9 h-9 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-600 transition-colors">
-                  <Phone className="w-5 h-5" />
-                </button>
-                <button className="w-9 h-9 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-600 transition-colors">
-                  <Video className="w-5 h-5" />
-                </button>
-                <button className="w-9 h-9 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-600 transition-colors">
+                <Button className="w-9 h-9 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-600 transition-colors">
                   <MoreVertical className="w-5 h-5" />
-                </button>
+                </Button>
               </div>
             </div>
 
@@ -310,7 +283,7 @@ const ConnectionsPage: React.FC = () => {
             {/* Input Area */}
             <div className="px-6 py-4 border-t bg-white">
               <div className="flex items-center gap-3 max-w-4xl mx-auto">
-                <input
+                <Input
                   type="text"
                   value={messageText}
                   onChange={(e) => setMessageText(e.target.value)}

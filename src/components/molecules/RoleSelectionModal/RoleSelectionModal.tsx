@@ -2,6 +2,7 @@ import React from 'react';
 import Heading from '../../atoms/Heading/Heading';
 import { Building2 } from 'lucide-react';
 import { School } from 'lucide-react';
+import { Button } from '../../atoms/Button/Button';
 
 type RoleSelectionModalProps = {
   isOpen: boolean;
@@ -48,7 +49,7 @@ const RoleSelectionModal: React.FC<RoleSelectionModalProps> = ({ isOpen, onSelec
 
         <div className="space-y-4">
           {roleOptions.map((role) => (
-            <button
+            <Button
               key={role.id}
               onClick={() => onSelectRole(role.id)}
               className="w-full flex items-center p-4 border border-gray-200 rounded-lg hover:shadow-md transition-all group"
@@ -62,7 +63,7 @@ const RoleSelectionModal: React.FC<RoleSelectionModalProps> = ({ isOpen, onSelec
                 <h4 className="font-bold text-lg">{role.title}</h4>
                 <p className="text-gray-600 text-sm">{role.description}</p>
               </div>
-            </button>
+            </Button>
           ))}
         </div>
       </div>

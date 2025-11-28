@@ -39,15 +39,15 @@ const EditLessonModal: React.FC<EditLessonModalProps> = ({
                         </svg>
                         Edit Lessons
                     </h3>
-                    <button 
-                        onClick={onClose} 
+                    <Button
+                        onClick={onClose}
                         className="text-gray-400 hover:text-gray-600 transition-colors"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <line x1="18" y1="6" x2="6" y2="18"></line>
                             <line x1="6" y1="6" x2="18" y2="18"></line>
                         </svg>
-                    </button>
+                    </Button>
                 </div>
 
                 <div className="space-y-6">
@@ -90,15 +90,15 @@ const EditLessonModal: React.FC<EditLessonModalProps> = ({
                     </div>
 
                     <div className="flex justify-end gap-3 mt-8 pt-6 border-t">
-                        <Button 
-                            variant="secondary" 
+                        <Button
+                            variant="secondary"
                             onClick={onClose}
                             className="px-6"
                         >
                             Cancel
                         </Button>
-                        <Button 
-                            variant="primary" 
+                        <Button
+                            variant="primary"
                             onClick={onSubmit}
                             className="px-6"
                         >

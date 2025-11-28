@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import MainTemplate from "../../templates/MainTemplate/MainTemplate";
 import { getUserProfile } from "../../../services/userService";
+import { Button } from "../../atoms/Button/Button";
 
 const UserProfilePage: React.FC = () => {
   const { id } = useParams();
@@ -22,7 +23,7 @@ const UserProfilePage: React.FC = () => {
     <MainTemplate>
       <div className="max-w-3xl mx-auto p-6">
         <div className="mb-4">
-          <button onClick={() => navigate(-1)} className="text-sm text-blue-600">&larr; Back</button>
+          <Button onClick={() => navigate(-1)} className="text-sm text-blue-600">&larr; Back</Button>
         </div>
         {loading ? (
           <div>Loading...</div>

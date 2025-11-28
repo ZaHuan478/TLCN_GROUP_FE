@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { Button } from "../../atoms/Button/Button";
 
 type ToastProps = {
     message: string;
@@ -34,12 +35,12 @@ export const Toast: React.FC<ToastProps> = ({ message, type, onClose, duration =
             <div className={`px-6 py-3 rounded-lg shadow-lg ${getTypeStyles()}`}>
                 <div className="flex items-center justify-between">
                     <span>{message}</span>
-                    <button
+                    <Button
                         onClick={onClose}
                         className="ml-4 text-white hover:text-gray-200"
                     >
                         ×
-                    </button>
+                    </Button>
                 </div>
             </div>
         </div>

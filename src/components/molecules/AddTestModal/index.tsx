@@ -64,7 +64,7 @@ export const AddTestModal: React.FC<AddTestModalProps> = ({ isOpen, onClose, onS
             </svg>
             Add New Career Path
           </h3>
-          <button
+          <Button
             onClick={handleClose}
             className="text-gray-400 hover:text-gray-600 transition-colors"
           >
@@ -72,7 +72,7 @@ export const AddTestModal: React.FC<AddTestModalProps> = ({ isOpen, onClose, onS
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
-          </button>
+          </Button>
         </div>
 
         {/* Body */}
@@ -112,7 +112,7 @@ export const AddTestModal: React.FC<AddTestModalProps> = ({ isOpen, onClose, onS
               Image Test
             </label>
             <div className="space-y-3">
-              <input
+              <Input
                 ref={fileInputRef}
                 type="file"
                 accept="image/*"
@@ -120,7 +120,7 @@ export const AddTestModal: React.FC<AddTestModalProps> = ({ isOpen, onClose, onS
                 className="hidden"
               />
 
-              <button
+              <Button
                 onClick={() => fileInputRef.current?.click()}
                 className="w-full flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-blue-400 hover:text-blue-600 transition-all disabled:bg-gray-100 disabled:cursor-not-allowed"
                 disabled={loading}
@@ -131,7 +131,7 @@ export const AddTestModal: React.FC<AddTestModalProps> = ({ isOpen, onClose, onS
                   <polyline points="21 15 16 10 5 21"></polyline>
                 </svg>
                 {image ? 'Change Image' : 'Upload Image'}
-              </button>
+              </Button>
 
               {imagePreview && (
                 <div className="relative rounded-lg overflow-hidden border border-gray-200">
@@ -140,7 +140,7 @@ export const AddTestModal: React.FC<AddTestModalProps> = ({ isOpen, onClose, onS
                     alt="Preview"
                     className="w-full h-48 object-cover"
                   />
-                  <button
+                  <Button
                     onClick={() => {
                       setImage(null);
                       setImagePreview(null);
@@ -152,7 +152,7 @@ export const AddTestModal: React.FC<AddTestModalProps> = ({ isOpen, onClose, onS
                       <line x1="18" y1="6" x2="6" y2="18"></line>
                       <line x1="6" y1="6" x2="18" y2="18"></line>
                     </svg>
-                  </button>
+                  </Button>
                 </div>
               )}
             </div>

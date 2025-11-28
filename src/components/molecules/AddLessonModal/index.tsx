@@ -39,7 +39,7 @@ const AddLessonModal: React.FC<AddLessonModalProps> = ({
                         </svg>
                         Add New Lesson
                     </h3>
-                    <button
+                    <Button
                         onClick={onClose}
                         className="text-gray-400 hover:text-gray-600 transition-colors"
                     >
@@ -47,7 +47,7 @@ const AddLessonModal: React.FC<AddLessonModalProps> = ({
                             <line x1="18" y1="6" x2="6" y2="18"></line>
                             <line x1="6" y1="6" x2="18" y2="18"></line>
                         </svg>
-                    </button>
+                    </Button>
                 </div>
 
                 <div className="space-y-6">

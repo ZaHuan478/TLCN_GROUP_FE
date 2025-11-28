@@ -160,7 +160,7 @@ const AIChat: React.FC = () => {
         {/* Navigation Actions */}
         <div className="flex-1 px-4 py-4">
           <div className="space-y-2">
-            <button
+            <Button
               onClick={handleGetAssessment}
               className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors text-left group"
             >
@@ -175,9 +175,9 @@ const AIChat: React.FC = () => {
                 <p className="text-sm font-medium text-gray-900">Assessment</p>
                 <p className="text-xs text-gray-500">Get learning report</p>
               </div>
-            </button>
+            </Button>
 
-            <button
+            <Button
               onClick={handleClearHistory}
               className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors text-left group"
             >
@@ -191,7 +191,7 @@ const AIChat: React.FC = () => {
                 <p className="text-sm font-medium text-gray-900">Clear History</p>
                 <p className="text-xs text-gray-500">Delete all messages</p>
               </div>
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -232,7 +232,7 @@ const AIChat: React.FC = () => {
               <p className="text-lg font-medium text-gray-600">Hello {user?.fullName}!</p>
               <p className="text-sm text-gray-500 mt-2">Start by asking me a question</p>
               <div className="mt-6 grid grid-cols-2 gap-3 max-w-md">
-                <button
+                <Button
                   onClick={() => setInputText("What should I study today?")}
                   className="px-4 py-3 bg-white border border-gray-200 rounded-lg hover:border-gray-300 hover:bg-gray-50 text-sm text-left transition-colors flex items-center gap-2"
                 >
@@ -241,8 +241,8 @@ const AIChat: React.FC = () => {
                     <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
                   </svg>
                   <span>Study suggestions</span>
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={() => setInputText("Explain this concept to me")}
                   className="px-4 py-3 bg-white border border-gray-200 rounded-lg hover:border-gray-300 hover:bg-gray-50 text-sm text-left transition-colors flex items-center gap-2"
                 >
@@ -252,8 +252,8 @@ const AIChat: React.FC = () => {
                     <line x1="12" y1="17" x2="12.01" y2="17"></line>
                   </svg>
                   <span>Explain concepts</span>
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={() => setInputText("Help me with my homework")}
                   className="px-4 py-3 bg-white border border-gray-200 rounded-lg hover:border-gray-300 hover:bg-gray-50 text-sm text-left transition-colors flex items-center gap-2"
                 >
@@ -262,8 +262,8 @@ const AIChat: React.FC = () => {
                     <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
                   </svg>
                   <span>Homework help</span>
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={() => setInputText("Create a study plan")}
                   className="px-4 py-3 bg-white border border-gray-200 rounded-lg hover:border-gray-300 hover:bg-gray-50 text-sm text-left transition-colors flex items-center gap-2"
                 >
@@ -274,7 +274,7 @@ const AIChat: React.FC = () => {
                     <line x1="3" y1="10" x2="21" y2="10"></line>
                   </svg>
                   <span>Study planning</span>
-                </button>
+                </Button>
               </div>
             </div>
           ) : (
@@ -351,7 +351,7 @@ const AIChat: React.FC = () => {
               </svg>
               <h2 className="font-semibold">Learning Assessment</h2>
             </div>
-            <button
+            <Button
               onClick={() => setShowAssessment(false)}
               className="text-gray-500 hover:text-gray-700 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
             >
@@ -359,7 +359,7 @@ const AIChat: React.FC = () => {
                 <line x1="18" y1="6" x2="6" y2="18"></line>
                 <line x1="6" y1="6" x2="18" y2="18"></line>
               </svg>
-            </button>
+            </Button>
           </div>
           <div className="p-4">
             {loadingAssessment ? (

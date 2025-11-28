@@ -212,12 +212,12 @@ export const CompanyManagement: React.FC = () => {
                         </td>
                         <AdminOnly>
                           <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <button
+                            <Button
                               className="text-red-600 hover:text-red-900"
                               onClick={() => handleDeleteClick(company.id)}
                             >
                               Deactivate
-                            </button>
+                            </Button>
                           </td>
                         </AdminOnly>
                       </tr>

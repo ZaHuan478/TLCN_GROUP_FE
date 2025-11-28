@@ -3,15 +3,14 @@ import NavLinks from "../../molecules/NavLinks/NavLinks";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "../../atoms/Button/Button";
 import { useAuth } from "../../../contexts/AuthContext";
-import { MessageCircle } from 'lucide-react';
 import searchApi, { } from '../../../api/searchApi';
 import { SearchAllResponse } from '../../../types/types';
 import { Input } from "../../atoms/Input/Input";
 import NotificationDropdown from "../../molecules/NotificationDropdown";
-
+import MessageDropdown from "../../molecules/MessageDropdown";
 
 const Navbar: React.FC = () => {
-  const { user, isAuthenticated, logout, refreshUser, unreadMessages, resetUnread, notifications, clearNotifications } = useAuth() as any;
+  const { user, isAuthenticated, logout, refreshUser } = useAuth() as any;
   const location = useLocation();
 
 
@@ -20,8 +19,6 @@ const Navbar: React.FC = () => {
   }
   const navigate = useNavigate();
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
-  const [showNotifDropdown, setShowNotifDropdown] = useState(false);
-  const notifRef = useRef<HTMLDivElement | null>(null);
   const profileRef = useRef<HTMLDivElement | null>(null);
   const searchRef = useRef<HTMLDivElement | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -43,9 +40,6 @@ const Navbar: React.FC = () => {
       if (profileRef.current && !profileRef.current.contains(target) && showProfileDropdown) {
         setShowProfileDropdown(false);
       }
-      if (notifRef.current && !notifRef.current.contains(target) && showNotifDropdown) {
-        setShowNotifDropdown(false);
-      }
       if (searchRef.current && !searchRef.current.contains(target) && showSearchDropdown) {
         setShowSearchDropdown(false);
       }
@@ -54,7 +48,7 @@ const Navbar: React.FC = () => {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [showProfileDropdown, showNotifDropdown, showSearchDropdown]);
+  }, [showProfileDropdown, showSearchDropdown]);
 
   const handleLogout = async () => {
     try {
@@ -302,50 +296,13 @@ const Navbar: React.FC = () => {
         {isAuthenticated && user ? (
           <div className="relative flex items-center" ref={profileRef}>
             <div className="mr-3 flex items-center gap-2">
-              {/* Messages Button with Notifications */}
-              <div className="relative" ref={notifRef}>
-                <button
-                  title="Messages"
-                  onClick={() => { setShowNotifDropdown((s) => !s); try { resetUnread && resetUnread(); } catch (e) { } }}
-                  className="relative w-10 h-10 rounded-full bg-gray-100 text-gray-700 flex items-center justify-center font-semibold focus:outline-none hover:bg-gray-200 transition-colors"
-                >
-                  <MessageCircle />
-                  {(unreadMessages || 0) > 0 && (
-                    <span className="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">{unreadMessages}</span>
-                  )}
-                </button>
+              <MessageDropdown />
 
-                {/** Messages dropdown */}
-                {showNotifDropdown && (
-                  <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-md shadow-lg py-2 z-20 border border-gray-200">
-                    <div className="px-4 py-2 text-sm text-gray-700">You have {unreadMessages || 0} new message{(unreadMessages || 0) > 1 ? 's' : ''}.</div>
-                    <div className="max-h-48 overflow-auto">
-                      {(notifications && notifications.length > 0) ? (
-                        notifications.map((n: any, idx: number) => (
-                          <div key={idx} className="px-3 py-2 border-t text-sm cursor-pointer hover:bg-gray-50" onClick={() => { try { resetUnread && resetUnread(); clearNotifications && clearNotifications(); navigate(`/connections?conversationId=${n.conversationId}`); setShowNotifDropdown(false); } catch (e) { } }}>
-                            <div className="font-medium">{n.message?.sender?.fullName || n.message?.sender?.username || 'Someone'}</div>
-                            <div className="text-xs text-gray-600 truncate">{n.message?.content}</div>
-                          </div>
-                        ))
-                      ) : (
-                        <div className="px-3 py-2 text-sm text-gray-500">No new messages</div>
-                      )}
-                    </div>
-                    <div className="px-2 py-2 border-t">
-                      <button className="w-full text-left text-sm text-blue-600 px-3 py-1 hover:bg-gray-50" onClick={() => { try { resetUnread && resetUnread(); clearNotifications && clearNotifications(); navigate('/connections'); setShowNotifDropdown(false); } catch (e) { } }}>
-                        View all messages
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Notifications Button */}
               <NotificationDropdown />
             </div>
 
             <div className="relative">
-              <button
+              <Button
                 onClick={() => setShowProfileDropdown(!showProfileDropdown)}
                 className="w-10 h-10 rounded-full bg-gray-700 text-white flex items-center justify-center font-semibold focus:outline-none hover:bg-gray-800 transition-colors overflow-hidden"
               >
@@ -363,7 +320,7 @@ const Navbar: React.FC = () => {
                 ) : (
                   getInitials()
                 )}
-              </button>
+              </Button>
 
               {showProfileDropdown && (
                 <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-lg shadow-lg overflow-hidden z-20 border border-gray-200 animate-slideDown">
@@ -380,28 +337,28 @@ const Navbar: React.FC = () => {
                   {/* Menu Items */}
                   <div className="py-1">
                     <Link to="/profile" onClick={() => setShowProfileDropdown(false)}>
-                      <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center gap-2 group">
+                      <Button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center gap-2 group">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500 group-hover:text-blue-600 transition-colors">
                           <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                           <circle cx="12" cy="7" r="4"></circle>
                         </svg>
                         <span>Profile</span>
-                      </button>
+                      </Button>
                     </Link>
 
                     <Link to="/settings" onClick={() => setShowProfileDropdown(false)}>
-                      <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors flex items-center gap-2 group">
+                      <Button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors flex items-center gap-2 group">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500 group-hover:text-gray-900 transition-colors">
                           <circle cx="12" cy="12" r="3"></circle>
                           <path d="M12 1v6m0 6v6M5.64 5.64l4.24 4.24m4.24 4.24l4.24 4.24M1 12h6m6 0h6M5.64 18.36l4.24-4.24m4.24-4.24l4.24-4.24"></path>
                         </svg>
                         <span>Settings</span>
-                      </button>
+                      </Button>
                     </Link>
 
                     {user?.role === 'COMPANY' && (
                       <Link to="/career-paths" onClick={() => setShowProfileDropdown(false)}>
-                        <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors flex items-center gap-2 group">
+                        <Button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors flex items-center gap-2 group">
                           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500 group-hover:text-purple-600 transition-colors">
                             <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
                             <circle cx="9" cy="7" r="4"></circle>
@@ -409,14 +366,14 @@ const Navbar: React.FC = () => {
                             <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                           </svg>
                           <span>Career Paths</span>
-                        </button>
+                        </Button>
                       </Link>
                     )}
 
                     {/* Divider */}
                     <div className="my-1 border-t border-gray-100"></div>
 
-                    <button
+                    <Button
                       onClick={handleLogout}
                       className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors flex items-center gap-2 group"
                     >
@@ -426,7 +383,7 @@ const Navbar: React.FC = () => {
                         <line x1="21" y1="12" x2="9" y2="12"></line>
                       </svg>
                       <span>Log out</span>
-                    </button>
+                    </Button>
                   </div>
                 </div>
               )}

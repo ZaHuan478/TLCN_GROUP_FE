@@ -4,6 +4,7 @@ import { getEnrolledCourses } from '../../../api/studentApi';
 import { courseApi } from '../../../api/courseApi';
 import { ChevronDown, ChevronUp, Users } from 'lucide-react';
 import { userApi } from '../../../api/userApi';
+import { Button } from '../../atoms/Button/Button';
 
 type CourseProgress = {
   id: string;
@@ -313,7 +314,7 @@ export const UserCoursesSection: React.FC<UserCoursesSectionProps> = ({
                     className="text-xs shrink-0"
                   />
                   {userRole === 'COMPANY' && (
-                    <button
+                    <Button
                       onClick={() => toggleCourseExpansion(course.id)}
                       className="p-1 hover:bg-gray-200 rounded transition-colors"
                       title={expandedCourses.has(course.id) ? 'Hide students' : 'Show students'}
@@ -323,7 +324,7 @@ export const UserCoursesSection: React.FC<UserCoursesSectionProps> = ({
                       ) : (
                         <ChevronDown className="w-5 h-5 text-gray-600" />
                       )}
-                    </button>
+                    </Button>
                   )}
                 </div>
               </div>

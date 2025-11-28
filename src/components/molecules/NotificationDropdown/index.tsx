@@ -3,6 +3,8 @@ import { notificationApi } from '../../../api/notificationApi';
 import { onNewNotification, onNotificationsRead } from '../../../services/socket';
 import { Notification } from '../../../types/types';
 import { useNavigate } from 'react-router-dom';
+import { Bell } from 'lucide-react';
+import { Button } from '../../atoms/Button/Button';
 
 const NotificationDropdown: React.FC = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -60,8 +62,8 @@ const NotificationDropdown: React.FC = () => {
   const markAsRead = async (notificationIds: string[]) => {
     try {
       await notificationApi.markAsRead(notificationIds);
-      setNotifications(prev => 
-        prev.map(n => 
+      setNotifications(prev =>
+        prev.map(n =>
           notificationIds.includes(n.id) ? { ...n, isRead: true } : n
         )
       );
@@ -71,25 +73,20 @@ const NotificationDropdown: React.FC = () => {
   };
 
   const handleNotificationClick = (notification: Notification) => {
-    console.log('Notification clicked:', notification);
-    console.log('Actor data:', notification.actor);
-    
     if (!notification.isRead) {
       markAsRead([notification.id]);
     }
 
     setIsOpen(false);
 
-    // Navigate to blog and trigger blog modal open
     if (notification.blogId) {
-      navigate('/', { 
-        state: { 
+      navigate('/', {
+        state: {
           scrollToBlogId: notification.blogId,
-          openBlogModal: notification.blogId 
-        } 
+          openBlogModal: notification.blogId
+        }
       });
-      
-      // Trigger blog modal after navigation
+
       setTimeout(() => {
         const blogElement = document.getElementById(`blog-${notification.blogId}`);
         if (blogElement) {
@@ -123,30 +120,25 @@ const NotificationDropdown: React.FC = () => {
 
   return (
     <div className="relative">
-      {/* Notification Bell */}
-      <button
+      <Button
         onClick={() => setIsOpen(!isOpen)}
         className="relative p-2 text-gray-600 hover:text-gray-900 focus:outline-none"
       >
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM9 17H4l5 5v-5zM12 3a6 6 0 016 6c0 7 3 9 3 9H3s3-2 3-9a6 6 0 016-6z" />
-        </svg>
-        
-        {/* Unread Badge */}
+         <Bell className='w-6 h-6'/>
+
         {unreadCount > 0 && (
           <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
-      </button>
+      </Button>
 
-      {/* Dropdown Menu */}
       {isOpen && (
         <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
           <div className="p-4 border-b border-gray-200">
             <h3 className="text-lg font-semibold">Notifications</h3>
             {unreadCount > 0 && (
-              <button
+              <Button
                 onClick={() => {
                   const unreadIds = notifications.filter(n => !n.isRead).map(n => n.id);
                   markAsRead(unreadIds);
@@ -154,7 +146,7 @@ const NotificationDropdown: React.FC = () => {
                 className="text-sm text-blue-600 hover:text-blue-800"
               >
                 Mark all as read
-              </button>
+              </Button>
             )}
           </div>
 
@@ -168,31 +160,34 @@ const NotificationDropdown: React.FC = () => {
                 <div
                   key={notification.id}
                   onClick={() => handleNotificationClick(notification)}
-                  className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 ${
-                    !notification.isRead ? 'bg-blue-50' : ''
-                  }`}
+                  className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 ${!notification.isRead ? 'bg-blue-50' : ''
+                    }`}
                 >
                   <div className="flex items-start space-x-3">
-                    {/* Actor Avatar */}
-                    {notification.actor && (
+                    {notification.actor ? (
                       <img
-                        src={notification.actor.avatar || 'https://via.placeholder.com/40x40/gray/white?text=U'}
+                        src={notification.actor.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(notification.actor.fullName || notification.actor.username || 'User')}&background=3B82F6&color=fff&size=40`}
                         alt={notification.actor.fullName || notification.actor.username}
-                        className="w-10 h-10 rounded-full object-cover"
+                        className="w-10 h-10 rounded-full object-cover border border-gray-200"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
-                          target.src = 'https://via.placeholder.com/40x40/gray/white?text=U';
+                          const name = notification.actor?.fullName || notification.actor?.username || 'User';
+                          target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=6B7280&color=fff&size=40`;
                         }}
                       />
+                    ) : (
+                      <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+                        <span className="text-white text-sm font-medium">?</span>
+                      </div>
                     )}
-                    
+
                     <div className="flex-1 min-w-0">
                       <p className="text-sm text-gray-900">{notification.message}</p>
                       <p className="text-xs text-gray-500 mt-1">
                         {formatTimeAgo(notification.createdAt)}
                       </p>
                     </div>
-                    
+
                     {!notification.isRead && (
                       <div className="w-2 h-2 bg-blue-600 rounded-full flex-shrink-0 mt-1"></div>
                     )}
@@ -204,9 +199,9 @@ const NotificationDropdown: React.FC = () => {
 
           {notifications.length > 10 && (
             <div className="p-4 border-t border-gray-200">
-              <button className="text-sm text-blue-600 hover:text-blue-800 w-full text-center">
+              <Button className="text-sm text-blue-600 hover:text-blue-800 w-full text-center">
                 View all notifications
-              </button>
+              </Button>
             </div>
           )}
         </div>

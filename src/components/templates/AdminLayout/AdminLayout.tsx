@@ -2,6 +2,7 @@ import React, { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../../../contexts/AuthContext";
 import AdminOnly from "../../atoms/AdminOnly/AdminOnly";
+import { Button } from "../../atoms/Button/Button";
 
 type SidebarItem = {
   path: string;
@@ -154,7 +155,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
 
           {/* Logout Button */}
           <div className="p-3 border-t border-gray-200">
-            <button
+            <Button
               onClick={handleLogout}
               className="w-full flex items-center space-x-3 px-3 py-2.5 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
             >
@@ -162,7 +163,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
               </svg>
               <span className="text-sm font-medium">Logout</span>
-            </button>
+            </Button>
           </div>
         </div>
       </aside>

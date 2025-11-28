@@ -108,7 +108,7 @@ export const StudentSettingsForm: React.FC = () => {
       {/* Tab Navigation */}
       <div className="border-b border-gray-200">
         <nav className="-mb-px flex gap-6">
-          <button
+          <Button
             onClick={() => setActiveTab('profile')}
             className={`pb-3 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === 'profile'
                 ? 'border-blue-500 text-blue-600'
@@ -122,8 +122,8 @@ export const StudentSettingsForm: React.FC = () => {
               </svg>
               Profile Settings
             </div>
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={() => setActiveTab('learning')}
             className={`pb-3 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === 'learning'
                 ? 'border-blue-500 text-blue-600'
@@ -137,7 +137,7 @@ export const StudentSettingsForm: React.FC = () => {
               </svg>
               Learning Results
             </div>
-          </button>
+          </Button>
         </nav>
       </div>
 

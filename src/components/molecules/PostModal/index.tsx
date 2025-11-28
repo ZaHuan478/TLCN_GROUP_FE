@@ -63,7 +63,6 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onPost, initialData }) =
     };
 
     const handlePost = () => {
-        // Defensive check: ensure current user is allowed to create posts
         if (!canUserCreateBlog(user as any)) {
             alert("You don't have permission to create posts.");
             onClose();
@@ -86,7 +85,7 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onPost, initialData }) =
                 </h2>
 
                 <Textarea
-                    placeholder={`What's on your mind, ${user?.fullName || user?.userName || 'there'}?`}
+                    placeholder={`What's on your mind, ${user?.fullName || user?.username || 'there'}?`}
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
                     rows={4}
@@ -103,13 +102,13 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onPost, initialData }) =
                                     alt={`Preview ${index + 1}`}
                                     className="w-full h-32 object-cover rounded-lg"
                                 />
-                                <button
+                                <Button
                                     type="button"
                                     onClick={() => removeImage(index)}
                                     className="absolute top-1 right-1 bg-black bg-opacity-50 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-opacity-70"
                                 >
                                     ×
-                                </button>
+                                </Button>
                             </div>
                         ))}
                     </div>

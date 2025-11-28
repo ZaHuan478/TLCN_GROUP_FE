@@ -182,21 +182,21 @@ export const CommentItem: React.FC<CommentItemProps> = ({
                     </span>
 
                     {canComment && depth < maxDepth && (
-                        <button
+                        <Button
                             onClick={() => setShowReplyInput(!showReplyInput)}
                             className="text-xs font-semibold text-blue-600 hover:underline"
                         >
                             {showReplyInput ? 'Cancel' : 'Reply'}
-                        </button>
+                        </Button>
                     )}
 
                     {hasReplies && (
-                        <button
+                        <Button
                             onClick={() => setShowReplies(!showReplies)}
                             className="text-xs font-semibold text-blue-600 hover:underline"
                         >
                             {showReplies ? 'Ẩn' : 'Xem'} {comment.replies!.length} phản hồi
-                        </button>
+                        </Button>
                     )}
                 </div>
 

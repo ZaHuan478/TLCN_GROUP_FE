@@ -143,7 +143,7 @@ export const TestDetailsModal: React.FC<TestDetailsModalProps> = ({ isOpen, onCl
                             </svg>
                         </div>
                     )}
-                    <button
+                    <Button
                         onClick={onClose}
                         className="absolute top-4 right-4 bg-black bg-opacity-50 hover:bg-opacity-70 text-white p-2 rounded-full transition-all"
                     >
@@ -151,7 +151,7 @@ export const TestDetailsModal: React.FC<TestDetailsModalProps> = ({ isOpen, onCl
                             <line x1="18" y1="6" x2="6" y2="18"></line>
                             <line x1="6" y1="6" x2="18" y2="18"></line>
                         </svg>
-                    </button>
+                    </Button>
 
                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 flex justify-between items-end">
                         <h2 className="text-3xl font-bold text-white">{test?.title || 'Loading...'}</h2>

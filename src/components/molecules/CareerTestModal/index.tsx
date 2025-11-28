@@ -152,12 +152,10 @@ export const CareerTestModal: React.FC<CareerTestModalProps> = ({
                                     {test.questions[currentQuestion].question}
                                 </h3>
 
-                                {/* Options */}
                                 <div className="space-y-4">
                                     {Object.entries(test.questions[currentQuestion].options).map(([key, value]) => {
-                                        console.log('🔍 Option key:', key, 'value:', value);
                                         return (
-                                        <button
+                                        <Button
                                             key={key}
                                             onClick={() => handleAnswer(key as 'A' | 'B' | 'C' | 'D')}
                                             className={`w-full text-left p-5 rounded-xl border-2 transition-all duration-200 ${getCurrentAnswer() === key
@@ -174,15 +172,14 @@ export const CareerTestModal: React.FC<CareerTestModalProps> = ({
                                                 </span>
                                                 <span className="text-gray-900 text-lg">{value}</span>
                                             </div>
-                                        </button>
-                                    )})})
+                                        </Button>
+                                    )})}
                                 </div>
                             </div>
 
-                            {/* Question Navigation */}
                             <div className="flex flex-wrap gap-3 mb-8">
                                 {test.questions.map((_, index) => (
-                                    <button
+                                    <Button
                                         key={index}
                                         onClick={() => setCurrentQuestion(index)}
                                         className={`w-10 h-10 rounded-lg text-sm font-semibold transition-colors ${index === currentQuestion
@@ -193,7 +190,7 @@ export const CareerTestModal: React.FC<CareerTestModalProps> = ({
                                             }`}
                                     >
                                         {index + 1}
-                                    </button>
+                                    </Button>
                                 ))}
                             </div>
                         </>

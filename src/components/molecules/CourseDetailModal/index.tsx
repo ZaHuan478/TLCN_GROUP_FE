@@ -37,7 +37,7 @@ const CourseDetailModal: React.FC<CourseDetailModalProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
           <h3 className="text-2xl font-bold text-gray-900">Course Details</h3>
-          <button
+          <Button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 transition-colors"
           >
@@ -45,7 +45,7 @@ const CourseDetailModal: React.FC<CourseDetailModalProps> = ({
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
-          </button>
+          </Button>
         </div>
 
         {/* Body */}

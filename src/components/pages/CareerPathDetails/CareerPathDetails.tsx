@@ -337,7 +337,7 @@ const CareerPathDetailsPage: React.FC = () => {
 
                 {/* Back Button */}
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                    <button
+                    <Button
                         onClick={() => navigate('/career-paths')}
                         className="flex items-center text-gray-600 hover:text-gray-900 transition-colors"
                     >
@@ -346,7 +346,7 @@ const CareerPathDetailsPage: React.FC = () => {
                             <polyline points="12 19 5 12 12 5"></polyline>
                         </svg>
                         Back to list
-                    </button>
+                    </Button>
                 </div>
 
                 {loading ? (
@@ -493,7 +493,7 @@ const CareerPathDetailsPage: React.FC = () => {
 
                                                         {/* Dropdown Menu */}
                                                         <div className="relative">
-                                                            <button
+                                                            <Button
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
                                                                     setOpenDropdownId(openDropdownId === lesson.id ? null : lesson.id);
@@ -505,11 +505,11 @@ const CareerPathDetailsPage: React.FC = () => {
                                                                     <circle cx="12" cy="5" r="1"></circle>
                                                                     <circle cx="12" cy="19" r="1"></circle>
                                                                 </svg>
-                                                            </button>
+                                                            </Button>
 
                                                             {openDropdownId === lesson.id && (
                                                                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-1 z-[9999]">
-                                                                    <button
+                                                                    <Button
                                                                         onClick={(e) => {
                                                                             e.stopPropagation();
                                                                             handleEditLesson(lesson);
@@ -521,8 +521,8 @@ const CareerPathDetailsPage: React.FC = () => {
                                                                             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                                                                         </svg>
                                                                         Edit Lesson
-                                                                    </button>
-                                                                    <button
+                                                                    </Button>
+                                                                    <Button
                                                                         onClick={(e) => {
                                                                             e.stopPropagation();
                                                                             handleViewLessonDetail(lesson);
@@ -537,8 +537,8 @@ const CareerPathDetailsPage: React.FC = () => {
                                                                             <line x1="16" y1="17" x2="8" y2="17"></line>
                                                                         </svg>
                                                                         View Tests
-                                                                    </button>
-                                                                    <button
+                                                                    </Button>
+                                                                    <Button
                                                                         onClick={(e) => {
                                                                             e.stopPropagation();
                                                                             handleAddTestToLesson(lesson);
@@ -552,9 +552,9 @@ const CareerPathDetailsPage: React.FC = () => {
                                                                             <line x1="9" y1="15" x2="15" y2="15"></line>
                                                                         </svg>
                                                                         Add Test to Lesson
-                                                                    </button>
+                                                                    </Button>
                                                                     <hr className="my-1 border-gray-200" />
-                                                                    <button
+                                                                    <Button
                                                                         onClick={(e) => {
                                                                             e.stopPropagation();
                                                                             handleDeleteLesson(lesson.id);
@@ -568,7 +568,7 @@ const CareerPathDetailsPage: React.FC = () => {
                                                                             <line x1="14" y1="11" x2="14" y2="17"></line>
                                                                         </svg>
                                                                         Delete Lesson
-                                                                    </button>
+                                                                    </Button>
                                                                 </div>
                                                             )}
                                                         </div>
@@ -619,7 +619,7 @@ const CareerPathDetailsPage: React.FC = () => {
                                                         {courseData.finalTest.description || 'No description provided'}
                                                     </p>
                                                 </div>
-                                                <button
+                                                <Button
                                                     onClick={() => handleEditTest(courseData.finalTest!)}
                                                     className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
                                                     title="Edit final test"
@@ -628,7 +628,7 @@ const CareerPathDetailsPage: React.FC = () => {
                                                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                                                         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                                                     </svg>
-                                                </button>
+                                                </Button>
                                             </div>
                                         </div>
                                     ) : (
@@ -649,10 +649,10 @@ const CareerPathDetailsPage: React.FC = () => {
                     </div>
                 ) : (
                     <div className="text-center py-20">
-                        <h2 className="text-2xl font-bold text-gray-900 mb-2">Không tìm thấy thông tin</h2>
-                        <p className="text-gray-500">Bài test không tồn tại hoặc đã bị xóa.</p>
+                        <h2 className="text-2xl font-bold text-gray-900 mb-2">No information found</h2>
+                        <p className="text-gray-500">The test does not exist or has been deleted.</p>
                         <Button variant="primary" onClick={() => navigate('/career-paths')} className="mt-6">
-                            Quay lại danh sách
+                            Back to list
                         </Button>
                     </div>
                 )}
@@ -687,7 +687,7 @@ const CareerPathDetailsPage: React.FC = () => {
                             <div className="flex items-center justify-between mb-6">
                                 <h3 className="text-2xl font-bold text-gray-900">{selectedLesson.title}</h3>
                                 <div className="flex items-center gap-2">
-                                    <button
+                                    <Button
                                         onClick={() => handleEditLesson(selectedLesson)}
                                         className="p-2 text-gray-400 hover:opacity-60 rounded-lg transition-opacity"
                                         title="Edit lesson"
@@ -696,13 +696,13 @@ const CareerPathDetailsPage: React.FC = () => {
                                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                                             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                                         </svg>
-                                    </button>
-                                    <button onClick={() => setShowLessonDetailModal(false)} className="text-gray-400 hover:opacity-60 transition-opacity">
+                                    </Button>
+                                    <Button onClick={() => setShowLessonDetailModal(false)} className="text-gray-400 hover:opacity-60 transition-opacity">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                             <line x1="18" y1="6" x2="6" y2="18"></line>
                                             <line x1="6" y1="6" x2="18" y2="18"></line>
                                         </svg>
-                                    </button>
+                                    </Button>
                                 </div>
                             </div>
                             <div className="prose max-w-none">
@@ -718,7 +718,7 @@ const CareerPathDetailsPage: React.FC = () => {
                                                     <p className="font-medium">{test.title}</p>
                                                     <p className="text-sm text-gray-500">{test.description}</p>
                                                 </div>
-                                                <button
+                                                <Button
                                                     onClick={() => handleEditTest(test)}
                                                     className="p-2 text-gray-400 hover:opacity-60 rounded-lg transition-opacity flex-shrink-0"
                                                     title="Edit test"
@@ -727,7 +727,7 @@ const CareerPathDetailsPage: React.FC = () => {
                                                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                                                         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                                                     </svg>
-                                                </button>
+                                                </Button>
                                             </div>
                                         ))}
                                     </div>
