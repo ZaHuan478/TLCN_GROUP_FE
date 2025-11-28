@@ -1,5 +1,7 @@
 import React from 'react';
 import Heading from '../../atoms/Heading/Heading';
+import { Building2 } from 'lucide-react';
+import { School } from 'lucide-react';
 
 type RoleSelectionModalProps = {
   isOpen: boolean;
@@ -11,7 +13,7 @@ type RoleOption = {
   id: string;
   title: string;
   description: string;
-  icon: string;
+  icon: React.ReactNode;
 }
 
 const roleOptions: RoleOption[] = [
@@ -19,14 +21,14 @@ const roleOptions: RoleOption[] = [
     id: 'student',
     title: 'Student',
     description: 'Access courses and learning materials to enhance your knowledge',
-    icon: '👨‍🎓',
+    icon: <School />,
 
   },
   {
     id: 'company',
     title: 'Company',
     description: 'Post job opportunities and recruit talented individuals',
-    icon: '🏢',
+    icon: <Building2 />,
   },
 ];
 
@@ -51,8 +53,10 @@ const RoleSelectionModal: React.FC<RoleSelectionModalProps> = ({ isOpen, onSelec
               onClick={() => onSelectRole(role.id)}
               className="w-full flex items-center p-4 border border-gray-200 rounded-lg hover:shadow-md transition-all group"
             >
-              <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white text-2xl mr-4 group-hover:scale-110 transition-transform`}>
-                {role.icon}
+              <div className={`w-12 h-12 rounded-full flex items-center justify-center mr-4 group-hover:scale-110 transition-transform ${role.id === 'student' ? ' text-blue-600' : ' text-green-600'}`}>
+                <div className="w-6 h-6">
+                  {role.icon}
+                </div>
               </div>
               <div className="text-left">
                 <h4 className="font-bold text-lg">{role.title}</h4>

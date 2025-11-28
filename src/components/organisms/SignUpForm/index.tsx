@@ -125,18 +125,27 @@ export const SignUpForm: React.FC = () => {
         registrationPayload.companyId = roleData.companyId;
       }
 
-      await register(registrationPayload);
+      const response = await register(registrationPayload);
 
-      authService.clearSession();
-      await refreshUser();
-
-      setToast({ message: "Registration successful! Redirecting to login page...", type: "success" });
+      setToast({ message: "Registration successful! Welcome to the platform!", type: "success" });
       setShowRoleModal(false);
       setPendingCredentials(null);
 
+      // Redirect based on user role after successful registration
       setTimeout(() => {
-        navigate("/signin");
-      }, 2000);
+        if (response && response.user) {
+          const user = response.user;
+          if (user.role === 'STUDENT') {
+            navigate("/");  // Home for students
+          } else if (user.role === 'COMPANY') {
+            navigate("/");  // Home for companies  
+          } else {
+            navigate("/");  // Default home
+          }
+        } else {
+          navigate("/");  // Fallback to home
+        }
+      }, 1500);
     } catch (err: any) {
       console.error('Full registration error:', err);
       console.error('Error response data:', err.response?.data);

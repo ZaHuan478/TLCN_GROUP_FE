@@ -10,6 +10,8 @@ export type User = {
   role: "STUDENT" | "COMPANY" | "ADMIN" | null;
   isActive: boolean;
   createdAt: string;
+  major?: string;
+  careerInterest?: string;
 };
 
 export type CompanyProfile = {
@@ -462,16 +464,6 @@ export type LikeInfo = {
 };
 
 export type NotificationType =
-<<<<<<< HEAD
-    | 'FOLLOW'
-    | 'LIKE'
-    | 'COMMENT'
-    | 'REPLY'
-    | 'MESSAGE'
-    | 'SYSTEM'
-    | 'COURSE_UPDATE'
-    | 'ACHIEVEMENT';
-=======
   | 'FOLLOW'
   | 'LIKE'
   | 'COMMENT'
@@ -479,7 +471,6 @@ export type NotificationType =
   | 'SYSTEM'
   | 'COURSE_UPDATE'
   | 'ACHIEVEMENT';
->>>>>>> 9ce45a4c80998c5974b19985816a1cb2bdb4b7d3
 
 export type NotificationActor = {
     id: string;
@@ -499,7 +490,6 @@ export type NotificationComment = {
 };
 
 export type Notification = {
-<<<<<<< HEAD
     id: string;
     userId: string;
     type: NotificationType;
@@ -527,15 +517,4 @@ export type UnreadCountResponse = {
 
 export type MarkAsReadPayload = {
     ids: string[];
-=======
-  id: string;
-  userId: string;
-  type: NotificationType;
-  title: string;
-  message: string;
-  data?: Record<string, any>;
-  isRead: boolean;
-  createdAt: string;
-  updatedAt: string;
->>>>>>> 9ce45a4c80998c5974b19985816a1cb2bdb4b7d3
 };

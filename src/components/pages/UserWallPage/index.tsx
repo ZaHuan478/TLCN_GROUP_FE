@@ -28,6 +28,7 @@ const UserWallPage: React.FC = () => {
     const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'warning' } | null>(null);
     const [followInfo, setFollowInfo] = useState<FollowInfo | null>(null);
     const [followLoading, setFollowLoading] = useState(false);
+    const [totalCourses, setTotalCourses] = useState(0);
 
     useEffect(() => {
         fetchUserProfile();
@@ -274,8 +275,9 @@ const UserWallPage: React.FC = () => {
                     coverColor={userProfile.coverColor}
                     type={userProfile.type}
                     stats={{
-                        courses: userProfile.courses,
+                        courses: totalCourses,
                         followers: followInfo?.followerCount ?? userProfile.followers,
+                        ...(userProfile.type === 'company' ? { students: 0 } : { points: userProfile.points }),
                     }}
                     isOwnProfile={isOwnProfile}
                     isFollowing={followInfo?.isFollowing ?? false}
@@ -323,7 +325,10 @@ const UserWallPage: React.FC = () => {
                     {/* Main Content */}
                     <div className="lg:col-span-2">
                         {activeTab === 'courses' && (
-                            <UserCoursesSection userId={userProfile.id} />
+                            <UserCoursesSection
+                                userId={userProfile.id}
+                                onCoursesLoaded={(count) => setTotalCourses(count)}
+                            />
                         )}
                         {activeTab === 'about' && (
                             <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-8">
