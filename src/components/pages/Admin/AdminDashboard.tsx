@@ -1,15 +1,55 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { AdminLayout } from "../../templates/AdminLayout/AdminLayout";
 import { AdminOnly } from "../../atoms/AdminOnly/AdminOnly";
 import { Button } from "../../atoms/Button/Button";
 import { StatCard } from "../../atoms/StatCard/StatCard";
+import { userApi } from "../../../api/userApi";
+import { blogApi } from "../../../api/blogApi";
+import { User } from "../../../types/types";
 
 export const AdminDashboard: React.FC = () => {
+  const [students, setStudents] = useState<User[]>([]);
+  const [companies, setCompanies] = useState<User[]>([]);
+  const [recentStudents, setRecentStudents] = useState<User[]>([]);
+  const [recentCompanies, setRecentCompanies] = useState<User[]>([]);
+  const [blogCount, setBlogCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      
+      // Fetch users by role
+      const [studentsData, companiesData, blogsData] = await Promise.all([
+        userApi.getAll('STUDENT'),
+        userApi.getAll('COMPANY'),
+        blogApi.getAll() // Get all blogs to count
+      ]);
+
+      setStudents(studentsData);
+      setCompanies(companiesData);
+      setBlogCount(blogsData.length || 0);
+
+      // Get recent users (last 5)
+      setRecentStudents(studentsData.slice(0, 3));
+      setRecentCompanies(companiesData.slice(0, 3));
+      
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const stats = [
     {
       label: "Total Students",
-      value: "1,234",
-      change: "+12% from last month",
+      value: loading ? "..." : students.length.toLocaleString(),
+      change: "Active users",
       positive: true,
       color: "blue" as const,
       icon: (
@@ -20,8 +60,8 @@ export const AdminDashboard: React.FC = () => {
     },
     {
       label: "Total Companies",
-      value: "89",
-      change: "+5% from last month",
+      value: loading ? "..." : companies.length.toLocaleString(),
+      change: "Registered companies",
       positive: true,
       color: "green" as const,
       icon: (
@@ -31,9 +71,9 @@ export const AdminDashboard: React.FC = () => {
       ),
     },
     {
-      label: "Active Blog Posts",
-      value: "456",
-      change: "+18% from last month",
+      label: "Total Blog Posts",
+      value: loading ? "..." : blogCount.toLocaleString(),
+      change: "Published posts",
       positive: true,
       color: "purple" as const,
       icon: (
@@ -43,14 +83,14 @@ export const AdminDashboard: React.FC = () => {
       ),
     },
     {
-      label: "Pending Reviews",
-      value: "23",
-      change: "-3% from last month",
-      positive: false,
+      label: "Total Users",
+      value: loading ? "..." : (students.length + companies.length).toLocaleString(),
+      change: "All platform users",
+      positive: true,
       color: "red" as const,
       icon: (
         <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
         </svg>
       ),
     },
@@ -67,14 +107,14 @@ export const AdminDashboard: React.FC = () => {
               Welcome back! Here's what's happening with your platform.
             </p>
           </div>
-          <AdminOnly>
-            <Button variant="primary" className="flex items-center space-x-2">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              <span>New Action</span>
-            </Button>
-          </AdminOnly>
+          <div className="flex items-center space-x-3">
+            {loading && (
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            )}
+            <span className="text-sm text-gray-500">
+              Last updated: {new Date().toLocaleTimeString()}
+            </span>
+          </div>
         </div>
 
         {/* Stats Grid */}
@@ -103,18 +143,42 @@ export const AdminDashboard: React.FC = () => {
               </AdminOnly>
             </div>
             <div className="space-y-3">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-lg transition-colors">
-                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                    <span className="text-blue-600 font-semibold text-sm">S{i}</span>
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">Student Name {i}</p>
-                    <p className="text-xs text-gray-500">student{i}@example.com</p>
-                  </div>
-                  <span className="text-xs text-gray-500">2 days ago</span>
+              {loading ? (
+                <div className="space-y-3">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="flex items-center space-x-3 p-3 animate-pulse">
+                      <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
+                      <div className="flex-1">
+                        <div className="h-4 bg-gray-200 rounded w-3/4 mb-1"></div>
+                        <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              ) : recentStudents.length > 0 ? (
+                recentStudents.map((student) => (
+                  <div key={student.id} className="flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-lg transition-colors">
+                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center overflow-hidden">
+                      {student.avatar ? (
+                        <img src={student.avatar} alt={student.fullName || student.username} className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-blue-600 font-semibold text-sm">
+                          {(student.fullName || student.username || 'U').charAt(0).toUpperCase()}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-gray-900">{student.fullName || student.username}</p>
+                      <p className="text-xs text-gray-500">{student.email}</p>
+                    </div>
+                    <span className="text-xs text-gray-500">
+                      {student.createdAt ? new Date(student.createdAt).toLocaleDateString() : 'Recently'}
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <p className="text-center text-gray-500 py-4">No students found</p>
+              )}
             </div>
           </div>
 
@@ -127,18 +191,42 @@ export const AdminDashboard: React.FC = () => {
               </AdminOnly>
             </div>
             <div className="space-y-3">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-lg transition-colors">
-                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                    <span className="text-green-600 font-semibold text-sm">C{i}</span>
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">Company {i}</p>
-                    <p className="text-xs text-gray-500">company{i}@example.com</p>
-                  </div>
-                  <span className="text-xs text-gray-500">3 days ago</span>
+              {loading ? (
+                <div className="space-y-3">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="flex items-center space-x-3 p-3 animate-pulse">
+                      <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
+                      <div className="flex-1">
+                        <div className="h-4 bg-gray-200 rounded w-3/4 mb-1"></div>
+                        <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              ) : recentCompanies.length > 0 ? (
+                recentCompanies.map((company) => (
+                  <div key={company.id} className="flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-lg transition-colors">
+                    <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center overflow-hidden">
+                      {company.avatar ? (
+                        <img src={company.avatar} alt={company.fullName || company.username} className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-green-600 font-semibold text-sm">
+                          {(company.fullName || company.username || 'C').charAt(0).toUpperCase()}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-gray-900">{company.fullName || company.username}</p>
+                      <p className="text-xs text-gray-500">{company.email}</p>
+                    </div>
+                    <span className="text-xs text-gray-500">
+                      {company.createdAt ? new Date(company.createdAt).toLocaleDateString() : 'Recently'}
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <p className="text-center text-gray-500 py-4">No companies found</p>
+              )}
             </div>
           </div>
         </div>
