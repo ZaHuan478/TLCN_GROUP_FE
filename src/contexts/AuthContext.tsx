@@ -25,19 +25,46 @@ type AuthProviderProps = {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [unreadMessages, setUnreadMessages] = useState<number>(0);
-    const [notifications, setNotifications] = useState<any[]>([]);
+    const [unreadMessages, setUnreadMessages] = useState<number>(() => {
+        try {
+            const saved = localStorage.getItem('unreadMessages');
+            return saved ? parseInt(saved, 10) : 0;
+        } catch {
+            return 0;
+        }
+    });
+    const [notifications, setNotifications] = useState<any[]>(() => {
+        try {
+            const saved = localStorage.getItem('messageNotifications');
+            return saved ? JSON.parse(saved) : [];
+        } catch {
+            return [];
+        }
+    });
+    const [messageHistory, setMessageHistory] = useState<any[]>(() => {
+        try {
+            const saved = localStorage.getItem('persistedMessages');
+            return saved ? JSON.parse(saved) : [];
+        } catch (error) {
+            console.error('AuthContext - Error loading persisted messages:', error);
+            return [];
+        }
+    });
+
+    // Debug: Monitor messageHistory changes
+    useEffect(() => {
+    }, [messageHistory]);
 
     // Restore user on mount
     useEffect(() => {
         let cancelled = false;
-        
+
         const initializeAuth = async () => {
             try {
                 const oauthResult = authService.handleOAuthCallback();
-                
+
                 if (cancelled) return;
-                
+
                 if (oauthResult) {
                     // Fix: Get user info after setting tokens
                     try {
@@ -74,7 +101,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         };
 
         initializeAuth();
-        
+
         return () => {
             cancelled = true;
         };
@@ -84,8 +111,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         try {
             setIsLoading(true);
             const response = await authService.login({ username, password });
-                setUser(response.user);
-                // socket handler registration done in user-effect
+            setUser(response.user);
+            // socket handler registration done in user-effect
         } catch (error) {
             throw error;
         } finally {
@@ -98,7 +125,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             setIsLoading(true);
             await authService.logout();
             // disconnect socket when logging out
-            try { socketService.disconnectSocket(); } catch (e) {}
+            try { socketService.disconnectSocket(); } catch (e) { }
+            // Clear message notifications on logout
+            setNotifications([]);
+            setUnreadMessages(0);
+            setMessageHistory([]);
+            localStorage.removeItem('messageNotifications');
+            localStorage.removeItem('unreadMessages');
+            localStorage.removeItem('persistedMessages');
             setUser(null);
         } catch (error) {
             console.error('Logout error:', error);
@@ -111,19 +145,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     const refreshUser = async (): Promise<void> => {
         try {
-            // Try to get fresh user data from backend
             if (authService.isAuthenticated()) {
                 try {
-                    // apiClient.get already extracts .data, so response = { user: User }
                     const response = await apiClient.get<{ user: User }>('/auth/me');
                     const updatedUser = response.user;
-                    console.log('Refreshed user data:', updatedUser);
                     setUser(updatedUser);
-                    // socket handler registration done in user-effect
                     localStorage.setItem("user", JSON.stringify(updatedUser));
                 } catch (apiError) {
                     console.warn('Failed to refresh from API, using cached data:', apiError);
-                    // Fallback to cached user
                     const currentUser = await authService.getCurrentUser();
                     setUser(currentUser);
                 }
@@ -140,7 +169,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         try {
             setIsLoading(true);
             const response = await authService.register(userData);
-            console.log("Register response:", response);
 
             if (response && response.user) {
                 setUser(response.user);
@@ -157,7 +185,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
     };
 
-    const resetUnread = () => setUnreadMessages(0);
+    const resetUnread = () => {
+        setUnreadMessages(0);
+        localStorage.setItem('unreadMessages', '0');
+    };
 
     // Register a single global socket handler when `user` becomes available
     useEffect(() => {
@@ -169,11 +200,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                     if (!payload) return;
                     const { message, conversationId } = payload;
                     if (message && message.sender && String(message.sender.id) === String(user.id)) return;
-                    setUnreadMessages((v) => v + 1);
+                    setUnreadMessages((v) => {
+                        const newCount = v + 1;
+                        localStorage.setItem('unreadMessages', newCount.toString());
+                        return newCount;
+                    });
                     // add to messages notifications (separate from system notifications)
+                    // Add to temporary notifications for real-time display
                     setNotifications((prev) => {
                         const next = [{ message, conversationId, receivedAt: Date.now(), type: 'MESSAGE' }, ...prev];
-                        return next.slice(0, 20);
+                        const sliced = next.slice(0, 20);
+                        localStorage.setItem('messageNotifications', JSON.stringify(sliced));
+                        return sliced;
+                    });
+                    // Add to persistent message history
+                    setMessageHistory((prev) => {
+                        const messageData = { message, conversationId, receivedAt: Date.now(), type: 'MESSAGE', id: Date.now() + Math.random() };
+                        const next = [messageData, ...prev];
+                        const sliced = next.slice(0, 50); // Keep more messages in history
+                        localStorage.setItem('persistedMessages', JSON.stringify(sliced));
+                        return sliced;
                     });
                 });
             } catch (e) {
@@ -181,29 +227,72 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             }
         } else {
             // ensure disconnect when no user
-            try { socketService.disconnectSocket(); } catch (e) {}
+            try { socketService.disconnectSocket(); } catch (e) { }
+            // Only reset unread count and temporary notifications, keep message history
             setUnreadMessages(0);
+            setNotifications([]);
+            localStorage.removeItem('messageNotifications');
+            localStorage.removeItem('unreadMessages');
+            // Don't clear message history here - only on explicit logout
         }
 
         return () => {
-            try { if (off && typeof off === 'function') off(); } catch (e) {}
+            try { if (off && typeof off === 'function') off(); } catch (e) { }
         };
     }, [user]);
 
-    const clearNotifications = () => setNotifications([]);
+    const clearNotifications = () => {
+        setNotifications([]);
+        localStorage.removeItem('messageNotifications');
+    };
 
-    const value: AuthContextType = { 
-        user, 
+    const clearMessageHistory = () => {
+        setMessageHistory([]);
+        localStorage.removeItem('persistedMessages');
+    };
+
+    const removeMessagesFromConversation = (conversationId: string) => {
+        setMessageHistory((prev) => {
+            const filtered = prev.filter((msg) => {
+                // Remove messages from the specified conversation
+                return msg.conversationId !== conversationId && 
+                       msg.message?.conversationId !== conversationId;
+            });
+            // Update localStorage
+            localStorage.setItem('persistedMessages', JSON.stringify(filtered));
+            return filtered;
+        });
+
+        // Also clear read messages state for users from this conversation
+        try {
+            const savedReadMessages = localStorage.getItem('readMessages');
+            if (savedReadMessages) {
+                const readMessages = JSON.parse(savedReadMessages);
+                // Remove read state for all participants of this conversation
+                // Note: We don't have direct conversation->users mapping here,
+                // so MessageDropdown will handle this cleanup
+                console.log('Conversation deleted, MessageDropdown will clean up read states');
+            }
+        } catch (e) {
+            console.error('Error cleaning read messages:', e);
+        }
+    };
+
+    const value: AuthContextType = {
+        user,
         isAuthenticated: authService.isAuthenticated() && !!user,
-        isLoading, 
-        login, 
+        isLoading,
+        login,
         register,
-        logout, 
+        logout,
         refreshUser,
         unreadMessages,
         resetUnread,
         notifications,
         clearNotifications,
+        messageHistory,
+        clearMessageHistory,
+        removeMessagesFromConversation,
     } as any;
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

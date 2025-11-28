@@ -1,23 +1,28 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useLocation } from "react-router-dom";
-import { Send, Search, MoreVertical, Phone, Video } from 'lucide-react';
+import { Send, Search, MoreVertical, Phone, Video, Trash2 } from 'lucide-react';
 import socketService from "../../../services/socket";
 import { useAuth } from "../../../contexts/AuthContext";
 import conversationApi from "../../../api/conversationApi";
 import { ConversationListItem } from "../../../types/types";
 import { Button } from "../../atoms/Button/Button";
 import { Input } from "../../atoms/Input/Input";
+import { Toast } from "../../molecules/ToastNotification";
 
 const ConnectionsPage: React.FC = () => {
   const { user } = useAuth();
-  const { resetUnread } = useAuth() as any;
+  const { resetUnread, removeMessagesFromConversation } = useAuth() as any;
   const location = useLocation();
   const [conversations, setConversations] = useState<ConversationListItem[]>([]);
   const [selected, setSelected] = useState<ConversationListItem | null>(null);
   const [messages, setMessages] = useState<any[]>([]);
   const [messageText, setMessageText] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [showOptionsDropdown, setShowOptionsDropdown] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'warning' } | null>(null);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     fetchConversations();
@@ -137,6 +142,30 @@ const ConnectionsPage: React.FC = () => {
     }
   };
 
+  const handleDeleteConversation = async () => {
+    if (!selected) return;
+    setShowConfirmDialog(true);
+  };
+
+  const confirmDeleteConversation = async () => {
+    if (!selected) return;
+
+    try {
+      await conversationApi.deleteConversation(selected.conversation.id);
+      setConversations(prev => prev.filter(c => c.conversation.id !== selected.conversation.id));
+      removeMessagesFromConversation(selected.conversation.id);
+
+      setSelected(null);
+      setShowOptionsDropdown(false);
+      setShowConfirmDialog(false);
+      setToast({ message: 'Conversation deleted successfully!', type: 'success' });
+    } catch (err) {
+      console.error('Error deleting conversation:', err);
+      setToast({ message: 'An error occurred while deleting the conversation!', type: 'error' });
+      setShowConfirmDialog(false);
+    }
+  };
+
   const otherParticipant = (item: ConversationListItem) => {
     if (!user) return null;
     return item.participants.find((p) => p.id !== user.id) || item.participants[0];
@@ -147,6 +176,18 @@ const ConnectionsPage: React.FC = () => {
     const name = (other?.fullName || other?.username || '').toLowerCase();
     return name.includes(searchQuery.toLowerCase());
   });
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowOptionsDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   return (
     <div className="flex h-[calc(100vh-80px)] bg-gray-50">
@@ -239,10 +280,29 @@ const ConnectionsPage: React.FC = () => {
                   <p className="text-xs text-green-600">Active now</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Button className="w-9 h-9 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-600 transition-colors">
-                  <MoreVertical className="w-5 h-5" />
-                </Button>
+              <div className="flex items-center gap-2" ref={dropdownRef}>
+                <div className="relative">
+                  <Button
+                    onClick={() => setShowOptionsDropdown(!showOptionsDropdown)}
+                    className="w-9 h-9 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-600 transition-colors"
+                  >
+                    <MoreVertical className="w-5 h-5" />
+                  </Button>
+
+                  {showOptionsDropdown && (
+                    <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                      <div className="py-1">
+                        <button
+                          onClick={handleDeleteConversation}
+                          className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                          <span>Delete Conversation</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -323,6 +383,39 @@ const ConnectionsPage: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Confirmation Dialog */}
+      {showConfirmDialog && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-96 max-w-md mx-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Confirmed deletion</h3>
+            <p className="text-gray-600 mb-6">Are you sure you want to delete this conversation? This action cannot be undone.</p>
+            <div className="flex justify-end gap-3">
+              <Button
+                onClick={() => setShowConfirmDialog(false)}
+                className="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={confirmDeleteConversation}
+                className="px-4 py-2 text-white bg-red-500 hover:bg-red-600 rounded"
+              >
+                Delete
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toast Notification */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
     </div>
   );
 };

@@ -79,6 +79,23 @@ export const onNewComment = (cb: (payload: { blogId: string, comment: Comment })
   return () => socket?.off('new_comment', cb);
 };
 
+// Like-specific events
+export const joinBlogLikeRoom = (blogId: string) => {
+  if (!socket) return;
+  socket.emit('join_blog_like_room', { blogId });
+};
+
+export const leaveBlogLikeRoom = (blogId: string) => {
+  if (!socket) return;
+  socket.emit('leave_blog_like_room', { blogId });
+};
+
+export const onBlogLikeUpdate = (cb: (payload: { blogId: string, liked: boolean, count: number, userId: string, timestamp: number }) => void) => {
+  if (!socket) return;
+  socket.on('blog_like_updated', cb);
+  return () => socket?.off('blog_like_updated', cb);
+};
+
 export default {
   connectSocket,
   disconnectSocket,
@@ -90,4 +107,7 @@ export default {
   joinBlogRoom,
   leaveBlogRoom,
   onNewComment,
+  joinBlogLikeRoom,
+  leaveBlogLikeRoom,
+  onBlogLikeUpdate,
 };

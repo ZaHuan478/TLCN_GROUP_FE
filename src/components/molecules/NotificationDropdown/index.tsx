@@ -41,7 +41,6 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ onToggle })
     try {
       setLoading(true);
       const response = await notificationApi.list(10, 0);
-      console.log('Loaded notifications:', response.notifications);
       response.notifications.forEach(n => {
         console.log('Notification actor:', n.actor);
         console.log('Has avatar:', n.actor?.avatar);

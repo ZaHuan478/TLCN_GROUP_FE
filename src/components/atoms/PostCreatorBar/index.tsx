@@ -21,7 +21,27 @@ const PostCreatorBar: React.FC<PostCreatorBarProps> = ({ onOpen }) => {
 
     return (
         <div className="bg-white rounded-xl shadow p-4 flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-full bg-gray-300" />
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center overflow-hidden">
+                {user?.avatar ? (
+                    <img
+                        src={user.avatar}
+                        alt={user.fullName || user.username || 'User'}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                            const parent = target.parentElement;
+                            if (parent) {
+                                parent.innerHTML = `<span class="text-white font-semibold text-lg">${(user?.fullName || user?.username || 'U').charAt(0).toUpperCase()}</span>`;
+                            }
+                        }}
+                    />
+                ) : (
+                    <span className="text-white font-semibold text-lg">
+                        {(user?.fullName || user?.username || 'U').charAt(0).toUpperCase()}
+                    </span>
+                )}
+            </div>
 
             <Button
                 variant="outline"

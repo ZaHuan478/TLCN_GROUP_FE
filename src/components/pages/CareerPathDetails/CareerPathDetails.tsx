@@ -84,16 +84,12 @@ const CareerPathDetailsPage: React.FC = () => {
             const response = await getLessonById(lesson.id) as any;
             const lessonData = response.data || response;
 
-            console.log('🔍 DEBUG - Lesson data:', lessonData);
-            console.log('🔍 DEBUG - Tests array:', lessonData.tests);
 
             // Extract tests from lesson data
             if (lessonData.tests && Array.isArray(lessonData.tests)) {
                 setLessonTests(lessonData.tests);
-                console.log('✓ Found', lessonData.tests.length, 'tests');
             } else {
                 setLessonTests([]);
-                console.log('No tests found for this lesson');
             }
 
             setShowLessonDetailModal(true);

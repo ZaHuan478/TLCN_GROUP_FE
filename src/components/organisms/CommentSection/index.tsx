@@ -53,7 +53,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
                     ))
                 ) : (
                     <p className="text-center text-gray-500 text-sm py-4">
-                        There are no comments yet. Be the first to comment! 💬
+                        There are no comments yet. Be the first to comment!
                     </p>
                 )}
             </div>

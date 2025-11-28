@@ -45,9 +45,7 @@ const BlogPage: React.FC = () => {
         try {
             setLoading(true);
             const response = await blogApi.getAll(forceRefresh);
-            console.log('Fetch blogs response:', response);
 
-            // Response should be an array directly
             if (Array.isArray(response)) {
                 setBlogs(response);
 
@@ -69,7 +67,6 @@ const BlogPage: React.FC = () => {
     };
 
     const handleAddPost = async (data: { content: string; images?: File[] }) => {
-        // Check permission before creating
         if (!permissions.canCreate) {
             setToast({
                 message: "You don't have permission to create posts. Only companies can create posts.",
@@ -81,7 +78,6 @@ const BlogPage: React.FC = () => {
 
         try {
             const newBlog = await blogApi.create(data);
-            console.log("Post created:", newBlog);
 
             setBlogs((prev) => {
                 const currentBlogs = Array.isArray(prev) ? prev : [];

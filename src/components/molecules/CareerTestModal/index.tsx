@@ -35,7 +35,6 @@ export const CareerTestModal: React.FC<CareerTestModalProps> = ({
         try {
             setLoading(true);
             const testData = await careerTestApi.getTest();
-            console.log('🔍 Test data structure:', JSON.stringify(testData, null, 2));
             setTest(testData);
             setAnswers([]);
             setCurrentQuestion(0);
@@ -79,7 +78,6 @@ export const CareerTestModal: React.FC<CareerTestModalProps> = ({
 
         try {
             setSubmitting(true);
-            console.log('Submitting answers:', answers);
             const result = await careerTestApi.submitTest(answers);
             setToast({ message: "Assessment completed successfully!", type: "success" });
             setTestResult(result);

@@ -54,10 +54,7 @@ const UserWallPage: React.FC = () => {
                 throw new Error('User ID is required');
             }
 
-            console.log('Fetching user profile for ID:', userId);
             const userData = await userApi.getById(userId);
-            console.log('User data received:', userData);
-
             const studentInfo = (userData as any).student;
             const companyInfo = (userData as any).company;
 
@@ -81,7 +78,6 @@ const UserWallPage: React.FC = () => {
                 enrolledCourses: [],
             };
 
-            console.log('Transformed profile:', profile);
             setUserProfile(profile);
         } catch (error: any) {
             console.error('Failed to load user profile:', error);
@@ -108,9 +104,7 @@ const UserWallPage: React.FC = () => {
 
         setFollowLoading(true);
         try {
-            console.log('🔄 FE: Calling toggleFollow for userId:', userId);
             const updatedInfo = await followApi.toggleFollow(userId);
-            console.log('✅ FE: Received updatedInfo:', updatedInfo);
             setFollowInfo(updatedInfo);
             setToast({
                 message: updatedInfo.isFollowing ? 'Following user successfully!' : 'Unfollowed user successfully!',
@@ -131,8 +125,20 @@ const UserWallPage: React.FC = () => {
         if (!userId) return;
 
         try {
+            // Debug logging
+            console.log('Attempting to create conversation with userId:', userId);
+            
             // Call API to get or create conversation with this user
             const conversationData = await conversationApi.getOrCreateConversation(userId);
+            
+            // Debug response
+            console.log('Conversation API response:', conversationData);
+
+            // Check if response has valid conversation data
+            if (!conversationData || !conversationData.conversation || !conversationData.conversation.id) {
+                console.error('Invalid conversation data structure:', conversationData);
+                throw new Error('Invalid conversation response from server');
+            }
 
             // Navigate to connections page with the conversation ID
             navigate(`/connections?conversationId=${conversationData.conversation.id}`);
@@ -161,7 +167,6 @@ const UserWallPage: React.FC = () => {
                 await refreshUser();
             }
 
-            console.log('Avatar updated successfully');
             setToast({ message: 'Avatar updated successfully!', type: 'success' });
         } catch (error) {
             console.error('Failed to update avatar:', error);

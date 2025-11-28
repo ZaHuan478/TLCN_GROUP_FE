@@ -63,9 +63,6 @@ const CoursesPage: React.FC = () => {
 				setLoading(true);
 				setError(null);
 				const response = await courseApi.getAll({ limit: 12 });
-				console.log('API Response:', response); // Debug log
-				
-				// response đã là CourseListResponse: { total, page, limit, data: Course[] }
 				const coursesData = Array.isArray(response.data) ? response.data : [];
 				const normalized = coursesData.map((course, index) =>
 					normalizeCourse(course, index)

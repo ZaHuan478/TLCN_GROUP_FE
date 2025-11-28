@@ -17,10 +17,7 @@ export const userApi = {
     async getById(id: string): Promise<User> {
         try {
             const response = await apiClient.get<any>(`/users/${id}`);
-            console.log('API Response for getById:', response);
-            console.log('Response.data:', response.data);
             const userData = response.data || response;
-            console.log('Extracted user data:', userData);
             return userData;
         } catch (error) {
             console.error(`Failed to fetch user ${id}:`, error);

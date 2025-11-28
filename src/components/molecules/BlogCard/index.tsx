@@ -10,7 +10,7 @@ import { BlogContent } from "../BlogContent";
 import { BlogStats } from "../BlogStats";
 import { BlogActions } from "../BlogActions";
 import { BlogModal } from "../BlogModal";
-import { joinBlogRoom, leaveBlogRoom, onNewComment } from "../../../services/socket";
+import { joinBlogRoom, leaveBlogRoom, onNewComment, joinBlogLikeRoom, leaveBlogLikeRoom, onBlogLikeUpdate } from "../../../services/socket";
 
 type BlogCardProps = {
     blog: Blog;
@@ -37,6 +37,29 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog, onEdit, onDelete }) =>
 
     useEffect(() => {
         loadLikes();
+        
+        // Join like room for real-time updates
+        joinBlogLikeRoom(blog.id);
+        
+        // Listen for like updates
+        const unsubscribeLike = onBlogLikeUpdate((payload) => {
+            if (payload.blogId === blog.id) {
+                // Don't update if this user made the change (already optimistically updated)
+                if (payload.userId !== user?.id) {
+                    setReactions([{
+                        id: "like",
+                        emoji: "",
+                        count: payload.count,
+                        isLiked: reactions.find(r => r.id === 'like')?.isLiked || false // Keep current user's like status
+                    }]);
+                }
+            }
+        });
+
+        return () => {
+            leaveBlogLikeRoom(blog.id);
+            unsubscribeLike?.();
+        };
     }, [blog.id]);
 
     useEffect(() => {

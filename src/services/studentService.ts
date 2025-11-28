@@ -22,7 +22,6 @@ export const getStudentProfile = async (): Promise<StudentProfile> => {
 
 export const updateStudentProfile = async (payload: UpdateStudentProfilePayload): Promise<StudentProfile> => {
   const response = await apiClient.put<any>('/students/profile', payload);
-  console.log('🔍 Updated student profile response:', response);
 
   if (response.student) {
     return {
@@ -43,7 +42,6 @@ export const updateStudentProfile = async (payload: UpdateStudentProfilePayload)
 
 export const getStudentLearningResults = async (): Promise<StudentLearningResultsResponse> => {
   const response = await apiClient.get<any>('/students/enrolled-courses');
-  console.log('🔍 Enrolled courses response:', response);
 
   const progress = response.progress || response.data || response || [];
   const completedCourses = progress.filter((p: any) => p.status === 'COMPLETED').length;

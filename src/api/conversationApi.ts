@@ -21,6 +21,10 @@ export const conversationApi = {
   sendMessage: async (conversationId: string, content: string): Promise<SendMessageResponse> => {
     return apiClient.post<SendMessageResponse>(`/conversations/messages/${conversationId}`, { content });
   },
+
+  deleteConversation: async (conversationId: string): Promise<void> => {
+    return apiClient.delete<void>(`/conversations/${conversationId}`);
+  },
 };
 
 export default conversationApi;

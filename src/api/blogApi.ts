@@ -59,7 +59,6 @@ export const blogApi = {
             }
 
             const response = await apiClient.get<any>('/blogs', { headers });
-            console.log('blogApi.getAll response:', response);
 
             let blogs: Blog[] = [];
 
@@ -83,7 +82,6 @@ export const blogApi = {
                 const cacheAge = lastFetch ? Date.now() - parseInt(lastFetch) : Infinity;
 
                 if (cached && cacheAge < 300000) {
-                    console.log('Using cached blogs due to API error (cache age:', cacheAge, 'ms)');
                     const cachedBlogs = JSON.parse(cached);
                     return transformBlogs(cachedBlogs);
                 }
@@ -111,13 +109,11 @@ export const blogApi = {
                 const formData = new FormData();
                 formData.append('content', data.content);
 
-                console.log('Uploading images:', data.images.length);
                 data.images.forEach((image) => {
                     formData.append('images', image);
                 });
 
                 const response = await apiClient.postFormData<any>('/blogs', formData);
-                console.log('blogApi.create (with images) response:', response);
 
                 const transformedBlog = transformBlog(response);
                 const cached = localStorage.getItem('blogs_cache');
@@ -128,7 +124,6 @@ export const blogApi = {
                 return transformedBlog;
             } else {
                 const response = await apiClient.post<any>('/blogs', { content: data.content });
-                console.log('blogApi.create response:', response);
 
                 const transformedBlog = transformBlog(response);
                 const cached = localStorage.getItem('blogs_cache');
@@ -156,7 +151,6 @@ export const blogApi = {
                 const updatedBlogs = [mockBlog, ...blogs];
                 localStorage.setItem('blogs_cache', JSON.stringify(updatedBlogs));
 
-                console.log('Created offline blog:', mockBlog);
                 return mockBlog;
             }
 

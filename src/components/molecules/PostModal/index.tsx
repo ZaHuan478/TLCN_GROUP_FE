@@ -4,6 +4,7 @@ import { Button } from "../../atoms/Button/Button";
 import { Textarea } from "../../atoms/Textarea/Textarea";
 import { useAuth } from "../../../contexts/AuthContext";
 import { canUserCreateBlog } from "../../../utils/userUtils";
+import { X } from "lucide-react";
 
 type PostModalProps = {
     onClose: () => void;
@@ -24,6 +25,14 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onPost, initialData }) =
             setContent(initialData.content);
         }
     }, [initialData]);
+
+    // Prevent body scroll when modal is open
+    useEffect(() => {
+        document.body.style.overflow = 'hidden';
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, []);
 
     const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = Array.from(event.target.files || []);
@@ -77,86 +86,111 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onPost, initialData }) =
         onClose();
     };
 
+    const handleBackdropClick = (e: React.MouseEvent) => {
+        if (e.target === e.currentTarget) {
+            onClose();
+        }
+    };
+
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-            <div className="bg-white rounded-xl shadow-lg w-full max-w-md p-4 relative">
-                <h2 className="text-lg font-semibold text-center mb-3">
-                    {initialData ? "Edit post" : "Create post"}
-                </h2>
-
-                <Textarea
-                    placeholder={`What's on your mind, ${user?.fullName || user?.username || 'there'}?`}
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                    rows={4}
-                    className="border-none bg-transparent"
-                />
-
-                {/* Image Preview */}
-                {imagePreviews.length > 0 && (
-                    <div className="mt-3 grid grid-cols-2 gap-2">
-                        {imagePreviews.map((preview, index) => (
-                            <div key={index} className="relative">
-                                <img
-                                    src={preview}
-                                    alt={`Preview ${index + 1}`}
-                                    className="w-full h-32 object-cover rounded-lg"
-                                />
-                                <Button
-                                    type="button"
-                                    onClick={() => removeImage(index)}
-                                    className="absolute top-1 right-1 bg-black bg-opacity-50 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-opacity-70"
-                                >
-                                    ×
-                                </Button>
-                            </div>
-                        ))}
-                    </div>
-                )}
-
-                {/* Hidden file input */}
-                <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={handleImageSelect}
-                    className="hidden"
-                />
-
-                <div className="flex justify-between items-center mt-4">
-                    <div className="flex space-x-3">
-                        {/* Image Upload Button */}
-                        <Button
-                            variant="icon"
-                            onClick={handleImageButtonClick}
-                            className="text-green-600 hover:text-green-700 hover:bg-green-50 p-2 rounded-full"
-                            title="Add images"
-                        >
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
-                            </svg>
-                        </Button>
-                    </div>
-
+        <div 
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] m-0 p-4"
+            onClick={handleBackdropClick}
+        >
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-auto transform transition-all animate-in fade-in-0 zoom-in-95 duration-300">
+                {/* Header */}
+                <div className="flex items-center justify-between p-4 border-b border-gray-100">
+                    <h3 className="text-xl font-semibold text-gray-900">
+                        {initialData ? "Edit Post" : "Create Post"}
+                    </h3>
                     <Button
-                        onClick={handlePost}
-                        disabled={!content.trim() && selectedImages.length === 0}
+                        variant="icon"
+                        onClick={onClose}
+                        aria-label="Close"
+                        className="p-2 hover:bg-gray-100 rounded-full transition-colors"
                     >
-                        {initialData ? "Update" : "Post"}
+                        <X className="w-5 h-5 text-gray-500" />
                     </Button>
                 </div>
 
-                <Button
-                    variant="icon"
-                    onClick={onClose}
-                    aria-label="Close"
-                    className="absolute top-4 right-4 text-gray-500 hover:text-black">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                </Button>
+                {/* Content Area */}
+                <div className="p-6">
+                    <div className="mb-4">
+                        <Textarea
+                            placeholder={`What's on your mind, ${user?.fullName || user?.username || 'there'}?`}
+                            value={content}
+                            onChange={(e) => setContent(e.target.value)}
+                            rows={4}
+                            className="w-full border-0 resize-none focus:ring-0 text-lg placeholder-gray-400 bg-transparent"
+                            style={{ minHeight: '120px' }}
+                        />
+                    </div>
+
+                    {/* Image Preview */}
+                    {imagePreviews.length > 0 && (
+                        <div className="mb-4">
+                            <div className="grid grid-cols-2 gap-3">
+                                {imagePreviews.map((preview, index) => (
+                                    <div key={index} className="relative group">
+                                        <img
+                                            src={preview}
+                                            alt={`Preview ${index + 1}`}
+                                            className="w-full h-40 object-cover rounded-xl border border-gray-200"
+                                        />
+                                        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 rounded-xl flex items-center justify-center">
+                                            <Button
+                                                type="button"
+                                                onClick={() => removeImage(index)}
+                                                className="opacity-0 group-hover:opacity-100 bg-red-500 hover:bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center transition-all duration-200 transform scale-90 hover:scale-100"
+                                            >
+                                                <X className="w-4 h-4" />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Hidden file input */}
+                    <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={handleImageSelect}
+                        className="hidden"
+                    />
+
+                    {/* Add Photo Section */}
+                    <div className="flex items-center justify-center mb-4">
+                        <Button
+                            variant="secondary"
+                            onClick={handleImageButtonClick}
+                            className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                        >
+                            <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <span className="text-gray-700">Add Photo</span>
+                        </Button>
+                    </div>
+                </div>
+
+                {/* Footer */}
+                <div className="px-6 pb-6">
+                    <Button
+                        onClick={handlePost}
+                        disabled={!content.trim() && selectedImages.length === 0}
+                        className={`w-full py-3 px-6 rounded-xl font-semibold transition-all duration-200 ${
+                            (!content.trim() && selectedImages.length === 0)
+                                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                : 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl transform hover:scale-[1.02]'
+                        }`}
+                    >
+                        {initialData ? "Update Post" : "Share Post"}
+                    </Button>
+                </div>
             </div>
         </div>
     );
