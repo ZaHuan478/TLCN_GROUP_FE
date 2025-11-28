@@ -81,7 +81,7 @@ export const StudentManagement: React.FC = () => {
         <div className="bg-white rounded-xl shadow-md p-6 border border-gray-100">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Search */}
-            <div>
+            {/* <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Search</label>
               <div className="relative">
                 <input
@@ -100,7 +100,7 @@ export const StudentManagement: React.FC = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </div>
-            </div>
+            </div> */}
 
             {/* Status Filter */}
             <div>
