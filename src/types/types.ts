@@ -418,6 +418,7 @@ export type SearchCompany = {
   industry?: string;
   avatar?: string;
   website?: string;
+  userId?: string; // For linking to user profile
 }
 
 export type SearchCourse = {

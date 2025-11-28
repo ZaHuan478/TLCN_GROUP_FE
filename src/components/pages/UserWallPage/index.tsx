@@ -107,7 +107,9 @@ const UserWallPage: React.FC = () => {
 
         setFollowLoading(true);
         try {
+            console.log('🔄 FE: Calling toggleFollow for userId:', userId);
             const updatedInfo = await followApi.toggleFollow(userId);
+            console.log('✅ FE: Received updatedInfo:', updatedInfo);
             setFollowInfo(updatedInfo);
             setToast({
                 message: updatedInfo.isFollowing ? 'Following user successfully!' : 'Unfollowed user successfully!',

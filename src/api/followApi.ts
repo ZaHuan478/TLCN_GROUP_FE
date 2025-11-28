@@ -3,13 +3,15 @@ import { FollowInfo, FollowersResponse, FollowingResponse } from '../types/types
 
 const followApi = {
   toggleFollow: async (targetUserId: string): Promise<FollowInfo> => {
-    const response = await apiClient.post(`/follows/${targetUserId}`) as any;
-    return response.data;
+    console.log('🔄 FE: Calling toggleFollow API for:', targetUserId);
+    const response = await apiClient.post(`/follows/${targetUserId}`);
+    console.log('✅ FE: toggleFollow response:', response);
+    return response;
   },
 
   getFollowInfo: async (targetUserId: string): Promise<FollowInfo> => {
-    const response = await apiClient.get(`/follows/${targetUserId}`) as any;
-    return response.data;
+    const response = await apiClient.get(`/follows/${targetUserId}`);
+    return response;
   },
 
   getFollowers: async (
@@ -19,8 +21,8 @@ const followApi = {
   ): Promise<FollowersResponse> => {
     const response = await apiClient.get(
       `/follows/${targetUserId}/followers?page=${page}&limit=${limit}`
-    ) as any;
-    return response.data;
+    );
+    return response;
   },
 
   getFollowing: async (
@@ -30,8 +32,8 @@ const followApi = {
   ): Promise<FollowingResponse> => {
     const response = await apiClient.get(
       `/follows/${targetUserId}/following?page=${page}&limit=${limit}`
-    ) as any;
-    return response.data;
+    );
+    return response;
   },
 };
 

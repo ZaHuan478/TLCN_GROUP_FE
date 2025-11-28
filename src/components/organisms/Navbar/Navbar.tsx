@@ -213,7 +213,7 @@ const Navbar: React.FC = () => {
                   {searchResults.companies.map((company) => (
                     <Link
                       key={company.id}
-                      to={`/users/${company.id}`}
+                      to={`/users/${company.userId || company.id}`}
                       onClick={() => {
                         setShowSearchDropdown(false);
                         setSearchQuery("");
