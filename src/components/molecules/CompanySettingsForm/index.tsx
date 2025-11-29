@@ -80,10 +80,10 @@ export const CompanySettingsForm: React.FC = () => {
       setDescription(updatedProfile.description ?? '');
       setPassword('');
       refreshUser();
-      setToast({ message: 'Cập nhật thông tin công ty thành công!', type: 'success' });
+      setToast({ message: 'Company information updated successfully!', type: 'success' });
     } catch (err) {
       console.error('Failed to update company profile', err);
-      setToast({ message: 'Cập nhật thông tin thất bại. Vui lòng thử lại!', type: 'error' });
+      setToast({ message: 'Failed to update information. Please try again!', type: 'error' });
     } finally {
       setIsSaving(false);
     }

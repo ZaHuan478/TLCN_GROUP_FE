@@ -27,7 +27,7 @@ export const OAuthSuccessPage: React.FC = () => {
         navigate('/', { replace: true });
       }, 1500);
     } else {
-      // Không có user sau khi init -> OAuth failed
+      // No user after init -> OAuth failed
       console.error('[OAuthSuccessPage] ✗ No user after OAuth initialization');
       setTimeout(() => {
         navigate('/?error=oauth_failed', { replace: true });
@@ -45,12 +45,12 @@ export const OAuthSuccessPage: React.FC = () => {
             </svg>
           </div>
         </div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Đăng nhập thành công!</h2>
-        <p className="text-gray-600 mb-4">
-          Bạn đã đăng nhập thành công với Google. Đang chuyển hướng...
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">Login Successful!</h2>
+        <p className="text-gray-600">
+          You have successfully logged in with Google. Redirecting...
         </p>
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
       </div>
     </div>
   );
-}; 
+};

@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "../Button/Button";
 import { useAuth } from "../../../contexts/AuthContext";
 import { canUserCreateBlog } from "../../../utils/userUtils";
+import { Toast } from "../../molecules/ToastNotification";
 
 type PostCreatorBarProps = {
     onOpen: () => void;
@@ -9,11 +10,12 @@ type PostCreatorBarProps = {
 
 const PostCreatorBar: React.FC<PostCreatorBarProps> = ({ onOpen }) => {
     const { user } = useAuth();
+    const [toastMessage, setToastMessage] = useState<{ message: string; type: 'success' | 'error' | 'warning' } | null>(null);
     const allowed = canUserCreateBlog(user as any);
 
     const handleOpen = () => {
         if (!allowed) {
-            alert("You don't have permission to create posts.");
+            setToastMessage({ message: "You don't have permission to create posts.", type: 'error' });
             return;
         }
         onOpen();
@@ -50,6 +52,14 @@ const PostCreatorBar: React.FC<PostCreatorBarProps> = ({ onOpen }) => {
             >
                 What's on your mind, {user?.fullName || user?.username || 'there'}?
             </Button>
+            
+            {toastMessage && (
+                <Toast
+                    message={toastMessage.message}
+                    type={toastMessage.type}
+                    onClose={() => setToastMessage(null)}
+                />
+            )}
         </div>
     );
 };

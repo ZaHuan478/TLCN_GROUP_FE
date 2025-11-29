@@ -61,10 +61,10 @@ export const TestDetailsModal: React.FC<TestDetailsModalProps> = ({ isOpen, onCl
                 content: lessonForm.content
             });
 
-            setToast({ message: 'Thêm bài học thành công!', type: 'success' });
+            setToast({ message: 'Lesson added successfully!', type: 'success' });
             setShowAddLessonModal(false);
 
-            if (confirm('Bạn có muốn thêm bài kiểm tra cho bài học này ngay bây giờ không?')) {
+            if (confirm('Would you like to add a test for this lesson now?')) {
                 setCurrentLessonId((response as any).data?.id || (response as any).id);
                 setIsAddingLessonTest(true);
                 setShowAddTestModal(true);
@@ -73,7 +73,7 @@ export const TestDetailsModal: React.FC<TestDetailsModalProps> = ({ isOpen, onCl
             setLessonForm({ title: '', order: lessonForm.order + 1, content: '' });
         } catch (error) {
             console.error('Failed to add lesson:', error);
-            setToast({ message: 'Thêm bài học thất bại.', type: 'error' });
+            setToast({ message: 'Failed to add lesson.', type: 'error' });
         }
     };
 
@@ -89,7 +89,7 @@ export const TestDetailsModal: React.FC<TestDetailsModalProps> = ({ isOpen, onCl
                     maxScore: testForm.maxScore,
                     content: testForm.content
                 });
-                setToast({ message: 'Thêm bài kiểm tra cho bài học thành công!', type: 'success' });
+                setToast({ message: 'Test added to lesson successfully!', type: 'success' });
             } else {
                 if (testId) {
                     await createTest({
@@ -101,7 +101,7 @@ export const TestDetailsModal: React.FC<TestDetailsModalProps> = ({ isOpen, onCl
                         maxScore: testForm.maxScore,
                         content: testForm.content
                     });
-                    setToast({ message: 'Thêm bài kiểm tra chung thành công!', type: 'success' });
+                    setToast({ message: 'General test added successfully!', type: 'success' });
                 }
             }
             setShowAddTestModal(false);
@@ -110,7 +110,7 @@ export const TestDetailsModal: React.FC<TestDetailsModalProps> = ({ isOpen, onCl
             setTestForm({ title: '', description: '', order: 1, type: 'MINI', maxScore: 100, content: '' });
         } catch (error) {
             console.error('Failed to add test:', error);
-            setToast({ message: 'Thêm bài kiểm tra thất bại.', type: 'error' });
+            setToast({ message: 'Failed to add test.', type: 'error' });
         }
     };
 
@@ -203,10 +203,10 @@ export const TestDetailsModal: React.FC<TestDetailsModalProps> = ({ isOpen, onCl
                                         <line x1="16" y1="17" x2="8" y2="17"></line>
                                         <polyline points="10 9 9 9 8 9"></polyline>
                                     </svg>
-                                    Mô tả
+                                    Description
                                 </h3>
                                 <p className="text-gray-600 leading-relaxed whitespace-pre-wrap">
-                                    {test.description || 'Chưa có mô tả chi tiết.'}
+                                    {test.description || 'No detailed description available.'}
                                 </p>
                             </div>
                             <div>
@@ -224,7 +224,7 @@ export const TestDetailsModal: React.FC<TestDetailsModalProps> = ({ isOpen, onCl
                                         {questions.map((q, index) => (
                                             <div key={q.id || index} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                                                 <div className="font-medium text-gray-900 mb-2">
-                                                    Câu {index + 1}: {q.question}
+                                                    Question {index + 1}: {q.question}
                                                 </div>
                                                 <div className="pl-4 space-y-1">
                                                     {q.options.map((opt, i) => (
@@ -239,14 +239,14 @@ export const TestDetailsModal: React.FC<TestDetailsModalProps> = ({ isOpen, onCl
                                     </div>
                                 ) : (
                                     <div className="bg-gray-50 rounded-lg p-8 text-center border border-dashed border-gray-300">
-                                        <p className="text-gray-500">Chưa có câu hỏi nào được thêm vào bài test này.</p>
+                                        <p className="text-gray-500">No questions have been added to this test yet.</p>
                                     </div>
                                 )}
                             </div>
                         </div>
                     ) : (
                         <div className="text-center py-12 text-gray-500">
-                            Không tìm thấy thông tin bài test.
+                            Test information not found.
                         </div>
                     )}
                 </div>
@@ -256,37 +256,37 @@ export const TestDetailsModal: React.FC<TestDetailsModalProps> = ({ isOpen, onCl
             {showAddLessonModal && (
                 <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black bg-opacity-50">
                     <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-xl">
-                        <h3 className="text-xl font-bold mb-4">Thêm bài học mới</h3>
+                        <h3 className="text-xl font-bold mb-4">Add New Lesson</h3>
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Tiêu đề bài học</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Lesson Title</label>
                                 <Input
                                     value={lessonForm.title}
                                     onChange={(e) => setLessonForm({ ...lessonForm, title: e.target.value })}
-                                    placeholder="Nhập tiêu đề bài học"
+                                    placeholder="Enter lesson title"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Nội dung bài học</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Lesson Content</label>
                                 <Textarea
                                     value={lessonForm.content}
                                     onChange={(e) => setLessonForm({ ...lessonForm, content: e.target.value })}
-                                    placeholder="Nhập nội dung bài học"
+                                    placeholder="Enter lesson content"
                                     className="min-h-[100px]"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Thứ tự (Order)</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Order</label>
                                 <Input
                                     type="number"
                                     value={lessonForm.order}
                                     onChange={(e) => setLessonForm({ ...lessonForm, order: parseInt(e.target.value) })}
-                                    placeholder="Nhập thứ tự"
+                                    placeholder="Enter order"
                                 />
                             </div>
                             <div className="flex justify-end gap-2 mt-6">
-                                <Button variant="secondary" onClick={() => setShowAddLessonModal(false)}>Hủy</Button>
-                                <Button variant="primary" onClick={handleAddLesson}>Thêm bài học</Button>
+                                <Button variant="secondary" onClick={() => setShowAddLessonModal(false)}>Cancel</Button>
+                                <Button variant="primary" onClick={handleAddLesson}>Add Lesson</Button>
                             </div>
                         </div>
                     </div>
@@ -306,37 +306,37 @@ export const TestDetailsModal: React.FC<TestDetailsModalProps> = ({ isOpen, onCl
                                 <Input
                                     value={testForm.title}
                                     onChange={(e) => setTestForm({ ...testForm, title: e.target.value })}
-                                    placeholder="Nhập tiêu đề bài kiểm tra"
+                                    placeholder="Enter test title"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Mô tả</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                                 <Input
                                     value={testForm.description}
                                     onChange={(e) => setTestForm({ ...testForm, description: e.target.value })}
-                                    placeholder="Nhập mô tả"
+                                    placeholder="Enter description"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Thứ tự (Order)</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Order</label>
                                 <Input
                                     type="number"
                                     value={testForm.order}
                                     onChange={(e) => setTestForm({ ...testForm, order: parseInt(e.target.value) })}
-                                    placeholder="Nhập thứ tự"
+                                    placeholder="Enter order"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Điểm tối đa</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Max Score</label>
                                 <Input
                                     type="number"
                                     value={testForm.maxScore}
                                     onChange={(e) => setTestForm({ ...testForm, maxScore: parseInt(e.target.value) })}
-                                    placeholder="Nhập điểm tối đa"
+                                    placeholder="Enter max score"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Nội dung (JSON)</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Content (JSON)</label>
                                 <Textarea
                                     value={testForm.content}
                                     onChange={(e) => setTestForm({ ...testForm, content: e.target.value })}
@@ -345,8 +345,8 @@ export const TestDetailsModal: React.FC<TestDetailsModalProps> = ({ isOpen, onCl
                                 />
                             </div>
                             <div className="flex justify-end gap-2 mt-6">
-                                <Button variant="secondary" onClick={() => setShowAddTestModal(false)}>Hủy</Button>
-                                <Button variant="primary" onClick={handleAddTest}>Thêm bài kiểm tra</Button>
+                                <Button variant="secondary" onClick={() => setShowAddTestModal(false)}>Cancel</Button>
+                                <Button variant="primary" onClick={handleAddTest}>Add Test</Button>
                             </div>
                         </div>
                     </div>

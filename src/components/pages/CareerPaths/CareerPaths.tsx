@@ -64,7 +64,7 @@ const CareerPathsPage: React.FC = () => {
           setTests(data);
         } catch (error) {
           console.error('Failed to load career tests:', error);
-          setToast({ message: 'Không thể tải danh sách bài test. Vui lòng thử lại!', type: 'error' });
+          setToast({ message: 'Unable to load test list. Please try again!', type: 'error' });
         } finally {
           setLoadingTests(false);
         }
@@ -76,7 +76,7 @@ const CareerPathsPage: React.FC = () => {
 
   const handleAddTest = async (data: { title: string; description: string; image: File | null }) => {
     if (user?.role !== 'COMPANY' && user?.role !== 'ADMIN') {
-      setToast({ message: 'Chỉ công ty hoặc admin mới có quyền tạo career path. Vui lòng đăng nhập với tài khoản công ty.', type: 'error' });
+      setToast({ message: 'Only companies or admins can create career paths. Please log in with a company account.', type: 'error' });
       return;
     }
 
@@ -105,17 +105,21 @@ const CareerPathsPage: React.FC = () => {
     }
   };
 
-  const handleDeleteTest = async (testId: string) => {
-    if (!confirm('Are you sure you want to delete this test?')) return;
-
+  const handleDeleteTest = async () => {
     try {
-      await deleteCareerTest(testId);
-      setTests(tests.filter(test => test.id !== testId));
+      await deleteCareerTest(deleteConfirm.testId);
+      setTests(tests.filter(test => test.id !== deleteConfirm.testId));
       setToast({ message: 'Test deleted successfully!', type: 'success' });
     } catch (error) {
       console.error('Failed to delete career test:', error);
       setToast({ message: 'Failed to delete career test. Please try again!', type: 'error' });
+    } finally {
+      setDeleteConfirm({ isOpen: false, testId: '' });
     }
+  };
+
+  const openDeleteConfirm = (testId: string) => {
+    setDeleteConfirm({ isOpen: true, testId });
   };
 
   const renderContent = () => {
@@ -205,7 +209,7 @@ const CareerPathsPage: React.FC = () => {
                       </h3>
 
                       <p className="text-gray-600 text-sm mb-4 line-clamp-2 flex-1">
-                        {test.description || 'Chưa có mô tả cho bài test này.'}
+                        {test.description || 'No description available for this test.'}
                       </p>
 
                       <div className="flex items-center justify-between text-xs text-gray-500 mb-4 pt-4 border-t border-gray-100">
@@ -240,7 +244,7 @@ const CareerPathsPage: React.FC = () => {
                           variant="unstyled"
                           onClick={() => handleDeleteTest(test.id)}
                           className="p-2.5 text-red-500 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors"
-                          title="Xóa bài test"
+                          title="Delete Test"
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <polyline points="3 6 5 6 21 6"></polyline>

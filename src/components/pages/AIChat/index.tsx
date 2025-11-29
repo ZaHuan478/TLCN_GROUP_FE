@@ -70,7 +70,7 @@ const AIChat: React.FC = () => {
       console.error('Failed to send message:', error);
       // Remove temp message on error
       setMessages((prev) => prev.slice(0, -1));
-      alert('Lỗi gửi tin nhắn: ' + (error.message || 'Unknown error'));
+      alert('Error sending message: ' + (error.message || 'Unknown error'));
     } finally {
       setLoading(false);
     }
@@ -84,15 +84,15 @@ const AIChat: React.FC = () => {
   };
 
   const handleClearHistory = async () => {
-    if (!confirm('Bạn có chắc muốn xóa toàn bộ lịch sử chat?')) return;
+    if (!confirm('Are you sure you want to delete all chat history?')) return;
 
     try {
       await chatbotApi.clearHistory();
       setMessages([]);
-      alert('Đã xóa lịch sử chat');
+      alert('Chat history deleted');
     } catch (error) {
       console.error('Failed to clear history:', error);
-      alert('Lỗi xóa lịch sử');
+      alert('Error deleting history');
     }
   };
 
@@ -104,7 +104,7 @@ const AIChat: React.FC = () => {
       setAssessment(result.assessment);
     } catch (error) {
       console.error('Failed to get assessment:', error);
-      alert('Lỗi tạo báo cáo đánh giá');
+      alert('Error creating assessment report');
       setShowAssessment(false);
     } finally {
       setLoadingAssessment(false);

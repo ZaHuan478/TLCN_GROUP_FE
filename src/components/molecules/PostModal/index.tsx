@@ -5,6 +5,7 @@ import { Textarea } from "../../atoms/Textarea/Textarea";
 import { useAuth } from "../../../contexts/AuthContext";
 import { canUserCreateBlog } from "../../../utils/userUtils";
 import { X } from "lucide-react";
+import { Toast } from "../ToastNotification";
 
 type PostModalProps = {
     onClose: () => void;
@@ -18,6 +19,7 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onPost, initialData }) =
     const [content, setContent] = useState("");
     const [selectedImages, setSelectedImages] = useState<File[]>([]);
     const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+    const [toastMessage, setToastMessage] = useState<{ message: string; type: 'success' | 'error' | 'warning' } | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -44,7 +46,7 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onPost, initialData }) =
         );
 
         if (validFiles.length !== files.length) {
-            alert('Please select only image files under 5MB each');
+            setToastMessage({ message: 'Please select only image files under 5MB each', type: 'warning' });
             return;
         }
 
@@ -73,8 +75,8 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onPost, initialData }) =
 
     const handlePost = () => {
         if (!canUserCreateBlog(user as any)) {
-            alert("You don't have permission to create posts.");
-            onClose();
+            setToastMessage({ message: "You don't have permission to create posts.", type: 'error' });
+            setTimeout(() => onClose(), 2000);
             return;
         }
 
@@ -192,6 +194,14 @@ const PostModal: React.FC<PostModalProps> = ({ onClose, onPost, initialData }) =
                     </Button>
                 </div>
             </div>
+
+            {toastMessage && (
+                <Toast
+                    message={toastMessage.message}
+                    type={toastMessage.type}
+                    onClose={() => setToastMessage(null)}
+                />
+            )}
         </div>
     );
 };

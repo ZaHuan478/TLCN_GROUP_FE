@@ -70,7 +70,7 @@ const CoursesPage: React.FC = () => {
 				setCourses(normalized);
 			} catch (err) {
 				console.error("Failed to load courses", err);
-				setError("Không thể tải danh sách khóa học. Vui lòng thử lại sau.");
+				setError("Unable to load course list. Please try again later.");
 			} finally {
 				setLoading(false);
 			}

@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Button } from '../../atoms/Button/Button';
 import { Input } from '../../atoms/Input/Input';
+import { Toast } from '../ToastNotification';
 
 type AddTestModalProps = {
   isOpen: boolean;
@@ -14,6 +15,7 @@ export const AddTestModal: React.FC<AddTestModalProps> = ({ isOpen, onClose, onS
   const [description, setDescription] = useState('');
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState<{ message: string; type: 'success' | 'error' | 'warning' } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -30,7 +32,7 @@ export const AddTestModal: React.FC<AddTestModalProps> = ({ isOpen, onClose, onS
 
   const handleSubmit = () => {
     if (!title.trim()) {
-      alert('Tiêu đề là bắt buộc');
+      setToastMessage({ message: 'Tiêu đề là bắt buộc', type: 'warning' });
       return;
     }
     onSubmit({ title, description, image });
@@ -185,6 +187,14 @@ export const AddTestModal: React.FC<AddTestModalProps> = ({ isOpen, onClose, onS
           </Button>
         </div>
       </div>
+      
+      {toastMessage && (
+        <Toast
+          message={toastMessage.message}
+          type={toastMessage.type}
+          onClose={() => setToastMessage(null)}
+        />
+      )}
     </div>
   );
 };

@@ -1,7 +1,7 @@
 import React from "react";
 
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
-    variant?: "primary" | "secondary" | "outline" | "icon" | "unstyled";
+    variant?: "primary" | "secondary" | "outline" | "icon" | "unstyled" | "destructive";
     children: React.ReactNode;
 };
 
@@ -11,7 +11,8 @@ const variants = {
     secondary: "bg-gray-100 text-gray-900 hover:bg-gray-200",
     outline: "border border-gray-300 text-gray-900 hover:bg-gray-50",
     icon: "bg-transparent text-gray-700 hover:bg-gray-100 p-2 rounded-fulls",
-    unstyled: ""
+    unstyled: "",
+    destructive: "bg-red-600 text-white hover:bg-red-700"
 };
 
 export const Button: React.FC<ButtonProps> = ({

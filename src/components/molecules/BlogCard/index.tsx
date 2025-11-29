@@ -4,13 +4,14 @@ import { commentApi } from "../../../api/commentApi";
 import { likeApi } from "../../../api/likeApi";
 import { Comment } from "../../../types/types.ts";
 import { useAuth } from "../../../contexts/AuthContext";
-import { canUserCreateBlog, canUserComment } from "../../../utils/userUtils.ts";
+import { canUserComment } from "../../../utils/userUtils.ts";
 import { BlogHeader } from "../BlogHeader";
 import { BlogContent } from "../BlogContent";
 import { BlogStats } from "../BlogStats";
 import { BlogActions } from "../BlogActions";
 import { BlogModal } from "../BlogModal";
 import { joinBlogRoom, leaveBlogRoom, onNewComment, joinBlogLikeRoom, leaveBlogLikeRoom, onBlogLikeUpdate } from "../../../services/socket";
+import { Toast } from "../ToastNotification/index.tsx";
 
 type BlogCardProps = {
     blog: Blog;
@@ -34,23 +35,21 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog, onEdit, onDelete }) =>
     const [comments, setComments] = useState<Comment[]>([]);
     const [totalComments, setTotalComments] = useState(0);
     const [loadingComments, setLoadingComments] = useState(false);
+    const [toastMessage, setToastMessage] = useState<{ message: string; type: 'success' | 'error' | 'warning' } | null>(null);
 
     useEffect(() => {
         loadLikes();
-        
-        // Join like room for real-time updates
+
         joinBlogLikeRoom(blog.id);
-        
-        // Listen for like updates
+
         const unsubscribeLike = onBlogLikeUpdate((payload) => {
             if (payload.blogId === blog.id) {
-                // Don't update if this user made the change (already optimistically updated)
                 if (payload.userId !== user?.id) {
                     setReactions([{
                         id: "like",
                         emoji: "",
                         count: payload.count,
-                        isLiked: reactions.find(r => r.id === 'like')?.isLiked || false // Keep current user's like status
+                        isLiked: reactions.find(r => r.id === 'like')?.isLiked || false
                     }]);
                 }
             }
@@ -73,21 +72,16 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog, onEdit, onDelete }) =>
             loadComments();
         }
 
-        // Join blog room when modal opens
         if (showModal) {
             joinBlogRoom(blog.id);
 
-            // Listen for new comments
             const unsubscribe = onNewComment((payload) => {
                 if (payload.blogId === blog.id && payload.comment) {
                     setComments(prev => {
-                        // Check if comment already exists to avoid duplicates
                         const exists = prev.some(c => c.id === payload.comment.id);
                         if (exists) return prev;
 
-                        // Check if this is a reply to an existing comment
                         if (payload.comment.parentId) {
-                            // Handle replies by updating the parent comment
                             return prev.map(comment => {
                                 if (comment.id === payload.comment.parentId) {
                                     return {
@@ -98,7 +92,6 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog, onEdit, onDelete }) =>
                                 return comment;
                             });
                         } else {
-                            // Add new top-level comment
                             return [payload.comment, ...prev];
                         }
                     });
@@ -115,7 +108,6 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog, onEdit, onDelete }) =>
 
     const loadLikes = async () => {
         if (!user) {
-            // Nếu chưa login, chỉ load count (backend vẫn trả về liked: false)
             try {
                 const likeInfo = await likeApi.getByBlogId(blog.id);
                 setReactions([{
@@ -139,7 +131,7 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog, onEdit, onDelete }) =>
                 isLiked: likeInfo.liked
             }]);
         } catch (error) {
-            console.error('❌ Failed to load likes:', error);
+            console.error('Failed to load likes:', error);
             setReactions([{ id: "like", emoji: "", count: 0, isLiked: false }]);
         }
     };
@@ -161,7 +153,7 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog, onEdit, onDelete }) =>
 
     const handleReaction = async (reactionId: string) => {
         if (!user) {
-            alert('Vui lòng đăng nhập để like bài viết');
+            setToastMessage({ message: 'Please login to like this post', type: 'warning' });
             return;
         }
 
@@ -187,7 +179,7 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog, onEdit, onDelete }) =>
                 isLiked: likeInfo.liked
             }]);
         } catch (error: any) {
-            console.error('❌ Failed to toggle like:', error);
+            console.error('Failed to toggle like:', error);
             setReactions([{
                 id: "like",
                 emoji: "",
@@ -196,9 +188,9 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog, onEdit, onDelete }) =>
             }]);
 
             if (error.response?.status === 401) {
-                alert('Your session has expired. Please log in again..');
+                setToastMessage({ message: 'Your session has expired. Please log in again.', type: 'error' });
             } else {
-                alert('Unable to like this post. Please try again.');
+                setToastMessage({ message: 'Unable to like this post. Please try again.', type: 'error' });
             }
         }
     };
@@ -213,11 +205,8 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog, onEdit, onDelete }) =>
             };
 
             const newCommentResult = await commentApi.create(commentData);
-            
-            // Don't update comments here if we're listening to real-time updates
-            // The socket listener will handle adding the comment
+
             if (!showModal) {
-                // Only update if modal is not open (no real-time listening)
                 setComments(prev => [newCommentResult, ...prev]);
                 setTotalComments(prev => prev + 1);
             }
@@ -225,11 +214,11 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog, onEdit, onDelete }) =>
             console.error('Failed to add comment:', error);
 
             if (error.response?.status === 401) {
-                alert('Please login to comment');
+                setToastMessage({ message: 'Please login to comment', type: 'warning' });
             } else if (error.response?.status === 403) {
-                alert('You do not have permission to comment');
+                setToastMessage({ message: 'You do not have permission to comment', type: 'error' });
             } else {
-                alert('Failed to add comment. Please try again.');
+                setToastMessage({ message: 'Failed to add comment. Please try again.', type: 'error' });
             }
         }
     };
@@ -245,11 +234,7 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog, onEdit, onDelete }) =>
             };
 
             const newReply = await commentApi.create(replyData);
-
-            // Don't update comments here if we're listening to real-time updates
-            // The socket listener will handle adding the reply
             if (!showModal) {
-                // Only update if modal is not open (no real-time listening)
                 setComments(prev => {
                     const addReplyToComment = (comments: Comment[]): Comment[] => {
                         return comments.map(comment => {
@@ -274,7 +259,7 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog, onEdit, onDelete }) =>
             }
         } catch (error: any) {
             console.error('Failed to reply to comment:', error);
-            alert('Failed to reply. Please try again.');
+            setToastMessage({ message: 'Failed to reply. Please try again.', type: 'error' });
         }
     };
 
@@ -302,7 +287,7 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog, onEdit, onDelete }) =>
             });
         } catch (error: any) {
             console.error('Failed to edit comment:', error);
-            alert('Failed to edit comment. Please try again.');
+            setToastMessage({ message: 'Failed to edit comment. Please try again.', type: 'error' });
         }
     };
 
@@ -338,7 +323,7 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog, onEdit, onDelete }) =>
             setTotalComments(prev => Math.max(0, prev - deletedCount));
         } catch (error: any) {
             console.error('Failed to delete comment:', error);
-            alert('Failed to delete comment. Please try again.');
+            setToastMessage({ message: 'Failed to delete comment. Please try again.', type: 'error' });
         }
     };
 
@@ -351,8 +336,8 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog, onEdit, onDelete }) =>
                 onDelete={onDelete}
             />
 
-            <div 
-                className="blog-card-clickable cursor-pointer" 
+            <div
+                className="blog-card-clickable cursor-pointer"
                 onClick={() => setShowModal(true)}
             >
                 <BlogContent blog={blog} />
@@ -384,6 +369,14 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog, onEdit, onDelete }) =>
                 onEdit={onEdit}
                 onDelete={onDelete}
             />
+
+            {toastMessage && (
+                <Toast
+                    message={toastMessage.message}
+                    type={toastMessage.type}
+                    onClose={() => setToastMessage(null)}
+                />
+            )}
         </div>
     );
 };

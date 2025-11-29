@@ -71,7 +71,7 @@ const CareerPathDetailsPage: React.FC = () => {
             }
         } catch (error) {
             console.error('Failed to load test details:', error);
-            setToast({ message: 'Không thể tải thông tin chi tiết.', type: 'error' });
+            setToast({ message: 'Unable to load details.', type: 'error' });
         } finally {
             setLoading(false);
         }
@@ -95,7 +95,7 @@ const CareerPathDetailsPage: React.FC = () => {
             setShowLessonDetailModal(true);
         } catch (error) {
             console.error('Failed to load lesson details:', error);
-            setToast({ message: 'Không thể tải thông tin bài học.', type: 'error' });
+            setToast({ message: 'Unable to load lesson information.', type: 'error' });
         }
     };
 
@@ -112,18 +112,18 @@ const CareerPathDetailsPage: React.FC = () => {
     };
 
     const handleDeleteLesson = async (lessonId: string) => {
-        if (!confirm('Bạn có chắc chắn muốn xóa bài học này không?')) return;
+        if (!confirm('Are you sure you want to delete this lesson?')) return;
 
         try {
             await import('../../../api/lessonApi').then(module => module.deleteLesson(lessonId));
-            setToast({ message: 'Xóa bài học thành công!', type: 'success' });
+            setToast({ message: 'Lesson deleted successfully!', type: 'success' });
             setOpenDropdownId(null);
             if (id) {
                 await loadTestDetails(id);
             }
         } catch (error) {
             console.error('Failed to delete lesson:', error);
-            setToast({ message: 'Xóa bài học thất bại.', type: 'error' });
+            setToast({ message: 'Failed to delete lesson.', type: 'error' });
         }
     };
 
@@ -137,7 +137,7 @@ const CareerPathDetailsPage: React.FC = () => {
 
     const handleUpdateLesson = async () => {
         if (!editingLessonId || !lessonForm.title.trim()) {
-            setToast({ message: 'Vui lòng nhập tiêu đề bài học!', type: 'warning' });
+            setToast({ message: 'Please enter lesson title!', type: 'warning' });
             return;
         }
 
@@ -148,7 +148,7 @@ const CareerPathDetailsPage: React.FC = () => {
                 content: lessonForm.content
             });
 
-            setToast({ message: 'Cập nhật bài học thành công!', type: 'success' });
+            setToast({ message: 'Lesson updated successfully!', type: 'success' });
             setShowEditLessonModal(false);
             setEditingLessonId(null);
             setLessonForm({ title: '', order: 1, content: '' });
@@ -158,7 +158,7 @@ const CareerPathDetailsPage: React.FC = () => {
             }
         } catch (error) {
             console.error('Failed to update lesson:', error);
-            setToast({ message: 'Cập nhật bài học thất bại.', type: 'error' });
+            setToast({ message: 'Failed to update lesson.', type: 'error' });
         }
     };
 
@@ -171,7 +171,7 @@ const CareerPathDetailsPage: React.FC = () => {
                 content: lessonForm.content
             });
 
-            setToast({ message: 'Thêm bài học thành công!', type: 'success' });
+            setToast({ message: 'Lesson added successfully!', type: 'success' });
             setShowAddLessonModal(false);
             setLessonForm({ title: '', order: lessonForm.order + 1, content: '' });
 
@@ -180,7 +180,7 @@ const CareerPathDetailsPage: React.FC = () => {
                 await loadTestDetails(id);
             }
 
-            if (confirm('Bạn có muốn thêm bài kiểm tra cho bài học này ngay bây giờ không?')) {
+            if (confirm('Would you like to add a test for this lesson now?')) {
                 setCurrentLessonId((response as any).data?.id || (response as any).id);
                 setIsAddingLessonTest(true);
                 // Reset test form to empty before opening
@@ -189,7 +189,7 @@ const CareerPathDetailsPage: React.FC = () => {
             }
         } catch (error) {
             console.error('Failed to add lesson:', error);
-            setToast({ message: 'Thêm bài học thất bại.', type: 'error' });
+            setToast({ message: 'Failed to add lesson.', type: 'error' });
         }
     };
 
@@ -207,7 +207,7 @@ const CareerPathDetailsPage: React.FC = () => {
 
     const handleUpdateTest = async () => {
         if (!editingTestId || !testForm.title.trim()) {
-            setToast({ message: 'Vui lòng nhập tiêu đề bài kiểm tra!', type: 'warning' });
+            setToast({ message: 'Please enter test title!', type: 'warning' });
             return;
         }
 
@@ -219,7 +219,7 @@ const CareerPathDetailsPage: React.FC = () => {
                 content: testForm.content
             });
 
-            setToast({ message: 'Cập nhật bài kiểm tra thành công!', type: 'success' });
+            setToast({ message: 'Test updated successfully!', type: 'success' });
             setShowEditTestModal(false);
             setEditingTestId(null);
             setTestForm({ title: '', description: '', type: 'MINI', maxScore: 100, content: '' });
@@ -229,7 +229,7 @@ const CareerPathDetailsPage: React.FC = () => {
             }
         } catch (error) {
             console.error('Failed to update test:', error);
-            setToast({ message: 'Cập nhật bài kiểm tra thất bại.', type: 'error' });
+            setToast({ message: 'Failed to update test.', type: 'error' });
         }
     };
 
@@ -244,7 +244,7 @@ const CareerPathDetailsPage: React.FC = () => {
                     maxScore: testForm.maxScore,
                     content: testForm.content
                 });
-                setToast({ message: 'Thêm mini test cho bài học thành công!', type: 'success' });
+                setToast({ message: 'Mini test added successfully!', type: 'success' });
 
                 // Reload lesson and reopen lesson detail modal
                 if (selectedLesson) {
@@ -265,7 +265,7 @@ const CareerPathDetailsPage: React.FC = () => {
                         maxScore: testForm.maxScore,
                         content: testForm.content
                     });
-                    setToast({ message: 'Thêm final test thành công!', type: 'success' });
+                    setToast({ message: 'Final test added successfully!', type: 'success' });
                     // Reload course data to show new final test
                     await loadTestDetails(id);
                 }
@@ -276,7 +276,7 @@ const CareerPathDetailsPage: React.FC = () => {
             setTestForm({ title: '', description: '', type: 'MINI', maxScore: 100, content: '' });
         } catch (error) {
             console.error('Failed to add test:', error);
-            setToast({ message: 'Thêm bài kiểm tra thất bại.', type: 'error' });
+            setToast({ message: 'Failed to add test.', type: 'error' });
         }
     };
 
@@ -451,7 +451,7 @@ const CareerPathDetailsPage: React.FC = () => {
                                     </h3>
                                     <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
                                         <p className="text-gray-600 leading-relaxed whitespace-pre-wrap text-lg">
-                                            {courseData.description || 'Chưa có mô tả chi tiết.'}
+                                            {courseData.description || 'No detailed description available.'}
                                         </p>
                                     </div>
                                 </div>
