@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Badge } from '../../atoms/Badge';
 import { getEnrolledCourses } from '../../../api/studentApi';
 import { courseApi } from '../../../api/courseApi';
-import { Users } from 'lucide-react';
 import { userApi } from '../../../api/userApi';
-import { Button } from '../../atoms/Button/Button';
+import { Play } from 'lucide-react';
 
 type CourseProgress = {
   id: string;
@@ -30,6 +30,7 @@ export const UserCoursesSection: React.FC<UserCoursesSectionProps> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -65,25 +66,31 @@ export const UserCoursesSection: React.FC<UserCoursesSectionProps> = ({
           const response = await getEnrolledCourses() as any;
           const data = response.data || response;
 
-          const transformedCourses: CourseProgress[] = (data.enrolledCourses || data.progress || data || []).map((item: any) => {
-            const courseData = item.course || item.careerPath || item;
-            let calculatedProgress = item.progress || 0;
+          const transformedCourses: CourseProgress[] = (data.enrolledCourses || data.progress || data || [])
+            .filter((item: any) => {
+              // Filter out courses that have been deleted (careerPath or course is null)
+              const courseData = item.course || item.careerPath || item;
+              return courseData && courseData.id && courseData.title;
+            })
+            .map((item: any) => {
+              const courseData = item.course || item.careerPath || item;
+              let calculatedProgress = item.progress || 0;
 
-            if (!item.progress && item.completedLessons !== undefined && item.totalLessons !== undefined && item.totalLessons > 0) {
-              calculatedProgress = Math.round((item.completedLessons / item.totalLessons) * 100);
-            }
+              if (!item.progress && item.completedLessons !== undefined && item.totalLessons !== undefined && item.totalLessons > 0) {
+                calculatedProgress = Math.round((item.completedLessons / item.totalLessons) * 100);
+              }
 
-            if (!calculatedProgress && item.progressPercentage !== undefined) {
-              calculatedProgress = item.progressPercentage;
-            }
+              if (!calculatedProgress && item.progressPercentage !== undefined) {
+                calculatedProgress = item.progressPercentage;
+              }
 
-            return {
-              id: item.careerPathId || courseData.id || item.id || '',
-              title: courseData.title || item.title || 'Untitled Course',
-              status: item.status || 'NOT_STARTED',
-              progress: calculatedProgress,
-            };
-          });
+              return {
+                id: item.careerPathId || courseData.id || item.id || '',
+                title: courseData.title || item.title || 'Untitled Course',
+                status: item.status || 'NOT_STARTED',
+                progress: calculatedProgress,
+              };
+            });
 
 
           setCourses(transformedCourses);
@@ -122,6 +129,20 @@ export const UserCoursesSection: React.FC<UserCoursesSectionProps> = ({
         return 'Not Started';
       default:
         return status;
+    }
+  };
+
+  const handleCourseClick = (course: CourseProgress) => {
+    // Chỉ cho phép navigate khi user là STUDENT và course đang IN_PROGRESS
+    if (userRole === 'STUDENT' && course.status === 'IN_PROGRESS') {
+      // Navigate đến trang học để tiếp tục
+      navigate(`/courses/${course.id}/learn`);
+    } else if (userRole === 'STUDENT' && course.status === 'COMPLETED') {
+      // Có thể navigate đến trang chi tiết hoặc review
+      navigate(`/career-paths/${course.id}`);
+    } else if (userRole === 'COMPANY') {
+      // Company xem chi tiết career path của mình
+      navigate(`/career-paths/${course.id}`);
     }
   };
 
@@ -199,7 +220,23 @@ export const UserCoursesSection: React.FC<UserCoursesSectionProps> = ({
         {courses.map((course) => (
           <div
             key={course.id}
-            className="bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors overflow-hidden"
+            onClick={() => handleCourseClick(course)}
+            className={`bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors overflow-hidden ${
+              (userRole === 'STUDENT' && course.status === 'IN_PROGRESS') || 
+              (userRole === 'STUDENT' && course.status === 'COMPLETED') ||
+              userRole === 'COMPANY'
+                ? 'cursor-pointer hover:shadow-md hover:bg-gray-100'
+                : 'cursor-default'
+            }`}
+            title={
+              userRole === 'STUDENT' && course.status === 'IN_PROGRESS'
+                ? 'Click to continue learning'
+                : userRole === 'STUDENT' && course.status === 'COMPLETED'
+                ? 'Click to view course details'
+                : userRole === 'COMPANY'
+                ? 'Click to view course details'
+                : ''
+            }
           >
             {/* Course Header */}
             <div className="p-4">
@@ -230,6 +267,9 @@ export const UserCoursesSection: React.FC<UserCoursesSectionProps> = ({
                     variant={getStatusVariant(course.status)}
                     className="text-xs shrink-0"
                   />
+                  {userRole === 'STUDENT' && course.status === 'IN_PROGRESS' && (
+                    <Play className="w-5 h-5 text-gray-600" />
+                  )}
                 </div>
               </div>
             </div>
